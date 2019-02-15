@@ -344,7 +344,7 @@ void (*DMAOperation[]) (void) = {
 
 void dma_execute(){
   
-    chipset.vposr   = internal.LOF | internal.vPos >> 7;
+    chipset.vposr   = internal.LOF | internal.vPos >> 8;
     chipset.vhposr  = internal.vPos << 8;
     chipset.vhposr |= internal.hPos;
    
