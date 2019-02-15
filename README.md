@@ -33,7 +33,7 @@ Currently I'm using SDL 2 as my host layer, this allows quick and easy developme
 1. The Emulator should use no external libraries, or support functions. 
 2. All I/O must go thorugh a "Host layer", this will be the only part to need a rewrite when porting.
 3. C only... I originally missed C++ so much, used an object oriented design pattern, but this became unnecessarily cumbersome in C, so the rewrite changed this to a more straight forward data structure/function approach.
-
+4. I'm not wedded to the Musashi 68K emulator, and would be happy to repalce it with something else if a suitable replacement is available.
 
 Issues.
 
