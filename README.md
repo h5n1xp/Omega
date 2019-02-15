@@ -1,5 +1,6 @@
 Omega
 
+
 Background.
 
 This project started around December 2017, when I was doing some bare metal coding on the RaspberryPi. 
@@ -13,6 +14,7 @@ This is how the Omega project was born, although I initially called it Zorro (af
 In retrospect choosing a simpler machine (like the Atari ST or classic Mac) would probably have been a better idea, as Amiga emulators are difficult to get working and nothing will ever come close to the functionlity of (Win)UAE. It seems unlikely there will be any more Amiga emulators, this could well be the last.. So I decided that a half pun, half tongue in cheek name of Omega was probably better than Zorro (which has other meanings in the Amiga world).
 
 The current code base is a mixture of the original "Zorro" project with one coding style which was hacked together to "just work"(tm) and the project rewrite with a different coding style, making the code very messy. I hope to clean this up over time.
+
 
 Architecture.
 
@@ -31,6 +33,7 @@ Currently I'm using SDL 2 as my host layer, this allows quick and easy developme
 1. The Emulator should use no external libraries, or support functions. 
 2. All I/O must go thorugh a "Host layer", this will be the only part to need a rewrite when porting.
 3. C only... I originally missed C++ so much, used an object oriented design pattern, but this became unnecessarily cumbersome so the rewrite change this to a more straight forwrd data structure/function approach.
+
 
 Issues.
 
