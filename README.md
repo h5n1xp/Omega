@@ -22,6 +22,13 @@ The "CIA" chips are similar to the chipset part, but also require a periodic fun
 The next part is the DMA sequencer. This should have been the core of the project, but it wasn't originally part of my design. This is fundamental to how the Amiga works, again implemeneted as a single function table containg 227 funcitions, a counter steps through each function advance every system cycle wrapping back to 0 when it reaches the end. There are "ood" and "even" cycles. "Odd" cycles hvae specific hardware functions mostly related to display generation. The "Even" cycles currently implmement "the copper", a simple 3 instruction processor which manages the display, these cycles will also need to implement "the blitter", a simple gfx processor. Currently the blitter is a single function part of the "chipset" functions which once all therequired registers have been written to, then performs the blitter operation, in a single "system cycle" (in other Amiga emualtors this is known as "immediate mode").
 The 68k runs largely independantly of the other parts, currently stepping through CPU cycles at the same rate as the DMA, interacting via the chipset and interrupts. 
 
+
+Status.
+Currently I'm using SDL 2 as my host layer, this allows quick and easy development, but I eventually want to run this on my RaspberryPI as a baremetal emulator fo there are conditions to wha can be added to the code: 
+1. The Emulator should use no external libraries, or support functions. 
+2. All I/O must go thorugh a "Host layer", this will be the only part to need a rewrite when porting.
+3. C only... I originally missed C++ so much, used an object oriented design pattern, but this became unnecessarily cumbersome so the rewrite change this to a more straight forwrd data structure/function approach.
+
 Issues.
 1. The Emulator can bootstrap Amiga Kickstart ROMs 1.2 and 1.3, but is unable to boot ROM 3.0. 
 2. A very crude floppy drive emulation is working, but can only read raw MFM floppy images, not normal ADF files. For some reason AmigaOS is unable to read the images, as it generates an error message stating the disk is corrupt... This is probably related to the blitter issues.
