@@ -1,6 +1,7 @@
 Omega
 
 Background.
+
 This project started around December 2017, when I was doing some bare metal coding on the RaspberryPi. 
 After getting a basic kernel booting I realised I had no software to run, the killer of all hobbyOS projects. So my mind wandered what would it be like if the RaspberryPI had a 68000 CPU instead of an ARM? 
 There are plenty of popular "old school" 68k operating systems out there (TOS, Classic Mac, AmigaOS) with lots of great software, why can't I run these on the raspberryPi wihout a host OS?
@@ -14,6 +15,7 @@ In retrospect choosing a simpler machine (like the Atari ST or classic Mac) woul
 The current code base is a mixture of the original "Zorro" project with one coding style which was hacked together to "just work"(tm) and the project rewrite with a different coding style, making the code very messy. I hope to clean this up over time.
 
 Architecture.
+
 The emulator is actually very simple. It is built around a core set of functions which manage memory access to the lower 16 megabytes of the system address space (For the time being the upper address space isn't accesible, since that adds a whole level of complexity). Within this 16meg space, there are four descrete areas, the 'Chipram", the "CIA" chips, the custom "chipset" registers, and the ROM. Almost all memory access to this space is big endian, where my plan is that the upper address space will be native endian. Right now the chipset registers are stored as a seprate structure (but in future I will probably allocate the memory for them in the actual 16meg space). The memory part is from the original project and is a mess, but kept since it works (subsequent rewrites haven't worked).
 
 The next part is the "chipset" register trap, a set of functions which trap read/writes to any address between 0xDFF000 and 0xDFF1FF and implements any special hardware function located at that address. For example a write to address 0xDFF09C needs to write a bit pattern to address DFF01E and potentially raise an IRQ on the 68K. This is imlmented as a set of function tables with specific functions for different sized acccesses (8bit, 16bit, 32bit). Since the data written to these registers is used by the extensively by the emulator internally, the are kept in native endian byte ordering for efficency. 
@@ -24,12 +26,14 @@ The 68k runs largely independantly of the other parts, currently stepping throug
 
 
 Status.
+
 Currently I'm using SDL 2 as my host layer, this allows quick and easy development, but I eventually want to run this on my RaspberryPI as a baremetal emulator (also perhaps for integration into NG AmigaOS projects like AROS) so there are conditions as to what can be added to the code: 
 1. The Emulator should use no external libraries, or support functions. 
 2. All I/O must go thorugh a "Host layer", this will be the only part to need a rewrite when porting.
 3. C only... I originally missed C++ so much, used an object oriented design pattern, but this became unnecessarily cumbersome so the rewrite change this to a more straight forwrd data structure/function approach.
 
 Issues.
+
 1. The Emulator can bootstrap Amiga Kickstart ROMs 1.2 and 1.3, but is unable to boot ROM 3.0. 
 2. A very crude floppy drive emulation is working, but can only read raw MFM floppy images, not normal ADF files. For some reason AmigaOS is unable to read the images, as it generates an error message stating the disk is corrupt... This is probably related to the blitter issues.
 3. The blitter almost works, and works well enough to generate graphics, but there are minor corruptions/anomolies. It is here where I need the most assistance, since AmigaOS uses the blitter to speed decoding ofthe floppy tracks, this need to work better. I laso want to implement this as a DMA function.
