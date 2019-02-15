@@ -31,8 +31,8 @@ Design Goals.
 
 Currently I'm using SDL 2 as my host layer, this allows quick and easy development, but I eventually want to run this on my RaspberryPI as a baremetal emulator (also perhaps for integration into NG AmigaOS projects like AROS) so there are conditions as to what can be added to the code: 
 1. The Emulator should use no external libraries, or support functions. 
-2. All I/O must go thorugh a "Host layer", this will be the only part to need a rewrite when porting.
-3. C only... I originally missed C++ so much, used an object oriented design pattern, but this became unnecessarily cumbersome in C, so the rewrite changed this to a more straight forward data structure/function approach.
+2. All I/O must go through a "Host layer", therefore this will be the only part to need a rewrite when porting.
+3. C only... I originally missed the functionality of C++ so much, that I used an object oriented design pattern, but this became unnecessarily cumbersome to implement in C, so the rewrite changed this to a more straight forward data structure/function approach. Older parts of the emulator still have vestiges of this design, it will eventually be removed.
 4. I'm not wedded to the Musashi 68K emulator, and would be happy to replace it with something else if a suitable replacement is available.
 5. The primary target for emulation is AmigaOS legal applications, therefore the hardardware emulation does not need to be as precise as the amazing (Win)UAE, and ultimately I don't *plan* to support anything more advanced than ECS... 
 
