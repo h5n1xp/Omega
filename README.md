@@ -32,7 +32,7 @@ Status.
 Currently I'm using SDL 2 as my host layer, this allows quick and easy development, but I eventually want to run this on my RaspberryPI as a baremetal emulator (also perhaps for integration into NG AmigaOS projects like AROS) so there are conditions as to what can be added to the code: 
 1. The Emulator should use no external libraries, or support functions. 
 2. All I/O must go thorugh a "Host layer", this will be the only part to need a rewrite when porting.
-3. C only... I originally missed C++ so much, used an object oriented design pattern, but this became unnecessarily cumbersome so the rewrite change this to a more straight forwrd data structure/function approach.
+3. C only... I originally missed C++ so much, used an object oriented design pattern, but this became unnecessarily cumbersome in C, so the rewrite changed this to a more straight forward data structure/function approach.
 
 
 Issues.
