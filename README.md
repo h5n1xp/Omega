@@ -5,7 +5,7 @@ Background.
 
 This project started around December 2017, when I was doing some bare metal coding on the RaspberryPi. 
 After getting a basic kernel booting I realised I had no software to run, the killer of all hobbyOS projects. So my mind wandered what would it be like if the RaspberryPI had a 68000 CPU instead of an ARM? 
-There are plenty of popular "old school" 68k operating systems out there (TOS, Classic Mac, AmigaOS) with lots of great software, why can't I run these on the raspberryPi wihout a host OS?
+There are plenty of popular "old school" 68k operating systems out there (TOS, Classic Mac, AmigaOS) with lots of great software, why can't I run these on the raspberryPi without a host OS?
 
 After the birth of my daughter, I found I had some free time so I set about trying to make a RaspberryPi kernel which was nothing but a 68000 emulator running on the bare metal, with full access to the RaspberryPi address space. 
 I decided to use the Musashi 68k emulator as the basis as I had used it in another project so had the source code working in "raw C" (no support libraries or host OS functions) and knew the emulator well. As the project developed, I realised that since I needed a set of functions to do the byte swapping to and from the memory there was no reason why I couldn't trap calls to certan addresses an emulate extra hardware functionality required to get an old 68k OS booting.
