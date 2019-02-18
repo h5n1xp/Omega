@@ -14,7 +14,6 @@
 
 #include "Memory.h"
 #include "Kick13.h"
-#include "Kick31.h"
 #include "Chipset.h"
 #include "CIA.h"
 

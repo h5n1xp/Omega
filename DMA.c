@@ -12,7 +12,6 @@
 //  Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed
 //  with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "SDL2/SDL.h"
 #include "DMA.h"
 #include "Memory.h"
 #include "Chipset.h"
@@ -331,12 +330,12 @@ void (*DMAOperation[]) (void) = {
     oddCycle,
     evenCycle,
     oddCycle,
-    oddCycle,
     evenCycle,
     oddCycle,
     evenCycle,
     oddCycle,
     evenCycle,
+    oddCycle,
 
 };
 
@@ -373,7 +372,7 @@ void dma_execute(){
         chipset.bpl8pt += chipset.bpl2mod;
         
         //VBL Time
-        if(internal.vPos > 0xf4 ){ //0x106 is the propper ntsc vbl
+        if(internal.vPos > 0x106 ){ //0x106 is the propper ntsc vbl
             internal.vPos = 0;
             
             
@@ -449,6 +448,13 @@ void dramCycle(void){
 void diskCycle(void){
     
     static int count=0;
+    Chipset_t* debugview= &chipset;
+    uint8_t* chipmemory = low16Meg;
+    uint8_t* Debug = &low16Meg[0x6b14];
+    
+    if(count>1000){
+       // printf("Must be somthing here");
+    }
     
     if( (chipset.dmaconr & 0x210) && chipset.dsklen & 0x8000 ){
         
@@ -466,7 +472,15 @@ void diskCycle(void){
             
             if( (chipset.dsklen & 0x3FFF) == 0){
                     putChipReg16[INTREQ](0x8002);
-                   printf("Transfered %d words from track %d (head %d) to 0x%06x\n",count,df0.diskTrack,1 - df0.diskSide,chipset.dskpt+(count*2));
+                
+                
+                //Debug should point to the memory where the track was written from disk
+                int originaldskpt = chipset.dskpt-(count*2);  //debugging
+                int deCount = count;//debugging
+                Debug = &low16Meg[originaldskpt];//debugging
+                
+                
+                   printf("Transfered %d words from track %d (head %d) to 0x%06x\n",count,df0.diskTrack,1 - df0.diskSide,chipset.dskpt-(count*2));
                 
                 count = 0;
             }
@@ -670,10 +684,7 @@ int copperExecute(){
     if((chipset.dmaconr & 0x280) != 0x280){
         return 0;
     }
-    
-
-
-    
+        
     switch(internal.copperCycle){
         case 0:
             internal.IR1 = internal.chipramW[internal.copperPC>>1];
@@ -941,7 +952,7 @@ int blitterCopyCycle(){
         }
         
         if(chipset.bltsizv==0x0){
-            chipset.bltsizh = 0;
+            //chipset.bltsizh = 0;
             
             //save blitter state - something might depend upon the blitter being in a known state
             //chipset.bltapt = internal.apt << 1;

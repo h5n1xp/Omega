@@ -2287,117 +2287,6 @@ void (*putChipReg16[])(uint16_t) ={
     noop
 };
 
-
-
-void checkInterrupt(Chipset_t* chipset){
-    
-    int intreqr =chipset->intreqr;
-    
-    
-    if(chipset->intenar & 0x4000){    // if master interrupt switch is enabled
-      
-        if(intreqr & 0x1){
-            m68k_set_irq(1); // Serial Transmit buffer empty
-        }
-          
-        if(intreqr & 0x2){
-            m68k_set_irq(1); // Disk block finished
-        }
-        
-        if(intreqr & 0x4){
-            m68k_set_irq(1); // Software int
-        }
-        
-        if(intreqr & 0x8){
-            m68k_set_irq(2); // Ports, IO and timers
-        }
-        
-        if(intreqr & 0x10){
-            m68k_set_irq(3); // Copper
-        }
-        
-        if(intreqr & 0x20){
-            m68k_set_irq(3); // VBL
-        }
-        
-        if(intreqr & 0x40){
-            m68k_set_irq(3); // Blitter finished
-        }
-        
-        if(intreqr & 0x80){
-            m68k_set_irq(4); // Audio 0
-        }
-        
-        if(intreqr & 0x100){
-            m68k_set_irq(4); // Audio 1
-        }
-        
-        if(intreqr & 0x200){
-            m68k_set_irq(4); // Audio 2
-        }
-        
-        if(intreqr & 0x400){
-            m68k_set_irq(4); // Audio 3
-        }
-        
-        if(intreqr & 0x800){
-            m68k_set_irq(5); // Serial receive buffer full
-        }
-        
-        if(intreqr & 0x1000){
-            m68k_set_irq(5); // Disk sync
-        }
-        
-        if(intreqr & 0x2000){
-            m68k_set_irq(6); // External Int
-        }
-    
-    }
-    
-    return;
-    
-    // The old interrupt handling code... works the same as the above code, no idea which is better :-/
-    
-    if(chipset->intenar & 16384){ // if master interrupt switch is enabled
-        
-        uint16_t intMask = chipset->intreqr & chipset->intenar; //only set the int level, if bits are enabled
-        
-        if(intMask !=0){
-        
-            if(intMask & 8192){  // External int
-                m68k_set_irq(6);
-            }else if(intMask & 4096){ // Disk sync
-                m68k_set_irq(5);
-            }else if(intMask & 2048){ // Serial receive buffer full
-                m68k_set_irq(5);
-            }else if(intMask & 1024){ // Audio 3
-                m68k_set_irq(4);
-            }else if(intMask & 512){  // Audio 2
-                m68k_set_irq(4);
-            }else if(intMask & 256){  // Audio 1
-                m68k_set_irq(4);
-            }else if(intMask & 128){  // Audio 0
-                m68k_set_irq(4);
-            }else if(intMask & 64){   // Blitter finished
-                m68k_set_irq(3);
-            }else if(intMask & 32){   // VBL
-                m68k_set_irq(3);
-            }else if(intMask & 16){   // Copper
-                m68k_set_irq(3);
-            }else if(intMask & 8){    // Ports, IO and timers
-                m68k_set_irq(2);
-            }else if(intMask & 4){    // Software int
-                m68k_set_irq(1);
-            }else if(intMask & 2){    // Disk block finished
-                m68k_set_irq(1);
-            }else if(intMask & 1){    // Serial Transmit buffer empty
-                m68k_set_irq(1);
-            }
-        }
-    }
-    
-}
-
 void eclock_execute(Chipset_t* chipset){
     
     internal.eClockCounter -=1;
@@ -2760,6 +2649,7 @@ void blitter_execute(Chipset_t* chipset){
             int adat=chipset->bltadat;
             int bdat=chipset->bltbdat;
             int cdat=chipset->bltcdat;
+            int ddat=chipset->bltddat;
             
             uint16_t afwm = chipset->bltafwm;
             uint16_t alwm = chipset->bltalwm;
@@ -2769,6 +2659,8 @@ void blitter_execute(Chipset_t* chipset){
             int lastHWord=sizeh - 1;
             
         
+            uint8_t* DebugViewForTrackdiskDEvice = &internal.chipramW[dpt];
+            uint8_t* chipramview = low16Meg;
             
             for(int y=0;y<sizev;++y){
                 
@@ -2874,6 +2766,7 @@ void blitter_execute(Chipset_t* chipset){
             chipset->bltadat = adat;
             chipset->bltbdat = bdat;
             chipset->bltcdat = cdat;
+            chipset->bltddat = ddat;
             
             chipset->dmaconr = chipset->dmaconr & 0xBFFF; //clear blitter busy bit
             putChipReg16[INTREQ](0x8040); // generate an interrupt!

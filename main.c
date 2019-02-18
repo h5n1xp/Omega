@@ -42,34 +42,6 @@ SDL_cond* interruptFlag;
 
 int disass = 0; //set to any value greter than 0 to turn on dissassembler
 
-/*
-int thdClock(void* data){
-    
-    int* sec = data;
-    
-    while(1){
-        
-        *sec +=1;
-        SDL_Delay(1000);
-    }
-    
-    return 0;
-}
-
-
-int thd68k(void* data){
-    
-    SDL_Delay(1000);
-    
-    while(1){
-        checkInterrupt(&chipset);
-        m68k_execute(100000);
-        SDL_Delay(50);
-    }
-    
-    return 0;
-}
-*/
 
 
 
@@ -130,7 +102,7 @@ int main(int argc, const char * argv[]) {
     }
     
     size = lseek(fd, 0, SEEK_END);
-    lseek(fd, 2004, SEEK_SET);
+    lseek(fd, 2000, SEEK_SET);
     read(fd, df0.mfmData, size);
     
     printf("Floppy size: %d\n",size);
@@ -172,46 +144,37 @@ int main(int argc, const char * argv[]) {
         
         printf("\n");
     }
- */   
+ */
     
     close(fd);
 
     
-    Floppy_t* f0 = &df0;
-    Floppy_t* f1 = &df1;
-    Floppy_t* f2 = &df2;
-    Floppy_t* f3 = &df3;
-    
     //setup emulator
     cpu_init();
     
-    SDL_Window* window;
-    SDL_Renderer* renderer;
+
     
     SDL_Init(SDL_INIT_EVERYTHING);
-    window = SDL_CreateWindow("Omega v0.1",
+    host.window = SDL_CreateWindow("Omega v0.1",
                               0,//window X position
                               0,//window Y position
                               640, 400,
                               SDL_WINDOW_RESIZABLE);// | SDL_WINDOW_FULLSCREEN_DESKTOP);
     
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
-    SDL_SetRenderDrawBlendMode(renderer,SDL_BLENDMODE_BLEND);
+    host.renderer = SDL_CreateRenderer(host.window, -1, SDL_RENDERER_PRESENTVSYNC);
+    SDL_SetRenderDrawBlendMode(host.renderer,SDL_BLENDMODE_BLEND);
     
     SDL_ShowCursor(SDL_DISABLE);
     //SDL_SetRelativeMouseMode(SDL_ENABLE);
 
     
-    host.playfield = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 640, 400);
-    host.renderer = renderer;
-    host.window = window;
-    
- 
+    host.playfield = SDL_CreateTexture(host.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 640, 400);
+     
 
     
     
     ///* Commodore Logo
-    host.commodoreLogo  = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_BGRA8888, SDL_TEXTUREACCESS_STREAMING, 50, 50);
+    host.commodoreLogo  = SDL_CreateTexture(host.renderer, SDL_PIXELFORMAT_BGRA8888, SDL_TEXTUREACCESS_STREAMING, 50, 50);
     int pitch = 50*4;
     void* pixels;
     SDL_LockTexture(host.commodoreLogo , NULL, &pixels, &pitch);
@@ -227,7 +190,7 @@ int main(int argc, const char * argv[]) {
     
     
     ///* Floppy disk image
-    host.spinner  = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_BGRA8888, SDL_TEXTUREACCESS_STREAMING, 50, 50);
+    host.spinner  = SDL_CreateTexture(host.renderer, SDL_PIXELFORMAT_BGRA8888, SDL_TEXTUREACCESS_STREAMING, 50, 50);
     pitch = 50*4;
     pixels =0;
     SDL_LockTexture(host.spinner , NULL, &pixels, &pitch);
