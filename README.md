@@ -15,7 +15,8 @@ Any 1.2 or 1.3 rom will work (256k or 512k). The adf, currently, needs to be the
 
 For ease, I have included a boot disk image called raw2.adf 
 
-Once the emualtor is running, hit F2 to "insert" the adf image into DF0: the emulator will now boot the disk. This is as far as we get righ now, as AmigaOS will open an intution screen (Yay, the OS works!!) and claim the disk is unreadable.
+Once the emulator is running, hit F2 to "insert" the adf image into DF0: the emulator will now boot the disk. 
+Currently the emulator is able to boot to Workbench 1.3
 
 Background.
 
