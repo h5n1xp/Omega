@@ -222,7 +222,7 @@ uint8_t floppyDataRead(Floppy_t* disk){ //this function should be called by the 
     
     //Don't allow 0 in the data stream
     uint8_t retVal = disk->mfmData[position];
-    if(disk->index>4 & retVal == 0){
+    if(retVal == 0){
         disk->index = 0;
         CIAIndex(&CIAB);    // generate CIAB index interupt
         retVal = disk->mfmData[(disk->diskTrack * (12798*2)) + (surface * 12798) + (disk->index)]; //firstvalue
