@@ -36,7 +36,6 @@ void cpu_init();
 void cpu_execute();
 
 void checkInterrupt(Chipset_t*);
-
 void system_loadState(uint32_t*);
 
 

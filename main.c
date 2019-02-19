@@ -102,7 +102,7 @@ int main(int argc, const char * argv[]) {
     }
     
     size = lseek(fd, 0, SEEK_END);
-    lseek(fd, 2000, SEEK_SET);
+    lseek(fd, 2004, SEEK_SET);
     read(fd, df0.mfmData, size);
     
     printf("Floppy size: %d\n",size);

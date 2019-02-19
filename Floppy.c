@@ -219,8 +219,17 @@ uint8_t floppyDataRead(Floppy_t* disk){ //this function should be called by the 
         disk->index = 0;
         CIAIndex(&CIAB);    // generate CIAB index interupt
     }
+    
+    //Don't allow 0 in the data stream
+    uint8_t retVal = disk->mfmData[position];
+    if(disk->index>4 & retVal == 0){
+        disk->index = 0;
+        CIAIndex(&CIAB);    // generate CIAB index interupt
+        retVal = disk->mfmData[(disk->diskTrack * (12798*2)) + (surface * 12798) + (disk->index)]; //firstvalue
+        disk->index +=1;
+    }
 
-    return disk->mfmData[position];
+    return retVal;
 }
 
 
@@ -322,11 +331,11 @@ void floppyDisk_execute(Floppy_t* floppy,Chipset_t* chipset, CIA_t* a, CIA_t* b)
             if( (b->prbw & 0x4) == 0){
                 b->prb &= 0xFB;         // clear side bit
                 floppy->diskSide = 0;  // set upper side
-                printf("Top Surface Selected\n");
+                //printf("Top Surface Selected\n");
             }else if(floppy->diskSide==0){
                 b->prb |= 0x4;         // set lower side
                 floppy->diskSide = 1;  // lower side
-                printf("Lower Surface Selected\n");
+                //printf("Lower Surface Selected\n");
             }
             
             if( (b->prbw & 0x2) == 0){

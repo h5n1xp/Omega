@@ -14,6 +14,7 @@
 
 #include "Chipset.h"
 #include "CIA.h"
+#include "CPU.h"
 #include "m68k.h"
 
 Chipset_t chipset;
@@ -438,6 +439,7 @@ void intena(uint16_t value){
         chipset.intenar = chipset.intenar | (value  & 32767);
     }
     
+    //checkInterrupt(&chipset);
 }
 
 void intreq(uint16_t value){
@@ -447,8 +449,8 @@ void intreq(uint16_t value){
         chipset.intreqr = chipset.intreqr | (value  & 32767);
     }
     
-    //experimental Interrupt handler
-   // chipset.intreqr &= (chipset.intenar | 0x4000) ;
+    //checkInterrupt(&chipset);
+
 }
 
 void adkcon(uint16_t value){
@@ -2292,7 +2294,7 @@ void eclock_execute(Chipset_t* chipset){
     
     /*
     The function is caled every DMA slot, which on a real Amiga lasts 280ns.
-    This would be about 3,571,428hz (i.e. 3 million times per second), which it about 5 times the eclock frequency
+    This would be about 3,571,428hz (i.e. 3 million times per second), which is 5 times the eclock frequency
     So this function counts down from 5, and then increments the eClock, at a rate of aproximately 715,909hz. 
      
      */
@@ -2616,14 +2618,14 @@ void blitter_execute(Chipset_t* chipset){
             
         }else{
             
-            static count = 0;
+           static int count = 0;
             
-            printf("Blitter Copy Mode: %d\n",count);
+          //  printf("Blitter Copy Mode: %d\n",count);
             
-            count++;
+           count++;
             
             //Area Copy Blitter
-            //printf("blit: A-%06x B-%06x C-%06x D-%06x W-%d H-%d\n",chipset->bltapt,chipset->bltbpt,chipset->bltcpt,chipset->bltdpt,chipset->bltsizh,chipset->bltsizv);
+            //printf("blit %d: A-%06x (%d) B-%06x (%d) C-%06x (%d) D-%06x (%d) W-%d H-%d\n",count,chipset->bltapt,chipset->bltamod,chipset->bltbpt,chipset->bltbmod,chipset->bltcpt,chipset->bltcmod,chipset->bltdpt,chipset->bltdmod,chipset->bltsizh,chipset->bltsizv);
             
             int useMask = chipset->bltcon0 >> 8;
             int shiftA = chipset->bltcon0 >> 12;
@@ -2769,13 +2771,13 @@ void blitter_execute(Chipset_t* chipset){
             chipset->bltsizv = 0; // all done;
             
             //save blitter state - something might depend upon the blitter being in a known state
-            //chipset->bltapt = apt << 1;
-            //chipset->bltbpt = bpt << 1;
-            //chipset->bltcpt = cpt << 1;
-            //chipset->bltdpt = dpt << 1;
-            //chipset->bltadat = adat;
-            //chipset->bltbdat = bdat;
-            //chipset->bltcdat = cdat;
+            chipset->bltapt = apt << 1;
+            chipset->bltbpt = bpt << 1;
+            chipset->bltcpt = cpt << 1;
+            chipset->bltdpt = dpt << 1;
+            chipset->bltadat = adat;
+            chipset->bltbdat = bdat;
+            chipset->bltcdat = cdat;
             //chipset->bltddat = ddat;
             
             chipset->dmaconr = chipset->dmaconr & 0xBFFF; //clear blitter busy bit

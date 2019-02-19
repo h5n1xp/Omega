@@ -90,7 +90,7 @@ void cpu_execute(){
     uint32_t* guru = low16Meg;
  */
     
-    m68k_execute(1);
+    m68k_execute(2);
 
 }
 
