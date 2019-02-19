@@ -4,7 +4,7 @@
 //  https://github.com/h5n1xp/Omega
 //
 //  Created by Matt Parsons on 02/02/2019.
-//  Copyright © 2019 Matt Pasons. All rights reserved.
+//  Copyright © 2019 Matt Parsons. All rights reserved.
 //  <h5n1xp@gmail.com>
 //
 //

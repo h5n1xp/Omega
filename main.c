@@ -4,7 +4,7 @@
 //  https://github.com/h5n1xp/Omega
 //
 //  Created by Matt Parsons on 02/02/2019.
-//  Copyright © 2019 Matt Pasons. All rights reserved.
+//  Copyright © 2019 Matt Parsons. All rights reserved.
 //  <h5n1xp@gmail.com>
 //
 //
@@ -93,7 +93,7 @@ int main(int argc, const char * argv[]) {
     }else{
        
         //fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
-        fd = open("/Users/Shared/uae/WORKBENCH/raw.adf",O_RDONLY);
+        fd = open("/Users/Shared/uae/WORKBENCH/BootDisk.adf",O_RDONLY);
         //fd = open("/Users/matt/Documents/WHDLoad Collection/rawread/test2.adf",O_RDONLY);
         if(fd==0){
             printf("no disk in DF0:\n");
