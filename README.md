@@ -1,6 +1,22 @@
 Omega
 
 
+Getting Started (quickly).
+
+Omega only needs a basic install of libSDL 2 to be installed on your system. Nothing else is required. To build on Linux, I use clang (but any c compiler will do), copy all the .c and .h files to a single directory, open a comandline cd into it, and then type:
+
+clang *.c -o omega -Iinclude -Lib -lsdl2 -LSDL2main
+
+This will build and link a file called omega. Run this with the options kickstart.rom bootdisk.adf; so it will look something like:
+
+omega ./kick13.rom ./raw2.adf
+
+Any 1.2 or 1.3 rom will work (256k or 512k). The adf, currently, needs to be the extended full MFM adf, you can make these using the winUAE comand line option -rawextadf that forces writing of all tracks, even if it decodes to amigados, as raw data. Create extended adf, format it in emulation: you have valid extedended adf, all tracks in original undecoded format.
+
+For ease, I have included a boot disk image called raw2.adf 
+
+Once the emualtor is running, hit F2 to "insert" the adf image into DF0: the emulator will now boot the disk. This is as far as we get righ now, as AmigaOS will open an intution screen (Yay, the OS works!!) and claim the disk is unreadable.
+
 Background.
 
 This project started around December 2017, when I was doing some bare metal coding on the RaspberryPi. 
