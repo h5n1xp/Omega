@@ -35,8 +35,6 @@ void ChipsetInit(){
     internal.vPos = 0;
     internal.bitplaneMask = 0;
     
-
-    
 }
 
 uint32_t OCS2ARGB(uint16_t color){
@@ -54,14 +52,6 @@ uint32_t EHB2ARGB(uint16_t color){
     value  = value | 0xFF000000; //opaque alpha
     return value;
 }
-
-
-
-//***********************************************************************************************
-//***********************************************************************************************
-//***********************************************************************************************
-//Nu Emualtor design functions ***************************************************************************
-
 
 uint16_t noRead(void){
     printf("can't read a Write only Register\n");
@@ -120,9 +110,8 @@ void bltbdatL(uint32_t value){  //
 }
 
 void cop1lchL(uint32_t value){  //
-    chipset.cop1lc = value;
+    chipset.cop1lc = value >> 1;
     //printf("(32bit)Copper 1: %0x\n",chipset.cop1lc);
-    //dissassembleCopperList(value, 256);
 }
 
 void cop2lchL(uint32_t value){  //
@@ -131,9 +120,8 @@ void cop2lchL(uint32_t value){  //
         return;
     }
     
-    chipset.cop2lc = value;
+    chipset.cop2lc = value >> 1;
     //printf("(32bit)Copper 2: %0x\n",chipset.cop2lc);
-    //dissassembleCopperList(value, 256);
 }
 
 void aud0perL(uint32_t value){  //
@@ -252,7 +240,6 @@ void dsklen(uint16_t value){
 void dskdat(uint16_t value){
     chipset.dskdat = value;
 }
-
 
 void vposw(uint16_t value){
     internal.LOF = value;
@@ -374,18 +361,22 @@ void bltadat(uint16_t value){
 }
 
 void cop1lch(uint16_t value){
-    chipset.cop1lc = (chipset.cop1lc & 0x0000FFFF) | ((value & 31) <<16); //only 5 bits as this is a weird ECS/OCS hibrid
+//    chipset.cop1lc = (chipset.cop1lc & 0x0000FFFF) | ((value & 31) <<16); //only 5 bits as this is a weird ECS/OCS hibrid
+      chipset.cop1lc = (value << 15) | (chipset.cop1lc & 0x00007FFF); //this is only shifted by 15 because all addresses are word aligend
 }
 void cop1lcl(uint16_t value){
-    chipset.cop1lc = (chipset.cop1lc & 0xFFFF0000) |  (value & 65535);
-    printf("(16bit)Copper 1: %0x\n",chipset.cop1lc);
+//    chipset.cop1lc = (chipset.cop1lc & 0xFFFF0000) |  (value & 65535);
+//    printf("(16bit)Copper 1: %0x\n",chipset.cop1lc);
+        chipset.cop1lc = (value >> 1)  | (chipset.cop1lc & 0xFFFF8000);
 }
 void cop2lch(uint16_t value){
-    chipset.cop2lc = (chipset.cop2lc & 0x0000FFFF) | ((value & 31) <<16); //only 5 bits as this is a weird ECS/OCS hibrid
+//    chipset.cop2lc = (chipset.cop2lc & 0x0000FFFF) | ((value & 31) <<16); //only 5 bits as this is a weird ECS/OCS hibrid
+      chipset.cop2lc = (value << 15) | (chipset.cop1lc & 0x00007FFF); //this is only shifted by 15 because all addresses are word aligend
 }
 void cop2lcl(uint16_t value){
-    chipset.cop2lc = (chipset.cop2lc & 0xFFFF0000) |  (value & 65535);
-    printf("(16bit)Copper 2: %0x\n",chipset.cop2lc);
+//    chipset.cop2lc = (chipset.cop2lc & 0xFFFF0000) |  (value & 65535);
+//    printf("(16bit)Copper 2: %0x\n",chipset.cop2lc);
+    chipset.cop2lc = (value >> 1)  | (chipset.cop2lc & 0xFFFF8000);
 }
 
 void copjmp1(uint16_t value){
@@ -856,10 +847,6 @@ void noop(uint16_t value){
 
 //***********************************************************************************************
 
-
-
-
-
 uint32_t noReadL(void){
     printf("can't do a 32bit read from Register yet \n");
     return 0;
@@ -1003,28 +990,6 @@ uint16_t (*getChipReg16[])(void) = {
     noRead,
     deniseid,
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

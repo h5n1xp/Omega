@@ -96,11 +96,6 @@
 
 
 
-
-
-
-
-
 void (*DMAOperation[]) (void) = {
     evenCycle,
     dramCycle,
@@ -523,6 +518,17 @@ void bitplaneCycle0_4(void){
         return;
     }
     
+    
+    if(chipset.bplcon0 & 0x8000){
+        
+        if( (internal.bitplaneMask & 0x8)  == 0x8){
+            
+            uint16_t* p = &internal.chipramW[chipset.bpl4pt];
+            chipset.bpl4pt +=1;
+            chipset.bpl4dat = *p;
+            return;
+        }
+    }
 
     
 }
@@ -543,11 +549,12 @@ void bitplaneCycle4_2(void){
         }
     }
     
-    /*
-    uint16_t* p = &internal.chipramW[chipset.bpl4pt];
-    chipset.bpl4pt +=1;
-    chipset.bpl4dat = *p;
-    */
+    
+    if( (internal.bitplaneMask & 0x8)  == 0x8){
+        uint16_t* p = &internal.chipramW[chipset.bpl4pt];
+        chipset.bpl4pt +=1;
+        chipset.bpl4dat = *p;
+    }
 }
 void bitplaneCycle6_3(void){
     
@@ -556,6 +563,15 @@ void bitplaneCycle6_3(void){
         return;
     }
     
+    if(chipset.bplcon0 & 0x8000){
+        
+        if( (internal.bitplaneMask & 0x4)  == 0x4){
+            uint16_t* p = &internal.chipramW[chipset.bpl3pt];
+            chipset.bpl3pt +=1;
+            chipset.bpl3dat = *p;
+            return;
+        }
+    }
 
     
 }
@@ -578,7 +594,7 @@ void bitplaneCycle2_1(void){
             }
         
             uint32_t* pixbuff = (uint32_t*)host.pixels;
-            planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, 0, 0, 0, 8);
+            planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat, 0, 8);
             return;
        }
     }
@@ -606,10 +622,11 @@ void bitplaneCycle3_2(void){
        }
     }
     
-    //uint16_t* p = &internal.chipramW[chipset.bpl3pt];
-    //chipset.bpl3pt +=1;
-    //chipset.bpl3dat = *p;
-    
+    if( (internal.bitplaneMask & 0x4)  == 0x4){
+        uint16_t* p = &internal.chipramW[chipset.bpl3pt];
+        chipset.bpl3pt +=1;
+        chipset.bpl3dat = *p;
+    }
 }
 void bitplaneCycle5_3(void){
     
@@ -618,6 +635,21 @@ void bitplaneCycle5_3(void){
         return;
     }
     
+    if(chipset.bplcon0 & 0x8000){
+        
+        if( (internal.bitplaneMask & 0x4)  == 0x4){
+            uint16_t* p = &internal.chipramW[chipset.bpl3pt];
+            chipset.bpl3pt +=1;
+            chipset.bpl3dat = *p;
+            return;
+        }
+    }
+    
+    if( (internal.bitplaneMask & 0x10)  == 0x10){
+        uint16_t* p = &internal.chipramW[chipset.bpl5pt];
+        chipset.bpl5pt +=1;
+        chipset.bpl5dat = *p;
+    }
 
     
 }
@@ -652,7 +684,7 @@ void bitplaneCycle1(void){
     }
     
     uint32_t* pixbuff = (uint32_t*)host.pixels;
-    planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, 0, 0, 0, delta);
+    planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat, 0, delta);
 }
 
 void drawBlank(){
@@ -679,9 +711,9 @@ int copperExecute(){
         
     switch(internal.copperCycle){
         case 0:
-            internal.IR1 = internal.chipramW[internal.copperPC>>1];
+            internal.IR1 = internal.chipramW[internal.copperPC];
             internal.IR1 = (internal.IR1 <<8) | (internal.IR1 >>8);
-            internal.copperPC += 2;
+            internal.copperPC += 1;
             internal.copperCycle = 1;
             
             if( (internal.IR1 & 0x1) == 0x1){
@@ -691,8 +723,8 @@ int copperExecute(){
             break;
             
         case 1:
-            internal.IR2 = internal.chipramW[internal.copperPC>>1];
-            internal.copperPC += 2;
+            internal.IR2 = internal.chipramW[internal.copperPC];
+            internal.copperPC += 1;
             
             internal.IR1 = (internal.IR1 >> 1) & 255;   // divide by 2 and mask off bad bits
             
@@ -703,7 +735,7 @@ int copperExecute(){
                 internal.copperCycle = 4;return 1;};         //pause copper until next vbl
             
             //Move
-            internal.IR2 = (internal.IR2 <<8) | (internal.IR2 >>8);
+            internal.IR2 = (internal.IR2 <<8) | (internal.IR2 >> 8);
             //printf("%04x Cop Move: %04x -> (%s)\n",internal.copperPC - 4,internal.IR2,regNames[internal.IR1]);
             putChipReg16[internal.IR1](internal.IR2);
             internal.copperCycle = 0;
@@ -711,8 +743,8 @@ int copperExecute(){
             break;
             
         case 2:
-            internal.IR2 = internal.chipramW[internal.copperPC>>1];
-            internal.copperPC += 2;
+            internal.IR2 = internal.chipramW[internal.copperPC];
+            internal.copperPC += 1;
             
             internal.IR2 = (internal.IR2 <<8) | (internal.IR2 >>8);
             
@@ -722,7 +754,7 @@ int copperExecute(){
             if( (internal.IR2 & 1) == 1){
                 
                 if( chipset.vhposr >= internal.IR1){
-                    internal.copperPC +=4;
+                    internal.copperPC +=2;
                 }
                 internal.copperCycle = 0;
                 

@@ -55,17 +55,25 @@
             Shift B;
             apply logic functions
             set clear zero flag
+ 
             if(Store D needed){
                 Store D;
             }
+ 
             update v and h counters
             cycle = 1 ; //repeat the operation
  
-            if(v & h == end conditon{
+            if(v == end condition){
+                reset v = starting value.
+                increment h
+            }
+ 
+            if(h == end conditon{
                 clear blitter busy flag
                 Generate interrupt;
                 cycle = 0;  // rest the blitter state
             }
+ 
  cycle 5:   fill mode
  
  
@@ -84,13 +92,12 @@ int OblitterExecute(){
     
     static int cycle;
     
-    //check if blitter DMA is on
-    //Check if blitter needs to run (blitter busy flag is set)
+    //check if blitter DMA is on; if not then return 0
+    //Check if blitter needs to run (blitter busy flag is set); if not then return 0;
     
     blitterOperation[cycle]();
-    
-    
-    return 0;
+
+    return 1; //if we got here we probably used the memory cycle...
     
     
 }

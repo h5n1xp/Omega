@@ -17,6 +17,11 @@
 
 #include <stdio.h>
 
+//keep internal blitter state in one place.
+typedef struct{
+    uint16_t sizev;
+}Blitter_t;
+
 int OblitterExecute(void);
 
 #endif /* Blitter_h */
