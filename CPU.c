@@ -90,7 +90,7 @@ void cpu_execute(){
     uint32_t* guru = low16Meg;
  */
     
-    m68k_execute(2);
+    m68k_execute(4);
 
 }
 
@@ -224,32 +224,55 @@ void checkInterrupt(Chipset_t* chipset){
 
 unsigned int cpu_read_byte(unsigned int address){
     
+    //If Address > 0xFFFFFF (the low16Meg), then access the BCM2837 chip
+    //Not needed if running on a real RaspberryPi. just allow the CPU to access the memory.
+    
     return chipReadByte(address);
     
 }
 
 unsigned int cpu_read_word(unsigned int address){
+    
+    //If Address > 0xFFFFFF (the low16Meg), then access the BCM2837 chip
+    //Not needed if running on a real RaspberryPi. just allow the CPU to access the memory.
+    
     return chipReadWord(address);
     
 }
 
 unsigned int cpu_read_long(unsigned int address){
+    
+    //If Address > 0xFFFFFF (the low16Meg), then access the BCM2837 chip
+    //Not needed if running on a real RaspberryPi. just allow the CPU to access the memory.
+    
     return chipReadLong(address);
     
 }
 
 
 void cpu_write_byte(unsigned int address,unsigned int value){
+    
+    //If Address > 0xFFFFFF (the low16Meg), then access the BCM2837 chip
+    //Not needed if running on a real RaspberryPi. just allow the CPU to access the memory.
+    
     chipWriteByte(address, value);
     
 }
 
 void cpu_write_word(unsigned int address,unsigned int value){
+    
+    //If Address > 0xFFFFFF (the low16Meg), then access the BCM2837 chip
+    //Not needed if running on a real RaspberryPi. just allow the CPU to access the memory.
+    
     chipWriteWord(address, value);
     
 }
 
 void cpu_write_long(unsigned int address,unsigned int value){
+    
+    //If Address > 0xFFFFFF (the low16Meg), then access the BCM2837 chip
+    //Not needed if running on a real RaspberryPi. just allow the CPU to access the memory.
+    
     chipWriteLong(address, value);
 
 }
