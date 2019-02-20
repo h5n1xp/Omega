@@ -572,6 +572,8 @@ void bitplaneCycle6_3(void){
             return;
         }
     }
+    
+    
 
     
 }
@@ -684,7 +686,7 @@ void bitplaneCycle1(void){
     }
     
     uint32_t* pixbuff = (uint32_t*)host.pixels;
-    planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat, 0, delta);
+    planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat,chipset.bpl5dat, delta);
 }
 
 void drawBlank(){
