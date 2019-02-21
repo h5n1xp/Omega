@@ -39,6 +39,8 @@ void planar2chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uint16_t
 
 void sprite2chunky(uint32_t* pixBuff,uint32_t* palette, int x,uint16_t plane1, uint16_t plane2,int delta);
 
+void pressKey(uint16_t keyCode);
+void releaseKey(uint16_t keyCode);
 
 
 void hostDisplay();

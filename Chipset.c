@@ -2314,7 +2314,7 @@ void blitter_execute(Chipset_t* chipset){
     //Blitter DMA Enabled and blitter busy flag set (which means bltsize was written to and blitting should start).
     if( (chipset->dmaconr & 16960) == 16960 ){
     
-        /*
+        
         //make it so the blitter doesn't blit immediatly
         static int delay;
         
@@ -2323,8 +2323,8 @@ void blitter_execute(Chipset_t* chipset){
         if(delay>0){
             return;
         }
-        delay = 5;
-        */
+        delay = 10;
+        
         
         
         if(chipset->bltcon1 & 1){
@@ -2682,6 +2682,8 @@ void blitter_execute(Chipset_t* chipset){
                         channelA = channelA & alwm;
                     }
                     
+                    uint16_t A = channelA; //Need to record the masked A for next cycle (Thanks to aros-sg on eab)
+                    
                     //shifting section
                     if(xIncrement==-1){
                         
@@ -2694,7 +2696,8 @@ void blitter_execute(Chipset_t* chipset){
                             channelB = (previousB << (16-shiftB)) | (channelB >> shiftB);
                         
                     }
-                    previousA = adat;
+                    //previousA = adat;
+                    previousA = A;
                     previousB = bdat;
                     
                     

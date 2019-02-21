@@ -142,7 +142,7 @@ uint8_t CIARead(CIA_t* cia,int reg){
         case 0x9:value =(cia->tod >> 8 ) & 255;break;//todmid
         case 0xA:value =(cia->tod >> 16) & 255;break;//todhi
         case 0xB:value =(cia->tod >> 24) & 255;break;//todunused
-        case 0xC:value = cia->sdr;break;//sdr
+        case 0xC:value = cia->sdr; cia->sdr = 0;break;//sdr - clear after read.
         case 0xD://icr
             value = cia->icr;
             cia->icr = 0;
@@ -227,7 +227,7 @@ void CIAExecute(CIA_t* cia){
     if( cia->icr > 0 && cia->irqLatch == 0 ){
         putChipReg16[INTREQ](cia->chipInt);
         cia->irqLatch = 1;
-        //printf("CIA %s int %d\n",cia->Name,cia->chipInt);
+        //printf("CIA %s int %d\n",cia->Name,cia->icr);
     }
     
 }
@@ -248,7 +248,7 @@ void CIATODEvent(CIA_t* cia){
 
 void CIAIndex(CIA_t* cia){
     
-    CIAWrite(cia,0xD, 0x90); // generate an interrupt
+    cia->icr =  cia->icr | (0x90 & cia->icrMask);
 }
 
 

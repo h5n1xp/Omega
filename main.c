@@ -328,7 +328,7 @@ int main(int argc, const char * argv[]) {
     }else{
        
         //fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
-        fd = open("/Users/Shared/uae/WORKBENCH/raw3.adf",O_RDONLY);
+        fd = open("/Users/Shared/uae/WORKBENCH/raw5.adf",O_RDONLY);
         //fd = open("/Users/matt/Documents/WHDLoad Collection/rawread/test2.adf",O_RDONLY);
         if(fd==0){
             printf("no disk in DF0:\n");
@@ -401,7 +401,7 @@ int main(int argc, const char * argv[]) {
 
     
     SDL_Init(SDL_INIT_EVERYTHING);
-    host.window = SDL_CreateWindow("Omega v0.1",
+    host.window = SDL_CreateWindow("Omega v0.4",
                               0,//window X position
                               0,//window Y position
                               640, 400,
@@ -480,12 +480,36 @@ int main(int argc, const char * argv[]) {
                     running=0;
                     break;
                     
+                case SDL_KEYUP:
+                    
+                    
+                    if(host.event.key.keysym.sym==SDLK_F1){
+                        //Capture F1
+                        break;
+                    }
+                    
+                    releaseKey(host.event.key.keysym.sym);
+                    break;
+                    
                 case SDL_KEYDOWN:
                     
                     if(host.event.key.keysym.sym==SDLK_ESCAPE){
                         running = 0;
                     }
                     
+ 
+                    
+                    if(host.event.key.keysym.sym==SDLK_F1){
+                        if(df0.data[0] !=0){
+                            df0.userInserted = 1;
+                            printf("Disk inserted in df0:\n");
+                        }
+                        break;
+                    }
+                    
+                    pressKey(host.event.key.keysym.sym);
+                    
+                    /*
                     if(host.event.key.keysym.sym==SDLK_z){
                         printf("Disk Now Valid\n");
                         df0.indexTop=6333;
@@ -493,10 +517,10 @@ int main(int argc, const char * argv[]) {
                     }
                     
                     if(host.event.key.keysym.sym==SDLK_q){
-                            printf("**! Reset !**\n");
-                            cpu_pulse_reset();
-                            chipset.dmaconr = 0;
-                            internal.copperPC = 0;
+                        printf("**! Reset !**\n");
+                        cpu_pulse_reset();
+                        chipset.dmaconr = 0;
+                        internal.copperPC = 0;
                         
                     }
                     
@@ -512,14 +536,9 @@ int main(int argc, const char * argv[]) {
                             }
                         }
                     }
+                    */
                     
-                    if(host.event.key.keysym.sym==SDLK_F1){
-                        if(df0.data[0] !=0){
-                            df0.userInserted = 1;
-                            printf("Disk inserted in df0:\n");
-                        }
-                        
-                    }
+                    
                     break;
                     
                 default:

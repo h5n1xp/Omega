@@ -574,7 +574,12 @@ void bitplaneCycle6_3(void){
     }
     
     
-
+    if( (internal.bitplaneMask & 0x20)  == 0x20){
+        uint16_t* p = &internal.chipramW[chipset.bpl6pt];
+        chipset.bpl6pt +=1;
+        chipset.bpl6dat = *p;
+        return;
+    }
     
 }
 void bitplaneCycle2_1(void){
@@ -662,6 +667,10 @@ void bitplaneCycle1(void){
         return;
     }
     
+    if(host.pixels == NULL){
+        return;
+    }
+    
     if( (internal.bitplaneMask & 0x1)  == 0x0){
         return;
     }
@@ -671,19 +680,16 @@ void bitplaneCycle1(void){
     chipset.bpl1dat = *p;
     
 
-    if(host.pixels == NULL){
-        return;
-    }
+
     
     int delta = 16;
     if(chipset.bplcon0 & 0x8000){
         delta = 8;
+        uint32_t* pixbuff = (uint32_t*)host.pixels;
+        planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat,0, delta);
+        return;
     }
 
-    
-    if(internal.vPos>144){
-        printf("");
-    }
     
     uint32_t* pixbuff = (uint32_t*)host.pixels;
     planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat,chipset.bpl5dat, delta);
