@@ -96,7 +96,7 @@
 
 
 
-void (*DMAOperation[]) (void) = {
+void (*DMALores[])() = {
     evenCycle,
     dramCycle,
     evenCycle,
@@ -153,7 +153,7 @@ void (*DMAOperation[]) (void) = {
     oddCycle,
     evenCycle,
     oddCycle,
-    bitplaneCycle0_4,
+    bitplaneCycle0_4,   //Normal start
     bitplaneCycle4_2,
     bitplaneCycle6_3,
     bitplaneCycle2_1,
@@ -335,22 +335,264 @@ void (*DMAOperation[]) (void) = {
 };
 
 
+void (*DMAHires[]) (void) = {
+        evenCycle,
+        dramCycle,
+        evenCycle,
+        dramCycle,
+        evenCycle,
+        dramCycle,
+        evenCycle,
+        diskCycle,
+        evenCycle,
+        diskCycle,
+        evenCycle,
+        diskCycle,
+        evenCycle,
+        audioCycle,
+        evenCycle,
+        audioCycle,
+        evenCycle,
+        audioCycle,
+        evenCycle,
+        audioCycle,
+        evenCycle,
+        spriteCycle,    //00
+        evenCycle,
+        spriteCycle,    //00
+        evenCycle,
+        spriteCycle,    //01
+        evenCycle,
+        spriteCycle,    //01
+        evenCycle,
+        spriteCycle,    //02
+        evenCycle,
+        spriteCycle,    //02
+        evenCycle,
+        spriteCycle,    //03
+        evenCycle,
+        spriteCycle,    //03
+        evenCycle,
+        spriteCycle,    //04
+        evenCycle,
+        spriteCycle,    //04
+        evenCycle,
+        spriteCycle,    //05
+        evenCycle,
+        spriteCycle,    //05
+        evenCycle,
+        spriteCycle,    //06
+        evenCycle,
+        spriteCycle,    //06
+        evenCycle,
+        spriteCycle,    //07
+        evenCycle,
+        spriteCycle,    //07
+        evenCycle,
+        oddCycle,
+        evenCycle,
+        oddCycle,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+        evenCycle,
+        oddCycle,
+        evenCycle,
+        oddCycle,
+        evenCycle,
+        oddCycle,
+        evenCycle,
+        oddCycle,
+        evenCycle,
+        oddCycle,
+};
+
+
+
 
 void dma_execute(){
-  
+    
     chipset.vposr   = internal.LOF | internal.vPos >> 8;
     chipset.vhposr  = internal.vPos << 8;
     chipset.vhposr |= internal.hPos;
-   
-    
-    DMAOperation[internal.hPos]();
+
+    if(chipset.bplcon0 & 0x8000){
+        DMAHires[internal.hPos]();
+    }else{
+        DMALores[internal.hPos]();
+    }
     eclock_execute(&chipset);   // CIA timers
 
     internal.hPos++;
     
     
     //end of line reached! 227 colour clocks have executed
-    if(internal.hPos >0xE3){
+    if(internal.hPos > 0xE3){
         
         internal.hPos = 0;
         internal.vPos +=1;
@@ -367,7 +609,7 @@ void dma_execute(){
         chipset.bpl8pt += chipset.bpl2mod;
         
         //VBL Time
-        if(internal.vPos > 0x106 ){ //0x106 is the propper ntsc vbl
+        if(internal.vPos > 0x10C ){ //0x106 is the propper ntsc vbl
             internal.vPos = 0;
             
             
@@ -412,6 +654,8 @@ void dma_execute(){
         
     }
 }
+
+
 
 
 void evenCycle(void){
@@ -460,25 +704,22 @@ void diskCycle(void){
             count +=1;
             
             if( (chipset.dsklen & 0x3FFF) == 0){
-                    putChipReg16[INTREQ](0x8002);
-                
-                /*
-                //Debug should point to the memory where the track was written from disk
-                int originaldskpt = chipset.dskpt-(count*2);  //debugging
-                int deCount = count;//debugging
-                printf("Transfered %d words from track %d (head %d) to 0x%06x\n",count,df0.diskTrack,1 - df0.diskSide,chipset.dskpt-(count*2));
-                */
-                
+                putChipReg16[INTREQ](0x8002);
                 count = 0;
             }
         }
+        return;
     }
+    
+    oddCycle();
 }
 void audioCycle(void){
 
+    oddCycle();
 }
 void spriteCycle(void){
 
+    oddCycle();
 }
 
 int bitplaneActive(){
@@ -489,11 +730,11 @@ int bitplaneActive(){
     }
     
     //too early horisonal position let the Copper and Blitter run
-    if(internal.hPos<chipset.ddfstrt){
+    if(internal.hPos<(chipset.ddfstrt)){
         return 0;
     }
  
-    //too late horisonal position let the Copper and Blitter run
+    //too late horisonal position let the Copper and Blitter run... why + 16?
     if(internal.hPos>(chipset.ddfstop+16)){
         return 0;
     }
@@ -505,7 +746,7 @@ int bitplaneActive(){
     
     // vpos not working...
     if(internal.vPos> ((chipset.diwstop>>8)| 256)){
-    //    return 0;
+       // return 0;
     }
     
     return 1;
@@ -522,7 +763,6 @@ void bitplaneCycle0_4(void){
     if(chipset.bplcon0 & 0x8000){
         
         if( (internal.bitplaneMask & 0x8)  == 0x8){
-            
             uint16_t* p = &internal.chipramW[chipset.bpl4pt];
             chipset.bpl4pt +=1;
             chipset.bpl4dat = *p;
@@ -530,8 +770,9 @@ void bitplaneCycle0_4(void){
         }
     }
 
-    
+    evenCycle();
 }
+
 void bitplaneCycle4_2(void){
     
     if(bitplaneActive()==0){
@@ -554,7 +795,10 @@ void bitplaneCycle4_2(void){
         uint16_t* p = &internal.chipramW[chipset.bpl4pt];
         chipset.bpl4pt +=1;
         chipset.bpl4dat = *p;
+        return;
     }
+    
+    oddCycle();
 }
 void bitplaneCycle6_3(void){
     
@@ -581,10 +825,14 @@ void bitplaneCycle6_3(void){
         return;
     }
     
+    evenCycle();
 }
 void bitplaneCycle2_1(void){
     
     if(bitplaneActive()==0){
+        
+        drawBlank();
+        
         return;
     }
     
@@ -601,7 +849,8 @@ void bitplaneCycle2_1(void){
             }
         
             uint32_t* pixbuff = (uint32_t*)host.pixels;
-            planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat, 0, 8);
+            planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat, 0,0, 8);
+                   host.FBCounter +=8;
             return;
        }
     }
@@ -610,7 +859,10 @@ void bitplaneCycle2_1(void){
         uint16_t* p = &internal.chipramW[chipset.bpl2pt];
         chipset.bpl2pt +=1;
         chipset.bpl2dat = *p;
+        return;
     }
+    
+    oddCycle();
 }
 
 void bitplaneCycle3_2(void){
@@ -633,7 +885,10 @@ void bitplaneCycle3_2(void){
         uint16_t* p = &internal.chipramW[chipset.bpl3pt];
         chipset.bpl3pt +=1;
         chipset.bpl3dat = *p;
+        return;
     }
+    
+    oddCycle();
 }
 void bitplaneCycle5_3(void){
     
@@ -656,14 +911,17 @@ void bitplaneCycle5_3(void){
         uint16_t* p = &internal.chipramW[chipset.bpl5pt];
         chipset.bpl5pt +=1;
         chipset.bpl5dat = *p;
+        return;
     }
 
+    evenCycle();
     
 }
 void bitplaneCycle1(void){
     
     
     if(bitplaneActive()==0){
+        drawBlank();
         return;
     }
     
@@ -681,27 +939,133 @@ void bitplaneCycle1(void){
     
 
 
-    
-    int delta = 16;
+
     if(chipset.bplcon0 & 0x8000){
-        delta = 8;
+
         uint32_t* pixbuff = (uint32_t*)host.pixels;
-        planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat,0, delta);
+        planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat, 0, 0, 8);
+        host.FBCounter +=8;
         return;
     }
 
     
     uint32_t* pixbuff = (uint32_t*)host.pixels;
-    planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat,chipset.bpl5dat, delta);
+    planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat,chipset.bpl5dat, chipset.bpl6dat, 16);
+            host.FBCounter +=16;
 }
 
+
+void setDisplayMode(int mode){
+    
+    int temp = host.FBCounter / 640;
+    temp = (temp) * 640;
+    host.FBCounter= temp;
+    
+}
+
+
+void hiresPlane4(){
+    
+    if(bitplaneActive()==0){
+        evenCycle(); // let the copper run
+        return;
+    }
+    
+    
+    if( (internal.bitplaneMask & 0x8)  == 0x8){
+        uint16_t* p = &internal.chipramW[chipset.bpl4pt];
+        chipset.bpl4pt +=1;
+        chipset.bpl4dat = *p;
+        return;
+    }
+    
+    evenCycle();
+    
+}
+
+void hiresPlane2(){
+    
+    if(bitplaneActive()==0){
+        evenCycle(); // let the copper run
+        return;
+    }
+    
+    if( (internal.bitplaneMask & 0x2)  == 0x2){
+        uint16_t* p = &internal.chipramW[chipset.bpl2pt];
+        chipset.bpl2pt +=1;
+        chipset.bpl2dat = *p;
+        return;
+    }
+    
+    oddCycle();
+    
+}
+
+void hiresPlane3(){
+    
+    if(bitplaneActive()==0){
+        evenCycle(); // let the copper run
+        return;
+    }
+    
+    if( (internal.bitplaneMask & 0x4)  == 0x4){
+        uint16_t* p = &internal.chipramW[chipset.bpl3pt];
+        chipset.bpl3pt +=1;
+        chipset.bpl3dat = *p;
+        return;
+    }
+    
+    evenCycle();
+    
+}
+
+void hiresPlane1(){
+    
+    if(bitplaneActive()==0){
+        evenCycle(); // let the copper run
+        return;
+    }
+    
+    if( (internal.bitplaneMask & 0x1)  == 0x1){
+        uint16_t* p = &internal.chipramW[chipset.bpl1pt];
+        chipset.bpl1pt +=1;
+        chipset.bpl1dat = *p;
+        
+        
+        if(host.pixels == NULL){
+            return;
+        }
+        
+        
+        
+        uint32_t* pixbuff = (uint32_t*)host.pixels;
+        planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat, 0,0, 8);
+        host.FBCounter +=8;
+        return;
+    }
+    
+    evenCycle();
+    
+}
+
+
+
+
+
+
+
 void drawBlank(){
+    
     uint32_t* pixbuff = (uint32_t*)host.pixels;
     
-    int res=32;
+    if(pixbuff==NULL || internal.vPos<44){
+        return;
+    }
+    return;
+    int res=16;
     
     if(chipset.bplcon0 & 0x8000){
-        res = 16;
+        return;
     }
     
     for(int i=0;i<res;++i){
@@ -756,6 +1120,10 @@ int copperExecute(){
             
             internal.IR2 = (internal.IR2 <<8) | (internal.IR2 >>8);
             
+            internal.comparisonMask = (internal.IR2 | 0x0000); //ignore the instruction bits
+
+            internal.IR1 &= internal.comparisonMask; //mask the wait position
+
             internal.copperCycle = 3;
             
             //Skip
@@ -776,8 +1144,13 @@ int copperExecute(){
             
         case 3:
             
+            if(1){}
+            uint16_t vhposr = chipset.vhposr;
+            uint16_t wait = internal.IR1;
+            uint16_t comparison = internal.IR2;
+            
             //Wait
-            if( chipset.vhposr >= internal.IR1){
+            if( (chipset.vhposr & internal.IR2)  >= internal.IR1){
                 internal.copperCycle = 0;
             }
             
@@ -814,6 +1187,7 @@ int blitterExecute(){
                 }else{
                     //Copy Mode
                     //printf("Copy Mode\n");
+                    /*
                     internal.useMask = chipset.bltcon0 >> 8;
                     internal.shiftA = chipset.bltcon0 >> 12;
                     internal.shiftB = chipset.bltcon1 >> 12;
@@ -837,7 +1211,7 @@ int blitterExecute(){
                     internal.sizeh = chipset.bltsizh;
                     
                     Internal_t* debug = &internal;
-                    
+                    */
                     state = 2;
                 }
             }

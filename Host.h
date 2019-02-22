@@ -35,7 +35,7 @@ typedef struct{
 
 extern Host_t host;
 
-void planar2chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uint16_t plane2,uint16_t plane3,uint16_t plane4,uint16_t plane5,int delta); //delta =8 hires, 16 = lores
+void planar2chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uint16_t plane2,uint16_t plane3,uint16_t plane4,uint16_t plane5,uint16_t plane6, int delta); //delta =8 hires, 16 = lores
 
 void sprite2chunky(uint32_t* pixBuff,uint32_t* palette, int x,uint16_t plane1, uint16_t plane2,int delta);
 

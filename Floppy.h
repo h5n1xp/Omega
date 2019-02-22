@@ -70,6 +70,7 @@ void floppyInsert(Floppy_t*);
 void floppyEject(Floppy_t*);
 
 
+void resetIndex(Floppy_t* disk);
 uint8_t floppyDataRead(Floppy_t* disk);
 void floppy_execute(Floppy_t*);
 

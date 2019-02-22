@@ -265,7 +265,7 @@ void expA2M(int fd, uint8_t* mfm){
                 
                 
             }
-            s += 830;
+            s += 830;   //pad track to make 12798 bytes to meet the ADF-EXT spec.
             printf("\n");
         }
 
@@ -276,8 +276,14 @@ void expA2M(int fd, uint8_t* mfm){
 
 
 
-
-
+//run the CPU in a seprate thread... need to sort out interrupts first...
+int thd68k(void* data){
+    
+    while(1){
+        cpu_execute();
+    }
+    
+}
 
 
 
@@ -467,7 +473,8 @@ int main(int argc, const char * argv[]) {
     
     
     
-    
+    Chipset_t* chipView = &chipset;
+    Internal_t* internalView = &internal;
     
     printf("\nEntering main loop\n");
     while(running){

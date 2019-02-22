@@ -505,6 +505,7 @@ typedef struct{
     int copperCycle;
     uint16_t IR1;
     uint16_t IR2;
+    uint16_t comparisonMask;    //comparison mask for wait and skip
     uint16_t LOF; //LOF bit
     
     int vPos;

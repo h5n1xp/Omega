@@ -360,7 +360,9 @@ void hostDisplay(){
     
 }
 
-void planar2chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uint16_t plane2,uint16_t plane3,uint16_t plane4,uint16_t plane5,int delta){ //delta =8 hires, 16 = lores
+void planar2chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uint16_t plane2,uint16_t plane3,uint16_t plane4,uint16_t plane5,uint16_t plane6,int delta){ //delta =8 hires, 16 = lores
+    
+    int counter = host.FBCounter;
     
     //Fetch and display 2 bytes of bitplane data (16 pixels)
     uint32_t colourIndex1 = 0;
@@ -374,6 +376,7 @@ void planar2chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uint16_t
         colourIndex1 = colourIndex1 | (((plane3>>j) & 1) << 2);
         colourIndex1 = colourIndex1 | (((plane4>>j) & 1) << 3);
         colourIndex1 = colourIndex1 | (((plane5>>j) & 1) << 4);
+        colourIndex1 = colourIndex1 | (((plane6>>j) & 1) << 5);
         
         int k=j+8;
         //build 8 chunky pixels from a byte of bitplane data
@@ -382,17 +385,17 @@ void planar2chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uint16_t
         colourIndex2 = colourIndex2 | (((plane3>>k) & 1) << 2);
         colourIndex2 = colourIndex2 | (((plane4>>k) & 1) << 3);
         colourIndex2 = colourIndex2 | (((plane5>>k) & 1) << 4);
+        colourIndex2 = colourIndex2 | (((plane6>>k) & 1) << 5);
         
-        
-        pixBuff[host.FBCounter] = internal.palette[colourIndex1];           // use SDL texture buffer
-        pixBuff[host.FBCounter+delta] = internal.palette[colourIndex2];// use SDL texture buffer
-        host.FBCounter +=1;
+        pixBuff[counter] = internal.palette[colourIndex1];           // use SDL texture buffer
+        pixBuff[counter+delta] = internal.palette[colourIndex2];// use SDL texture buffer
+        counter +=1;
         
         if(delta==16){
-            pixBuff[host.FBCounter] = internal.palette[colourIndex1];           // use SDL texture buffer
-            pixBuff[host.FBCounter+delta] = internal.palette[colourIndex2];// use SDL texture buffer
+            pixBuff[counter] = internal.palette[colourIndex1];           // use SDL texture buffer
+            pixBuff[counter+delta] = internal.palette[colourIndex2];// use SDL texture buffer
             //
-            host.FBCounter +=1;
+            counter +=1;
         }
         
         

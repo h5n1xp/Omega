@@ -36,6 +36,22 @@ void bitplaneCycle3_2(void);
 void bitplaneCycle5_3(void);
 void bitplaneCycle1(void);
 
+void loresPlane4(void);
+void loresPlane6(void);
+void loresPlane2(void);
+void loresPlane3(void);
+void loresPlane5(void);
+void loresPlane1(void);
+
+void hiresPlane4(void);
+void hiresPlane2(void);
+void hiresPlane3(void);
+void hiresPlane1(void);
+
+void drawBlank();
+
+void setDisplayMode(int); // 0 = lores, 1 = highres
+
 int blitterCopyCycle();
 int blitterLineCycle();
 

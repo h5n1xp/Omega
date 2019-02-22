@@ -16,6 +16,8 @@
 #include "CIA.h"
 #include "CPU.h"
 #include "m68k.h"
+#include "DMA.h"
+
 
 Chipset_t chipset;
 Internal_t internal;
@@ -47,7 +49,9 @@ uint32_t OCS2ARGB(uint16_t color){
 
 uint32_t EHB2ARGB(uint16_t color){
     
-    uint32_t value  =  ((color <<11)& 0xF00000) | ((color <<7)&0xF000) | ((color << 3)&0xF0); // high nybble.
+    color = color >> 1;
+    
+    uint32_t value  =  ((color <<12)& 0xF00000) | ((color <<8)&0xF000) | ((color << 4)&0xF0); // high nybble.
     value |= (value >> 4);// low nyble
     value  = value | 0xFF000000; //opaque alpha
     return value;
@@ -214,6 +218,10 @@ uint16_t deniseid(){
 
 void wordWrite(uint16_t value){
     printf("16bit Write: Not implemented!\n");
+}
+
+void wordIllegalWrite(uint16_t value){
+     printf("16bit Write: To a read only register!\n");
 }
 
 void dskpth(uint16_t value){
@@ -517,6 +525,13 @@ void bpl8ptl(uint16_t value){
 }
 
 void bplcon0(uint16_t value){
+    
+    if( (value & 0x8000) != (chipset.bplcon0 & 0x8000)){
+        
+        setDisplayMode(1);
+
+    }
+    
     chipset.bplcon0 = value;
     
     int planes = (value >> 12) & 7 ;
@@ -528,6 +543,7 @@ void bplcon0(uint16_t value){
         case 3: internal.bitplaneMask  = 0x07;break;
         case 4: internal.bitplaneMask  = 0x0F;break;
         case 5: internal.bitplaneMask  = 0x1F;break;
+        case 6: internal.bitplaneMask  = 0x3F;break;
         default: internal.bitplaneMask = 0x0;break;
     }
 }
@@ -678,6 +694,10 @@ void spr7pos(uint16_t value){
 }
 void spr7ctl(uint16_t value){
     chipset.spr7ctl = value;
+}
+
+void spr7data(uint16_t value){
+    chipset.spr7data = value;
 }
 
 void color00(uint16_t value){
@@ -1987,32 +2007,23 @@ void (*putChipReg32[])(uint32_t) ={
 
 
 
-
-
-
-
-
-
-
-
-
 void (*putChipReg16[])(uint16_t) ={
-    wordWrite,
-    noop,
-    wordWrite,
-    wordWrite,
-    noop,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
+    wordIllegalWrite,
+    wordIllegalWrite,
+    wordIllegalWrite,
+    wordIllegalWrite,
+    wordIllegalWrite,
+    wordIllegalWrite,
+    wordIllegalWrite,
+    wordIllegalWrite,
+    wordIllegalWrite,
+    wordIllegalWrite,
+    wordIllegalWrite,
+    wordIllegalWrite,
+    wordIllegalWrite,
+    wordIllegalWrite,
+    wordIllegalWrite,
+    wordIllegalWrite,
     dskpth,
     dskptl,
     dsklen,
@@ -2092,7 +2103,7 @@ void (*putChipReg16[])(uint16_t) ={
     wordWrite,
     wordWrite,
     wordWrite,
-    wordWrite,
+    noop,
     wordWrite,
     wordWrite,
     wordWrite,
@@ -2187,7 +2198,7 @@ void (*putChipReg16[])(uint16_t) ={
     wordWrite,
     spr7pos,
     spr7ctl,
-    wordWrite,
+    spr7data,
     wordWrite,
     color00,
     color01,
@@ -2314,7 +2325,7 @@ void blitter_execute(Chipset_t* chipset){
     //Blitter DMA Enabled and blitter busy flag set (which means bltsize was written to and blitting should start).
     if( (chipset->dmaconr & 16960) == 16960 ){
     
-        
+        /*
         //make it so the blitter doesn't blit immediatly
         static int delay;
         
@@ -2324,7 +2335,7 @@ void blitter_execute(Chipset_t* chipset){
             return;
         }
         delay = 10;
-        
+        */
         
         
         if(chipset->bltcon1 & 1){

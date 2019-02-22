@@ -208,6 +208,11 @@ void floppy_init(Floppy_t* floppy,int driveNumber){
  
  }
 
+void resetIndex(Floppy_t* disk){
+    
+    disk->index = 0;
+    
+}
 
 uint8_t floppyDataRead(Floppy_t* disk){ //this function should be called by the DMA
     
