@@ -50,6 +50,7 @@ void hiresPlane1(void);
 
 void drawBlank();
 
+void displayLineReset(void);
 void setDisplayMode(int); // 0 = lores, 1 = highres
 
 int blitterCopyCycle();

@@ -741,6 +741,7 @@ int bitplaneActive(){
     
     //too early vertical position let the Copper and Blitter run
     if(internal.vPos<(chipset.diwstrt>>8)){
+        
         return 0;
     }
     
@@ -753,22 +754,6 @@ int bitplaneActive(){
 }
 
 void bitplaneCycle0_4(void){
-    
-    if(bitplaneActive()==0){
-        evenCycle(); // let the copper run
-        return;
-    }
-    
-    
-    if(chipset.bplcon0 & 0x8000){
-        
-        if( (internal.bitplaneMask & 0x8)  == 0x8){
-            uint16_t* p = &internal.chipramW[chipset.bpl4pt];
-            chipset.bpl4pt +=1;
-            chipset.bpl4dat = *p;
-            return;
-        }
-    }
 
     evenCycle();
 }
@@ -779,18 +764,7 @@ void bitplaneCycle4_2(void){
         return;
     }
     
-    if(chipset.bplcon0 & 0x8000){
-        
-        if( (internal.bitplaneMask & 0x2)  == 0x2){
-        
-            uint16_t* p = &internal.chipramW[chipset.bpl2pt];
-            chipset.bpl2pt +=1;
-            chipset.bpl2dat = *p;
-            return;
-        }
-    }
-    
-    
+    chipset.bpl4dat = 0;
     if( (internal.bitplaneMask & 0x8)  == 0x8){
         uint16_t* p = &internal.chipramW[chipset.bpl4pt];
         chipset.bpl4pt +=1;
@@ -807,17 +781,7 @@ void bitplaneCycle6_3(void){
         return;
     }
     
-    if(chipset.bplcon0 & 0x8000){
-        
-        if( (internal.bitplaneMask & 0x4)  == 0x4){
-            uint16_t* p = &internal.chipramW[chipset.bpl3pt];
-            chipset.bpl3pt +=1;
-            chipset.bpl3dat = *p;
-            return;
-        }
-    }
-    
-    
+    chipset.bpl6dat = 0;
     if( (internal.bitplaneMask & 0x20)  == 0x20){
         uint16_t* p = &internal.chipramW[chipset.bpl6pt];
         chipset.bpl6pt +=1;
@@ -827,6 +791,7 @@ void bitplaneCycle6_3(void){
     
     evenCycle();
 }
+
 void bitplaneCycle2_1(void){
     
     if(bitplaneActive()==0){
@@ -835,26 +800,8 @@ void bitplaneCycle2_1(void){
         
         return;
     }
-    
-    if(chipset.bplcon0 & 0x8000){
-        
-       if( (internal.bitplaneMask & 0x1)  == 0x1){
-            uint16_t* p = &internal.chipramW[chipset.bpl1pt];
-            chipset.bpl1pt +=1;
-            chipset.bpl1dat = *p;
-        
-        
-            if(host.pixels == NULL){
-                return;
-            }
-        
-            uint32_t* pixbuff = (uint32_t*)host.pixels;
-            planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat, 0,0, 8);
-                   host.FBCounter +=8;
-            return;
-       }
-    }
-    
+
+    chipset.bpl2dat = 0;
     if( (internal.bitplaneMask & 0x2)  == 0x2){
         uint16_t* p = &internal.chipramW[chipset.bpl2pt];
         chipset.bpl2pt +=1;
@@ -870,17 +817,8 @@ void bitplaneCycle3_2(void){
     if(bitplaneActive()==0){
         return;
     }
-    
-    if(chipset.bplcon0 & 0x8000){
-        
-        if( (internal.bitplaneMask & 0x2)  == 0x2){
-            uint16_t* p = &internal.chipramW[chipset.bpl2pt];
-            chipset.bpl2pt +=1;
-            chipset.bpl2dat = *p;
-            return;
-       }
-    }
-    
+ 
+    chipset.bpl3dat = 0;
     if( (internal.bitplaneMask & 0x4)  == 0x4){
         uint16_t* p = &internal.chipramW[chipset.bpl3pt];
         chipset.bpl3pt +=1;
@@ -897,16 +835,7 @@ void bitplaneCycle5_3(void){
         return;
     }
     
-    if(chipset.bplcon0 & 0x8000){
-        
-        if( (internal.bitplaneMask & 0x4)  == 0x4){
-            uint16_t* p = &internal.chipramW[chipset.bpl3pt];
-            chipset.bpl3pt +=1;
-            chipset.bpl3dat = *p;
-            return;
-        }
-    }
-    
+    chipset.bpl5dat = 0;
     if( (internal.bitplaneMask & 0x10)  == 0x10){
         uint16_t* p = &internal.chipramW[chipset.bpl5pt];
         chipset.bpl5pt +=1;
@@ -936,17 +865,6 @@ void bitplaneCycle1(void){
     uint16_t* p = &internal.chipramW[chipset.bpl1pt];
     chipset.bpl1pt +=1;
     chipset.bpl1dat = *p;
-    
-
-
-
-    if(chipset.bplcon0 & 0x8000){
-
-        uint32_t* pixbuff = (uint32_t*)host.pixels;
-        planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat, 0, 0, 8);
-        host.FBCounter +=8;
-        return;
-    }
 
     
     uint32_t* pixbuff = (uint32_t*)host.pixels;
@@ -954,6 +872,13 @@ void bitplaneCycle1(void){
             host.FBCounter +=16;
 }
 
+void displayLineReset(){
+    
+    int temp = host.FBCounter / 640;
+    temp = (temp) * 640;
+    host.FBCounter= temp;
+    
+}
 
 void setDisplayMode(int mode){
     
@@ -971,7 +896,7 @@ void hiresPlane4(){
         return;
     }
     
-    
+    chipset.bpl4dat = 0;
     if( (internal.bitplaneMask & 0x8)  == 0x8){
         uint16_t* p = &internal.chipramW[chipset.bpl4pt];
         chipset.bpl4pt +=1;
@@ -990,6 +915,7 @@ void hiresPlane2(){
         return;
     }
     
+    chipset.bpl2dat = 0;
     if( (internal.bitplaneMask & 0x2)  == 0x2){
         uint16_t* p = &internal.chipramW[chipset.bpl2pt];
         chipset.bpl2pt +=1;
@@ -1008,6 +934,7 @@ void hiresPlane3(){
         return;
     }
     
+    chipset.bpl3dat = 0;
     if( (internal.bitplaneMask & 0x4)  == 0x4){
         uint16_t* p = &internal.chipramW[chipset.bpl3pt];
         chipset.bpl3pt +=1;
@@ -1022,10 +949,12 @@ void hiresPlane3(){
 void hiresPlane1(){
     
     if(bitplaneActive()==0){
+        
         evenCycle(); // let the copper run
         return;
     }
     
+    chipset.bpl1dat = 0;
     if( (internal.bitplaneMask & 0x1)  == 0x1){
         uint16_t* p = &internal.chipramW[chipset.bpl1pt];
         chipset.bpl1pt +=1;
@@ -1042,6 +971,14 @@ void hiresPlane1(){
         planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat, 0,0, 8);
         host.FBCounter +=8;
         return;
+    }else{
+        
+        uint32_t* pixbuff = (uint32_t*)host.pixels;
+        for(int i=0;i<8;++i){
+            pixbuff[host.FBCounter]=internal.palette[0];
+            host.FBCounter +=1;
+        }
+        
     }
     
     evenCycle();

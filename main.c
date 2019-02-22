@@ -334,7 +334,7 @@ int main(int argc, const char * argv[]) {
     }else{
        
         //fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
-        fd = open("/Users/Shared/uae/WORKBENCH/raw5.adf",O_RDONLY);
+        fd = open("/Users/Shared/uae/WORKBENCH/raw4.adf",O_RDONLY);
         //fd = open("/Users/matt/Documents/WHDLoad Collection/rawread/test2.adf",O_RDONLY);
         if(fd==0){
             printf("no disk in DF0:\n");

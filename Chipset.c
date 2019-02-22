@@ -526,12 +526,8 @@ void bpl8ptl(uint16_t value){
 
 void bplcon0(uint16_t value){
     
-    if( (value & 0x8000) != (chipset.bplcon0 & 0x8000)){
-        
-        setDisplayMode(1);
+    displayLineReset(); //restart drawing if the bplcon has changed. THis might need to take a value as to how many lines were needed to change the mode
 
-    }
-    
     chipset.bplcon0 = value;
     
     int planes = (value >> 12) & 7 ;
@@ -1026,7 +1022,7 @@ void (*putChipReg32[])(uint32_t) ={
     longWrite,
     longWrite,
     longWrite,
-    longWrite,
+    noopL,
     longWrite,
     longWrite,
     longWrite,
