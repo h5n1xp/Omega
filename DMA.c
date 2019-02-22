@@ -494,7 +494,7 @@ int bitplaneActive(){
     }
  
     //too late horisonal position let the Copper and Blitter run
-    if(internal.hPos>(chipset.ddfstop+8)){
+    if(internal.hPos>(chipset.ddfstop+16)){
         return 0;
     }
     
