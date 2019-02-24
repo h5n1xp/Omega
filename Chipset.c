@@ -48,13 +48,17 @@ uint32_t OCS2ARGB(uint16_t color){
 }
 
 uint32_t EHB2ARGB(uint16_t color){
+
+    int red = (((color <<12)& 0xF00000) >> 1) & 0xFF0000;
+    int green = (((color <<8)& 0xF000) >> 1 ) & 0xFF00;
+    int blue = (((color <<4)& 0xF0) >> 1 ) & 0xFF;
     
-    color = color >> 1;
-    
-    uint32_t value  =  ((color <<12)& 0xF00000) | ((color <<8)&0xF000) | ((color << 4)&0xF0); // high nybble.
-    value |= (value >> 4);// low nyble
+    uint32_t value  =  red | green | blue;
     value  = value | 0xFF000000; //opaque alpha
     return value;
+   
+    
+    return 0;
 }
 
 uint16_t noRead(void){
@@ -2612,7 +2616,7 @@ void blitter_execute(Chipset_t* chipset){
                 xIncrement = -1;
                 
                 if(fillmode>0){
-                    printf("NO FILL MODE YET!!");
+                    printf("NO FILL MODE YET!!\n");
                 }
                 
             }
@@ -2641,10 +2645,6 @@ void blitter_execute(Chipset_t* chipset){
             int sizeh = chipset->bltsizh;
             int sizev = chipset->bltsizv;
             int lastHWord=sizeh - 1;
-            
-        
-            uint8_t* DebugViewForTrackdiskDEvice = &internal.chipramW[dpt];
-            uint8_t* chipramview = low16Meg;
             
             for(int y=0;y<sizev;++y){
                 
