@@ -401,7 +401,7 @@ void copjmp2(uint16_t value){
 
 void diwstrt(uint16_t value){
     chipset.diwstrt = value;
-    
+    //printf("diwstart: %04x\n",value);
 }
 
 void diwstop(uint16_t value){

@@ -168,7 +168,7 @@ void expA2M(int fd, uint8_t* mfm){
                 //sector info
                 
                 lowlevelSector[4] = 0xFF;
-                lowlevelSector[5] = sector << 1 | side;
+                lowlevelSector[5] = track << 1 | side;
                 lowlevelSector[6] = sector;
                 lowlevelSector[7] = 11 - sector;
                 
@@ -193,12 +193,14 @@ void expA2M(int fd, uint8_t* mfm){
                 lowlevelSector[22] = 0x0;
                 lowlevelSector[23] = 0x0;
                 
+                
+                uint16_t* buffer = (uint16_t*)lowlevelSector;
+                
                 //Header checksum
                 uint32_t sum =0;
-                for(int i = 4; i < 22;++i){
-                    sum ^=lowlevelSector[i];
+                for(int i = 2; i < 11;++i){
+                    sum ^=buffer[i];
                 }
-                
                 
                 lowlevelSector[24] = (sum >> 24) & 0xFF;
                 lowlevelSector[25] = (sum >> 16) & 0xFF;
@@ -206,23 +208,15 @@ void expA2M(int fd, uint8_t* mfm){
                 lowlevelSector[27] = (sum) & 0xFF;
                 
                 
+
+                
                 //data
                 for(int i=0;i<512;++i){
                     lowlevelSector[32+i] = adf[i+(count*512)];
                     
                 }
                 
-                //data checksum
-                sum = 0;
-                
-                for(int i = 32; i < 544;++i){
-                    sum ^=lowlevelSector[i];
-                }
-                
-                lowlevelSector[28] = (sum >> 24) & 0xFF;
-                lowlevelSector[29] = (sum >> 16) & 0xFF;
-                lowlevelSector[30] = (sum >> 8) & 0xFF;
-                lowlevelSector[31] = (sum) & 0xFF;
+
                 
                 //***************
                 
@@ -247,10 +241,28 @@ void expA2M(int fd, uint8_t* mfm){
                 //header checksum
                 encodeBlock(&lowlevelSector[24], &mfm[s+48], 4); //adds 8 bytes
                 
+                //Data section
+                encodeBlock(&lowlevelSector[32], &mfm[s+64], 512);
+                
+                
+                //data checksum
+                sum = 0;
+                
+                buffer = (uint16_t*)&mfm[s+64];
+                
+                for(int i = 0; i < 512;++i){
+                    sum ^=buffer[i];
+                }
+                
+                lowlevelSector[28] = (sum >> 24) & 0xFF;
+                lowlevelSector[29] = (sum >> 16) & 0xFF;
+                lowlevelSector[30] = (sum >> 8) & 0xFF;
+                lowlevelSector[31] = (sum) & 0xFF;
+                
+                
                 //Data checksum
                 encodeBlock(&lowlevelSector[28], &mfm[s+56], 4); //adds 8 bytes
                 
-                encodeBlock(&lowlevelSector[32], &mfm[s+64], 512);
                 
                 //Add clocking bits
                 for(int i =8;i<1088;i++){
@@ -334,7 +346,7 @@ int main(int argc, const char * argv[]) {
     }else{
        
         //fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
-        fd = open("/Users/Shared/uae/WORKBENCH/raw4.adf",O_RDONLY);
+        fd = open("/Users/Shared/uae/WORKBENCH/raw5.adf",O_RDONLY);
         //fd = open("/Users/matt/Documents/WHDLoad Collection/rawread/test2.adf",O_RDONLY);
         if(fd==0){
             printf("no disk in DF0:\n");
@@ -495,6 +507,11 @@ int main(int argc, const char * argv[]) {
                         break;
                     }
                     
+                    if(host.event.key.keysym.sym==SDLK_F2){
+                        //Capture F2
+                        break;
+                    }
+                    
                     releaseKey(host.event.key.keysym.sym);
                     break;
                     
@@ -511,6 +528,11 @@ int main(int argc, const char * argv[]) {
                             df0.userInserted = 1;
                             printf("Disk inserted in df0:\n");
                         }
+                        break;
+                    }
+                    
+                    if(host.event.key.keysym.sym==SDLK_F2){
+                        toggleLEDs();
                         break;
                     }
                     

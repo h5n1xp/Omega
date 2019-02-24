@@ -45,5 +45,6 @@ void releaseKey(uint16_t keyCode);
 
 void hostDisplay();
 
+void toggleLEDs();
 
 #endif /* Host_h */

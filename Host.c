@@ -87,9 +87,9 @@ const uint8_t keyMapping[] ={
     0x54,
     0x55,
     0x56,
-    0x57,
     0x58,
     0x59,
+    0x0,
     0x0,
     0x0,
     0x0,
@@ -259,17 +259,22 @@ const uint8_t keyMapping[] ={
     0x0
 };
 
+int LEDActive = 1;
 
 void pressKey(uint16_t keyCode){
     CIAWrite(&CIAA, 0xC, ~(keyMapping[keyCode]<<1) );      //place value in register
     CIAA.icr =  CIAA.icr | (0x8 & CIAA.icrMask);     //raise Serial port interrupt flag
-    printf("keyCode: %d -> %d (down)\n",keyCode,keyMapping[keyCode]);
+    printf("keyCode: %d -> %02x (down)\n",keyCode,keyMapping[keyCode]);
 }
 
 void releaseKey(uint16_t keyCode){
     CIAWrite(&CIAA, 0xC, ~((keyMapping[keyCode] << 1) | 1) ); //place value in register, with key up flag
     CIAA.icr =  CIAA.icr | (0x8 & CIAA.icrMask);      //raise Serial port interrupt flag
     //printf("keyCode: %d -> %d (up)\n",keyCode,keyMapping[keyCode]);
+}
+
+void toggleLEDs(){
+    LEDActive = 1 - LEDActive;
 }
 
 void hostDisplay(){
@@ -316,41 +321,44 @@ void hostDisplay(){
 
     SDL_RenderCopy(host.renderer, host.playfield, &oops,NULL);
     
-    //Power Light
-    switch ((CIAA.pra &3)) {
-        case 0:SDL_SetRenderDrawColor(host.renderer, 255, 255, 31, 255);break;
-        case 1:SDL_SetRenderDrawColor(host.renderer, 31, 31, 31, 255);break;
-        case 2:SDL_SetRenderDrawColor(host.renderer, 182, 182, 31, 255);break;
-        case 3:SDL_SetRenderDrawColor(host.renderer, 31, 31, 31, 255);break;
+    if(LEDActive==1){
+    
+        //Power Light
+        switch ((CIAA.pra &3)) {
+            case 0:SDL_SetRenderDrawColor(host.renderer, 255, 255, 31, 255);break;
+            case 1:SDL_SetRenderDrawColor(host.renderer, 31, 31, 31, 255);break;
+            case 2:SDL_SetRenderDrawColor(host.renderer, 182, 182, 31, 255);break;
+            case 3:SDL_SetRenderDrawColor(host.renderer, 31, 31, 31, 255);break;
+        }
+    
+        SDL_Rect pLED ={winX-55,winY-40,50,7};
+        SDL_RenderFillRect(host.renderer, &pLED);
+    
+        //Floppy Light
+        if( (CIAB.prb & 128) == 0){
+            SDL_SetRenderDrawColor(host.renderer, 255, 255, 31, 255);
+        }else{
+            SDL_SetRenderDrawColor(host.renderer, 31, 31, 31, 255);
+        }
+    
+        SDL_Rect dLED ={winX-55,winY-20,50,7};
+        SDL_RenderFillRect(host.renderer, &dLED);
+    
+    
+        //Commodore Logo
+        SDL_Rect clo={winX-55,winY-100,50,50};
+        SDL_RenderCopy(host.renderer, host.commodoreLogo, NULL, &clo);
+    
+        //Spinny disk
+        SDL_Rect spin={5,winY-60,50,50};
+        double angle = ((double)df0.index/6400.0)*365.0;
+        SDL_RenderCopyEx(host.renderer, host.spinner, NULL, &spin,angle,NULL,SDL_FLIP_NONE);
+    
+        //Disk head
+        SDL_SetRenderDrawColor(host.renderer, 255, 255, 255, 255);
+        SDL_Rect head = {29,(winY-59)+(df0.diskTrack/6),3,3};
+        SDL_RenderFillRect(host.renderer,&head);
     }
-    
-    SDL_Rect pLED ={winX-55,winY-40,50,7};
-    SDL_RenderFillRect(host.renderer, &pLED);
-    
-    //Floppy Light
-    if( (CIAB.prb & 128) == 0){
-        SDL_SetRenderDrawColor(host.renderer, 255, 255, 31, 255);
-    }else{
-        SDL_SetRenderDrawColor(host.renderer, 31, 31, 31, 255);
-    }
-    
-    SDL_Rect dLED ={winX-55,winY-20,50,7};
-    SDL_RenderFillRect(host.renderer, &dLED);
-    
-    
-    //Commodore Logo
-    SDL_Rect clo={winX-55,winY-100,50,50};
-    SDL_RenderCopy(host.renderer, host.commodoreLogo, NULL, &clo);
-    
-    //Spinny disk
-    SDL_Rect spin={5,winY-60,50,50};
-    double angle = ((double)df0.index/6400.0)*365.0;
-    SDL_RenderCopyEx(host.renderer, host.spinner, NULL, &spin,angle,NULL,SDL_FLIP_NONE);
-    
-    //Disk head
-    SDL_SetRenderDrawColor(host.renderer, 255, 255, 255, 255);
-    SDL_Rect head = {29,(winY-59)+(df0.diskTrack/6),3,3};
-    SDL_RenderFillRect(host.renderer,&head);
     
     //render display
     SDL_RenderPresent(host.renderer);

@@ -27,6 +27,8 @@ void dramCycle(void);
 void diskCycle(void);
 void audioCycle(void);
 void spriteCycle(void);
+
+//deprecated DMA cycles, to be replaced with lores
 void bitplaneCycle0_4(void);
 void bitplaneCycle4_2(void);
 void bitplaneCycle6_3(void);

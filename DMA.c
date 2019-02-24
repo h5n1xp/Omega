@@ -575,21 +575,30 @@ void (*DMAHires[]) (void) = {
 
 
 
+
+
 void dma_execute(){
     
     chipset.vposr   = internal.LOF | internal.vPos >> 8;
     chipset.vhposr  = internal.vPos << 8;
     chipset.vhposr |= internal.hPos;
-
-    if(chipset.bplcon0 & 0x8000){
-        DMAHires[internal.hPos]();
-    }else{
-        DMALores[internal.hPos]();
-    }
+    
+    uint16_t conr = chipset.dmaconr;
+    uint16_t cont = chipset.dmaconr & 0x300;
+    
+    
+        if(chipset.bplcon0 & 0x8000){
+            DMAHires[internal.hPos]();
+        }else{
+            DMALores[internal.hPos]();
+        }
+    
+    
     eclock_execute(&chipset);   // CIA timers
 
     internal.hPos++;
     
+
     
     //end of line reached! 227 colour clocks have executed
     if(internal.hPos > 0xE3){
@@ -609,7 +618,7 @@ void dma_execute(){
         chipset.bpl8pt += chipset.bpl2mod;
         
         //VBL Time
-        if(internal.vPos > 0x10C ){ //0x106 is the propper ntsc vbl
+        if(internal.vPos > 0x106 ){ //0x106 is the propper ntsc vbl
             internal.vPos = 0;
             
             
@@ -681,7 +690,7 @@ void oddCycle(void){
 }
 
 void dramCycle(void){
-
+    
 }
 
 void diskCycle(void){
@@ -721,6 +730,7 @@ void spriteCycle(void){
 
     oddCycle();
 }
+
 
 int bitplaneActive(){
     
@@ -850,7 +860,7 @@ void bitplaneCycle1(void){
     
     
     if(bitplaneActive()==0){
-        drawBlank();
+        //drawBlank();
         return;
     }
     
@@ -858,18 +868,23 @@ void bitplaneCycle1(void){
         return;
     }
     
-    if( (internal.bitplaneMask & 0x1)  == 0x0){
+    if( (internal.bitplaneMask & 0x1)  == 0x1){
+
+    
+        uint16_t* p = &internal.chipramW[chipset.bpl1pt];
+        chipset.bpl1pt +=1;
+        chipset.bpl1dat = *p;
+    }
+    
+    //don't start actually rendering a deiplay before 44 lines
+    if(internal.vPos<43){
         return;
     }
     
-    uint16_t* p = &internal.chipramW[chipset.bpl1pt];
-    chipset.bpl1pt +=1;
-    chipset.bpl1dat = *p;
-
-    
     uint32_t* pixbuff = (uint32_t*)host.pixels;
     planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat,chipset.bpl5dat, chipset.bpl6dat, 16);
-            host.FBCounter +=16;
+    host.FBCounter +=16;
+
 }
 
 void displayLineReset(){
@@ -947,10 +962,14 @@ void hiresPlane3(){
 }
 
 void hiresPlane1(){
-    
+     
     if(bitplaneActive()==0){
         
         evenCycle(); // let the copper run
+        return;
+    }
+    
+    if(host.pixels == NULL){
         return;
     }
     
@@ -959,27 +978,20 @@ void hiresPlane1(){
         uint16_t* p = &internal.chipramW[chipset.bpl1pt];
         chipset.bpl1pt +=1;
         chipset.bpl1dat = *p;
-        
-        
-        if(host.pixels == NULL){
-            return;
-        }
-        
-        
-        
-        uint32_t* pixbuff = (uint32_t*)host.pixels;
-        planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat, 0,0, 8);
-        host.FBCounter +=8;
-        return;
-    }else{
-        
-        uint32_t* pixbuff = (uint32_t*)host.pixels;
-        for(int i=0;i<8;++i){
-            pixbuff[host.FBCounter]=internal.palette[0];
-            host.FBCounter +=1;
-        }
-        
+    
     }
+        
+    //don't start actually rendering a deiplay before 44 lines
+    if(internal.vPos<43){
+        return;
+    }
+    
+    uint32_t* pixbuff = (uint32_t*)host.pixels;
+    planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat, 0,0, 8);
+    host.FBCounter +=8;
+    return;
+    
+
     
     evenCycle();
     
