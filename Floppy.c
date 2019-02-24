@@ -220,7 +220,7 @@ uint8_t floppyDataRead(Floppy_t* disk){ //this function should be called by the 
     int position = (disk->diskTrack * (12798*2)) + (surface * 12798) + (disk->index);
     
     disk->index +=1;
-    if(disk->index>12667){ //ADF track has 12798 bytes, but on a normal AmigaOS disk 12668 are used.
+    if(disk->index>12687){ //ADF track has 12798 bytes, but on a normal AmigaOS disk 12668 are used.
         disk->index = 0;
         CIAIndex(&CIAB);    // generate CIAB index interupt
     }

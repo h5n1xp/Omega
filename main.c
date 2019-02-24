@@ -44,81 +44,31 @@ int disass = 0; //set to any value greter than 0 to turn on dissassembler
 
 
 
-uint32_t decodeMFML(uint8_t* dat){
-    
-    uint32_t odd  = dat[0] <<24 | dat[1] <<16 | dat[2] << 8 | dat[3];
-    uint32_t even  = dat[4] <<24 | dat[5] <<16 | dat[6] << 8 | dat[7];
-    uint32_t value = ((odd & 0x55555555) << 1) | (even & 0x55555555);
-    
-    value = ((value << 8) & 0xFF00FF00 ) | ((value >> 8) & 0xFF00FF );
-    value = value << 16 | value >> 16;
-    
-    return value;
-    
-}
-
-uint8_t decodeData(uint8_t* dat,int size){
-    return ((dat[0] & 0x55) << 1) | (dat[size] & 0x55);
-}
-
 void encodeBlock(uint8_t* source, uint8_t* destination,int size){
 
     for(int i=0;i<size;i++){
-        destination[i] = (source[i]) & 0x55;
-        destination[i+size] = (source[i] >> 1) & 0x55;
+        destination[i] = (source[i] >> 1) & 0x55;
+        destination[i+size] = (source[i]) & 0x55;
     }
 
 }
 
-uint8_t clocking(uint8_t previous,uint8_t data){
+
+
+uint8_t addClockBits(uint8_t previous, uint8_t value) {
+    // Clear all previously set clock bits
+    value &= 0x55;
     
-    uint8_t e = previous & 0x1;
+    // Compute clock bits (clock bit values are inverted)
+    uint8_t lShifted = (value << 1);
+    uint8_t rShifted = (value >> 1) | (previous << 7);
+    uint8_t cBitsInv = lShifted | rShifted;
     
-    uint8_t a = data >> 6;
-    uint8_t b = (data >> 4) & 3;
-    uint8_t c = (data >> 2) & 3;
-    uint8_t d = data & 3;
+    // Reverse the computed clock bits
+    uint64_t cBits = cBitsInv ^ 0xAA;
     
-    uint8_t oa = 0;
-    uint8_t ob = 0;
-    uint8_t oc = 0;
-    uint8_t od = 0;
-    
-    if(a == 1){
-        oa = 1;
-    }else if(e == 0 && a == 0){
-        oa = 2;
-    }else if(e == 1 && a == 0){
-        oa = 0;
-    }
-    
-    if(b == 1){
-        ob = 1;
-    }else if(a == 0 && b == 0){
-        ob = 2;
-    }else if(a == 1 && b == 0){
-        ob = 0;
-    }
-    
-    if(c == 1){
-        oc = 1;
-    }else if(b == 0 && c == 0){
-        oc = 2;
-    }else if(b == 1 && c == 0){
-        oc = 0;
-    }
-    
-    if(d == 1){
-        od = 1;
-    }else if(b == 0 && d == 0){
-        od = 2;
-    }else if(b == 1 && d == 0){
-        od = 0;
-    }
-    
-    uint8_t retVal = oa << 6 | ob << 4 | oc << 2 | od;
-    
-    return retVal;
+    // Return original value with the clock bits added
+    return value | cBits;
 }
 
 void expA2M(int fd, uint8_t* mfm){
@@ -132,7 +82,7 @@ void expA2M(int fd, uint8_t* mfm){
     int tracks = (sectors / 22);
     
     //each track is 12798 bytes in size, multiplied by 2 because there are 2 sides
-    int mfmSize = tracks * (12798 * 2);
+    //int mfmSize = tracks * (12798 * 2);
     
     uint8_t adf[size];
    // uint8_t mfm[mfmSize];
@@ -144,19 +94,16 @@ void expA2M(int fd, uint8_t* mfm){
 
     
     int count = 0;
-    int secBump =0;
     int s = 0;
     
     for(int track = 0;track<tracks;track++){
-        
         for(int side=0;side<2;side++){
             for(int sector=0;sector<11;sector++){
-                int secCountDown = 11 - sector;
                 
-                int offset = (track+1) * (side+1) * (sector+1) * 1088; //1088 bytes per sector
+                //int secCountDown = 11 - sector;
                 
                 
-                printf("%d: Track %d, Side: %d, Sector %d (%d)\n",s,track,side,sector,secCountDown);
+                //printf("%d: Track %d, Side: %d, Sector %d (%d)\n",s,track,side,sector,secCountDown);
                 
                 //Build the sector
                 lowlevelSector[0] = 0x0;
@@ -173,7 +120,7 @@ void expA2M(int fd, uint8_t* mfm){
                 lowlevelSector[7] = 11 - sector;
                 
                 //Sector label
-                lowlevelSector[8]  = 0xAA;
+                lowlevelSector[8]  = 0x0;
                 lowlevelSector[9]  = 0x0;
                 lowlevelSector[10] = 0x0;
                 lowlevelSector[11] = 0x0;
@@ -193,22 +140,6 @@ void expA2M(int fd, uint8_t* mfm){
                 lowlevelSector[22] = 0x0;
                 lowlevelSector[23] = 0x0;
                 
-                
-                uint16_t* buffer = (uint16_t*)lowlevelSector;
-                
-                //Header checksum
-                uint32_t sum =0;
-                for(int i = 2; i < 11;++i){
-                    sum ^=buffer[i];
-                }
-                
-                lowlevelSector[24] = (sum >> 24) & 0xFF;
-                lowlevelSector[25] = (sum >> 16) & 0xFF;
-                lowlevelSector[26] = (sum >> 8) & 0xFF;
-                lowlevelSector[27] = (sum) & 0xFF;
-                
-                
-
                 
                 //data
                 for(int i=0;i<512;++i){
@@ -238,51 +169,83 @@ void expA2M(int fd, uint8_t* mfm){
                 //Disklabel
                 encodeBlock(&lowlevelSector[8], &mfm[s+16], 16);//adds 32 bytes
                 
-                //header checksum
-                encodeBlock(&lowlevelSector[24], &mfm[s+48], 4); //adds 8 bytes
-                
                 //Data section
                 encodeBlock(&lowlevelSector[32], &mfm[s+64], 512);
                 
                 
-                //data checksum
-                sum = 0;
-                
-                buffer = (uint16_t*)&mfm[s+64];
-                
-                for(int i = 0; i < 512;++i){
-                    sum ^=buffer[i];
+                //Header checksum
+                uint8_t hcheck[4] = { 0, 0, 0, 0 };
+                for(unsigned i = 8; i < 48; i += 4) {
+                    hcheck[0] ^= mfm[s+i];
+                    hcheck[1] ^= mfm[s+i+1];
+                    hcheck[2] ^= mfm[s+i+2];
+                    hcheck[3] ^= mfm[s+i+3];
                 }
                 
-                lowlevelSector[28] = (sum >> 24) & 0xFF;
-                lowlevelSector[29] = (sum >> 16) & 0xFF;
-                lowlevelSector[30] = (sum >> 8) & 0xFF;
-                lowlevelSector[31] = (sum) & 0xFF;
+                lowlevelSector[24] = hcheck[0];
+                lowlevelSector[25] = hcheck[1];
+                lowlevelSector[26] = hcheck[2];
+                lowlevelSector[27] = hcheck[3];
+                
+                //header checksum
+                encodeBlock(&lowlevelSector[24], &mfm[s+48], 4); //adds 8 bytes
                 
                 
-                //Data checksum
+                // Data checksum
+                uint8_t dcheck[4] = { 0, 0, 0, 0 };
+                for(unsigned i = 64; i < 1088; i += 4) {
+                    dcheck[0] ^= mfm[s+i];
+                    dcheck[1] ^= mfm[s+i+1];
+                    dcheck[2] ^= mfm[s+i+2];
+                    dcheck[3] ^= mfm[s+i+3];
+                }
+                
+                lowlevelSector[28] = dcheck[0];
+                lowlevelSector[29] = dcheck[1];
+                lowlevelSector[30] = dcheck[2];
+                lowlevelSector[31] = dcheck[3];
+                
+                //Encode Data checksum
                 encodeBlock(&lowlevelSector[28], &mfm[s+56], 4); //adds 8 bytes
                 
                 
+                
                 //Add clocking bits
-                for(int i =8;i<1088;i++){
+                for(int i=8;i<1088;i++){
                     uint8_t previous = mfm[s+i-1];
                     
-                    mfm[s+i] = clocking(previous, mfm[s+i]);
+                    mfm[s+i] = addClockBits(previous,mfm[s+i]);
+                    //mfm[s+i] = clocking(previous, mfm[s+i]);
                     
                 }
                 
-                s += 1088;
+                s += 1088;    //Why not 1088, which is the size of the data we've produced
                 count +=1;
                 
+            
+            }
+            
+            //Add clocking bits to the track gap
+            mfm[s]   = addClockBits(mfm[s-1],0);
+            mfm[s+1] = 0xA8;
+            mfm[s+2] = 0x55;
+            mfm[s+3] = 0x55;
+            mfm[s+4] = 0xAA;
+            
+            for(int i=5;i<700;i++){
+                uint8_t previous = mfm[s+i-1];
+                
+                mfm[s+i] = addClockBits(previous,0);
+                //mfm[s+i] = clocking(previous, mfm[s+i]);
                 
             }
+            
             s += 830;   //pad track to make 12798 bytes to meet the ADF-EXT spec.
-            printf("\n");
+            //printf("\n");
         }
 
     }
-     printf("loaded");
+     //printf("loaded");
 
 }
 
@@ -296,6 +259,7 @@ int thd68k(void* data){
     }
     
 }
+
 
 
 
@@ -346,23 +310,24 @@ int main(int argc, const char * argv[]) {
     }else{
        
         //fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
-        fd = open("/Users/Shared/uae/WORKBENCH/raw5.adf",O_RDONLY);
-        //fd = open("/Users/matt/Documents/WHDLoad Collection/rawread/test2.adf",O_RDONLY);
+        fd = open("/Users/Shared/uae/DosUae/DLXP4.ADF",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/CuAmiga15.adf",O_RDONLY);
+        
         if(fd==0){
             printf("no disk in DF0:\n");
         }
         
     }
     
-    size = lseek(fd, 0, SEEK_END);
-    lseek(fd, 2004, SEEK_SET);
-    read(fd, df0.mfmData, size);
+    //size = lseek(fd, 0, SEEK_END);
+    //lseek(fd, 2004, SEEK_SET);
+    //read(fd, df0.mfmData, size);
     
-    printf("Floppy size: %d\n",size);
+    //printf("Floppy size: %d\n",size);
  
 
     
-    /*
+/*
     uint32_t buffer[65536];
     
     uint8_t* dat = df0.mfmData;
@@ -388,11 +353,11 @@ int main(int argc, const char * argv[]) {
                     
                     if(j>492 && j<523){
                         char ch =((dat[i+j] & 0x55) << 1) | (dat[512+i+j] & 0x55);
-                        printf("%c",ch);
+                        //printf("%c",ch);
                     }
                     
                 }
-                printf("\n");
+                //printf("\n");
 
             }
             
@@ -402,12 +367,9 @@ int main(int argc, const char * argv[]) {
     }
  */
     
-    close(fd);
-
-    
 // Experimental ADF to MFM loader
-    fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
-//    expA2M(fd,df0.mfmData);
+
+    expA2M(fd,df0.mfmData);
     close(fd);
     
     
@@ -419,7 +381,7 @@ int main(int argc, const char * argv[]) {
 
     
     SDL_Init(SDL_INIT_EVERYTHING);
-    host.window = SDL_CreateWindow("Omega v0.4",
+    host.window = SDL_CreateWindow("Omega v0.5",
                               0,//window X position
                               0,//window Y position
                               640, 400,
@@ -538,34 +500,6 @@ int main(int argc, const char * argv[]) {
                     
                     pressKey(host.event.key.keysym.sym);
                     
-                    /*
-                    if(host.event.key.keysym.sym==SDLK_z){
-                        printf("Disk Now Valid\n");
-                        df0.indexTop=6333;
-                        
-                    }
-                    
-                    if(host.event.key.keysym.sym==SDLK_q){
-                        printf("**! Reset !**\n");
-                        cpu_pulse_reset();
-                        chipset.dmaconr = 0;
-                        internal.copperPC = 0;
-                        
-                    }
-                    
-                    if(host.event.key.keysym.sym==SDLK_a){
-                        if(df0.data[0] !=0){
-                            
-                            df0.userInserted = 1 - df0.userInserted; //toggle ejecting
-                            if(df0.userInserted==1){
-                                printf("**!Disk inserted in df0:!**\n");
-                            }else{
-                                printf("**!Disk removed from df0:!**\n");
-                                df0.diskchange=0;
-                            }
-                        }
-                    }
-                    */
                     
                     
                     break;
