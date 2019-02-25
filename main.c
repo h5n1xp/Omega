@@ -311,6 +311,10 @@ int main(int argc, const char * argv[]) {
        
         //fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
         fd = open("/Users/Shared/uae/DosUae/DLXP4.ADF",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/DISK1.ADF",O_RDONLY);Fright Night
+        //fd = open("/Users/Shared/uae/DosUae/Fright Night.adf",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/JUGGLER.ADF",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/amiga_500a_Tutorial_Disk.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/CuAmiga15.adf",O_RDONLY);
         
         if(fd==0){

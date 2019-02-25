@@ -90,7 +90,7 @@ void cpu_execute(){
     uint32_t* guru = low16Meg;
  */
     
-    m68k_execute(2);
+    m68k_execute(4);
 
 }
 
@@ -99,81 +99,7 @@ void cpu_execute(){
 
 void checkInterrupt(Chipset_t* chipset){
     
-    /*
-    int intreqr = chipset->intreqr;
-    
-    
-    if(chipset->intenar & 0x4000){    // if master interrupt switch is enabled
-        
-        if(intreqr == 0){
-            m68k_set_irq(0); // no interrupt
-        }
-        
-        if(intreqr & 0x1){
-            m68k_set_irq(1); // Serial Transmit buffer empty
-        }
-        
-        if(intreqr & 0x2){
-            m68k_set_irq(1); // Disk block finished
-        }
-        
-        if(intreqr & 0x4){
-            m68k_set_irq(1); // Software int
-        }
-        
-        if(intreqr & 0x8){
-            m68k_set_irq(2); // Ports, IO and timers
-        }
-        
-        if(intreqr & 0x10){
-            m68k_set_irq(3); // Copper
-        }
-        
-        if(intreqr & 0x20){
-            m68k_set_irq(3); // VBL
-        }
-        
-        if(intreqr & 0x40){
-            m68k_set_irq(3); // Blitter finished
-        }
-        
-        if(intreqr & 0x80){
-            m68k_set_irq(4); // Audio 0
-        }
-        
-        if(intreqr & 0x100){
-            m68k_set_irq(4); // Audio 1
-        }
-        
-        if(intreqr & 0x200){
-            m68k_set_irq(4); // Audio 2
-        }
-        
-        if(intreqr & 0x400){
-            m68k_set_irq(4); // Audio 3
-        }
-        
-        if(intreqr & 0x800){
-            m68k_set_irq(5); // Serial receive buffer full
-        }
-        
-        if(intreqr & 0x1000){
-            m68k_set_irq(5); // Disk sync
-        }
-        
-        if(intreqr & 0x2000){
-            m68k_set_irq(6); // External Int
-        }
-        
-    }else{
-        m68k_set_irq(0); // no interrupt
-    }
-    
-    return;
-     */
-    
-    // The old interrupt handling code... works the same as the above code, no idea which is better :-/
-    
+    m68k_end_timeslice();
     
     if(chipset->intenar & 0x4000){ // if master interrupt switch is enabled
         

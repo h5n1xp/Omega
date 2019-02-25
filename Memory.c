@@ -13,7 +13,7 @@
 //  with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "Memory.h"
-#include "Kick13.h"
+//#include "Kick13.h"
 #include "Chipset.h"
 #include "CIA.h"
 
@@ -26,7 +26,7 @@ unsigned char low16Meg[16777216];
 void loadROM(){
     
     for(int i=0;i<524288;++i){
-         low16Meg[0xF80000+i] = kick13[i];
+//         low16Meg[0xF80000+i] = kick13[i];
     }
 }
 
