@@ -336,63 +336,63 @@ void (*DMALores[])() = {
 
 
 void (*DMAHires[]) (void) = {
-        evenCycle,
-        dramCycle,
-        evenCycle,
-        dramCycle,
-        evenCycle,
-        dramCycle,
-        evenCycle,
-        diskCycle,
-        evenCycle,
-        diskCycle,
-        evenCycle,
-        diskCycle,
-        evenCycle,
-        audioCycle,
-        evenCycle,
-        audioCycle,
-        evenCycle,
-        audioCycle,
-        evenCycle,
-        audioCycle,
-        evenCycle,
-        spriteCycle,    //00
-        evenCycle,
-        spriteCycle,    //00
-        evenCycle,
-        spriteCycle,    //01
-        evenCycle,
-        spriteCycle,    //01
-        evenCycle,
-        spriteCycle,    //02
-        evenCycle,
-        spriteCycle,    //02
-        evenCycle,
-        spriteCycle,    //03
-        evenCycle,
-        spriteCycle,    //03
-        evenCycle,
-        spriteCycle,    //04
-        evenCycle,
-        spriteCycle,    //04
-        evenCycle,
-        spriteCycle,    //05
-        evenCycle,
-        spriteCycle,    //05
-        evenCycle,
-        spriteCycle,    //06
-        evenCycle,
-        spriteCycle,    //06
-        evenCycle,
-        spriteCycle,    //07
-        evenCycle,
-        spriteCycle,    //07
-        evenCycle,
-        oddCycle,
-        evenCycle,
-        oddCycle,
+    evenCycle,
+    dramCycle,
+    evenCycle,
+    dramCycle,
+    evenCycle,
+    dramCycle,
+    evenCycle,
+    diskCycle,
+    evenCycle,
+    diskCycle,
+    evenCycle,
+    diskCycle,
+    evenCycle,
+    audioCycle,
+    evenCycle,
+    audioCycle,
+    evenCycle,
+    audioCycle,
+    evenCycle,
+    audioCycle,
+    evenCycle,
+    spriteCycle,//00
+    evenCycle,
+    spriteCycle,//00
+    evenCycle,
+    spriteCycle,//01
+    evenCycle,
+    spriteCycle,//01
+    evenCycle,
+    spriteCycle,//02
+    evenCycle,
+    spriteCycle,//02
+    evenCycle,
+    spriteCycle,//03
+    evenCycle,
+    spriteCycle,//03
+    evenCycle,
+    spriteCycle,//04
+    evenCycle,
+    spriteCycle,//04
+    evenCycle,
+    spriteCycle,//05
+    evenCycle,
+    spriteCycle,//05
+    evenCycle,
+    spriteCycle,//06
+    evenCycle,
+    spriteCycle,//06
+    evenCycle,
+    spriteCycle,//07
+    evenCycle,
+    spriteCycle,//07
     hiresPlane4,
+    hiresPlane2,
+    hiresPlane3,
+    hiresPlane1,
+    hiresPlane4,    //Normal Plane Start
     hiresPlane2,
     hiresPlane3,
     hiresPlane1,
@@ -560,16 +560,16 @@ void (*DMAHires[]) (void) = {
     hiresPlane2,
     hiresPlane3,
     hiresPlane1,
-        evenCycle,
-        oddCycle,
-        evenCycle,
-        oddCycle,
-        evenCycle,
-        oddCycle,
-        evenCycle,
-        oddCycle,
-        evenCycle,
-        oddCycle,
+    evenCycle,
+    oddCycle,
+    evenCycle,
+    oddCycle,
+    evenCycle,
+    oddCycle,
+    evenCycle,
+    oddCycle,
+    evenCycle,
+    oddCycle,
 };
 
 
@@ -745,7 +745,7 @@ int bitplaneActive(){
     }
  
     //too late horisonal position let the Copper and Blitter run... why + 16?
-    if(internal.hPos>(chipset.ddfstop+16)){
+    if(internal.hPos>0xd7+16){//(chipset.ddfstop+16)){     //not sure why the ddfstop sometimes have wrong values.
         return 0;
     }
     
@@ -889,7 +889,7 @@ void bitplaneCycle1(void){
 
 void displayLineReset(){
     
-    int temp = host.FBCounter / 640;
+    int temp = (host.FBCounter / 640);
     temp = (temp) * 640;
     host.FBCounter= temp;
     
