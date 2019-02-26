@@ -16,6 +16,7 @@
 #define Chipset_h
 
 #include <stdio.h>
+#include <stdint.h>
 
 #define CHIPBASE 0xDFF000
 #define BLTDDAT  0x0

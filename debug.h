@@ -16,6 +16,7 @@
 #define debug_h
 
 #include <stdio.h>
+#include <stdint.h>
 
 static char* regNames[] = {"BLTDDAT",
     "DMACONR",

@@ -263,7 +263,7 @@ int thd68k(void* data){
 
 
 
-int main(int argc, const char * argv[]) {
+int main(int argc, char * argv[]) {
     
     
     //load rom from disk if need be

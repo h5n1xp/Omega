@@ -16,7 +16,7 @@
 #define Blitter_h
 
 #include <stdio.h>
-
+#include <stdint.h>
 //keep internal blitter state in one place.
 typedef struct{
     uint16_t sizev;
