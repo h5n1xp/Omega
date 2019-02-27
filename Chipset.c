@@ -446,7 +446,7 @@ void intena(uint16_t value){
         chipset.intenar = chipset.intenar | (value  & 32767);
     }
     
-    //checkInterrupt(&chipset);
+    checkInterrupt(&chipset);
 }
 
 void intreq(uint16_t value){
@@ -456,7 +456,7 @@ void intreq(uint16_t value){
         chipset.intreqr = chipset.intreqr | (value  & 32767);
     }
     
-    //checkInterrupt(&chipset);
+    checkInterrupt(&chipset);
 
 }
 
