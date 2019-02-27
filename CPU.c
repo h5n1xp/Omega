@@ -34,15 +34,15 @@ unsigned char* _emulatorMemory;
 void cpu_pulse_reset(void){
     uint32_t pc = m68k_get_reg(NULL, M68K_REG_PC);
     uint32_t sp = m68k_get_reg(NULL, M68K_REG_SP);
-    internal.copperPC=0;
+    ChipsetInit();
     
     printf("PC:%0x6\n",pc);
     printf("SP:%0x6\n",sp);
     
     printf("Machine reset...\n");
     m68k_set_reg(M68K_REG_PC, 0xF80002); //start executing at the ROM + 2
-    CIAA.pra = 1;
-    CIAB.prb = 0;
+    //CIAA.pra = 1;
+    //CIAB.prb = 0;
     
 }
 

@@ -17,6 +17,7 @@
 #include "Chipset.h"
 #include "CIA.h"
 #include "Host.h"
+#include "Blitter.h"
 
 #include "CPU.h"
 
@@ -693,7 +694,7 @@ void dramCycle(void){
     
 }
 
-int turboFloppy = 0;
+int turboFloppy = 1;
 
 void diskCycle(void){
         
@@ -701,16 +702,28 @@ void diskCycle(void){
         
         if(chipset.dsklen & 0x3FFF){
             
-            uint8_t byte = floppyDataRead();
-            low16Meg[chipset.dskpt] = byte;
-            chipset.dskpt +=1;
-                    byte = floppyDataRead();
-            low16Meg[chipset.dskpt] = byte;
-            chipset.dskpt +=1;
-            chipset.dsklen -= 1;
-        
+            uint8_t byte;
+            
             //For faster floppy loading double up the data read
             if(turboFloppy==1){
+                
+                for(int i=0;i<8;++i){
+                        byte = floppyDataRead();
+                    low16Meg[chipset.dskpt] = byte;
+                    chipset.dskpt +=1;
+                        byte = floppyDataRead();
+                    low16Meg[chipset.dskpt] = byte;
+                    chipset.dskpt +=1;
+                    chipset.dsklen -= 1;
+                
+                    if( (chipset.dsklen & 0x3FFF) == 0){
+                        putChipReg16[INTREQ](0x8002);
+                        return;
+                    }
+                }
+                
+            }else{
+                
                     byte = floppyDataRead();
                 low16Meg[chipset.dskpt] = byte;
                 chipset.dskpt +=1;
@@ -718,14 +731,15 @@ void diskCycle(void){
                 low16Meg[chipset.dskpt] = byte;
                 chipset.dskpt +=1;
                 chipset.dsklen -= 1;
+                
+                if( (chipset.dsklen & 0x3FFF) == 0){
+                    putChipReg16[INTREQ](0x8002);
+                }
             }
             
             
             
-            if( (chipset.dsklen & 0x3FFF) == 0){
-                putChipReg16[INTREQ](0x8002);
-                //df0.index = 2; //try to reduce disk errors by artifically syncing disk head...
-            }
+
         }
         return;
     }

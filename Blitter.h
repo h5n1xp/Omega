@@ -16,6 +16,7 @@
 #define Blitter_h
 
 #include <stdio.h>
+#include "Chipset.h"
 
 //keep internal blitter state in one place.
 typedef struct{
@@ -23,5 +24,7 @@ typedef struct{
 }Blitter_t;
 
 int OblitterExecute(void);
+
+void blitter_execute(Chipset_t*);
 
 #endif /* Blitter_h */

@@ -49,6 +49,7 @@ int thd68k(void* data){
     
     while(1){
         cpu_execute();
+        SDL_Delay(1);
     }
     
 }
@@ -97,9 +98,9 @@ int main(int argc, const char * argv[]) {
         fd = open(argv[2],O_RDWR);
     }else{
        
-        //fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
+        fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/DLXP4.ADF",O_RDONLY);
-        fd = open("/Users/Shared/uae/DosUae/DISK1.ADF",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/DISK1.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/Fright Night.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/JUGGLER.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/amiga_500a_Tutorial_Disk.ADF",O_RDONLY);
@@ -117,7 +118,28 @@ int main(int argc, const char * argv[]) {
     close(fd);
     
     //DF1
-    fd = open("/Users/Shared/uae/WORKBENCH/EX-1_3.adf",O_RDONLY);
+    //Floppy disk
+    if(argc>3){
+        printf("%s\n",argv[3]);
+        fd = open(argv[3],O_RDWR);
+    }else{
+        
+        //fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/DLXP4.ADF",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/DISK1.ADF",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/Fright Night.adf",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/JUGGLER.ADF",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/amiga_500a_Tutorial_Disk.ADF",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/CuAmiga15.adf",O_RDONLY);
+        fd = open("/Users/Shared/uae/WORKBENCH/EX-1_3.adf",O_RDONLY);
+        
+        if(fd==0){
+            printf("no disk in DF1:\n");
+        }
+        
+    }
+    
+
     ADF2MFM(fd,floppyInit(1));
     close(fd);
     

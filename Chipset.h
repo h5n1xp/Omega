@@ -547,7 +547,7 @@ extern Internal_t internal;
 
 void ChipsetInit();
 
-void blitter_execute(Chipset_t*);
+
 void sprite_execute(Chipset_t*);
 void eclock_execute(Chipset_t*);
 
