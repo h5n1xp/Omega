@@ -19,8 +19,8 @@
 
 //#define CHIPTOP  0x3FFFF // for 256K Chip
 //#define CHIPTOP  0x7FFFF // for 512K
-#define CHIPTOP  0xFFFFF // for 1Meg
-//#define CHIPTOP 0x1FFFFF // for 2Meg
+//#define CHIPTOP  0xFFFFF // for 1Meg
+#define CHIPTOP 0x1FFFFF // for 2Meg
 
 extern unsigned char low16Meg[16777216]; // only the DMA should use this
 

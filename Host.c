@@ -17,6 +17,7 @@
 #include "Chipset.h"
 #include "CIA.h"
 #include "Floppy.h"
+#include "image.h"
 
 Host_t host;
 
@@ -273,6 +274,61 @@ void releaseKey(uint16_t keyCode){
     //printf("keyCode: %d -> %d (up)\n",keyCode,keyMapping[keyCode]);
 }
 
+void hostInit(){
+   
+    SDL_Init(SDL_INIT_EVERYTHING);
+    host.window = SDL_CreateWindow("Omega v0.5",
+                                   0,//window X position
+                                   0,//window Y position
+                                   640, 400,
+                                   SDL_WINDOW_RESIZABLE);// | SDL_WINDOW_FULLSCREEN_DESKTOP);
+    
+    host.renderer = SDL_CreateRenderer(host.window, -1, SDL_RENDERER_PRESENTVSYNC);
+    SDL_SetRenderDrawBlendMode(host.renderer,SDL_BLENDMODE_BLEND);
+    
+    SDL_ShowCursor(SDL_DISABLE);
+    //SDL_SetRelativeMouseMode(SDL_ENABLE);
+    
+    
+    host.playfield = SDL_CreateTexture(host.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 640, 400);
+    
+    
+    
+    
+    ///* Commodore Logo
+    host.commodoreLogo  = SDL_CreateTexture(host.renderer, SDL_PIXELFORMAT_BGRA8888, SDL_TEXTUREACCESS_STREAMING, 50, 50);
+    int pitch = 50*4;
+    void* pixels;
+    SDL_LockTexture(host.commodoreLogo , NULL, &pixels, &pitch);
+    
+    uint32_t* pixel =pixels;
+    uint32_t* longLog =(uint32_t*) clogo;
+    for(int index=0;index<2500;index +=1){
+        pixel[index]=longLog[index];
+    }
+    SDL_UnlockTexture(host.commodoreLogo);
+    SDL_SetTextureBlendMode(host.commodoreLogo, SDL_BLENDMODE_BLEND);
+    //*/
+    
+    
+    ///* Floppy disk image
+    host.spinner  = SDL_CreateTexture(host.renderer, SDL_PIXELFORMAT_BGRA8888, SDL_TEXTUREACCESS_STREAMING, 50, 50);
+    pitch = 50*4;
+    pixels =0;
+    SDL_LockTexture(host.spinner , NULL, &pixels, &pitch);
+    
+    pixel =pixels;
+    longLog =(uint32_t*) floppyImage;
+    for(int index=0;index<2500;index +=1){
+        pixel[index]=longLog[index];
+    }
+    SDL_UnlockTexture(host.spinner);
+    SDL_SetTextureBlendMode(host.spinner, SDL_BLENDMODE_BLEND);
+    //*/
+
+    
+}
+
 void toggleLEDs(){
     LEDActive = 1 - LEDActive;
 }
@@ -351,12 +407,14 @@ void hostDisplay(){
     
         //Spinny disk
         SDL_Rect spin={5,winY-60,50,50};
-        double angle = ((double)df0.index/6400.0)*365.0;
+        //double angle = ((double)df0.index/6400.0)*365.0;
+        double angle = ((double)df[0].index/6400.0)*365.0;
         SDL_RenderCopyEx(host.renderer, host.spinner, NULL, &spin,angle,NULL,SDL_FLIP_NONE);
     
         //Disk head
         SDL_SetRenderDrawColor(host.renderer, 255, 255, 255, 255);
-        SDL_Rect head = {29,(winY-59)+(df0.diskTrack/6),3,3};
+        //SDL_Rect head = {29,(winY-59)+(df0.diskTrack/6),3,3};
+        SDL_Rect head = {29,(winY-59)+(df[0].track/6),3,3};
         SDL_RenderFillRect(host.renderer,&head);
     }
     

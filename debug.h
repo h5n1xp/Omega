@@ -274,7 +274,7 @@ static char* regNames[] = {"BLTDDAT",
     "RESERVED33",
     "NO-OP"};
 
-void ADF2MFM(int adfSize,uint8_t* adf, uint8_t MFMdisk[80][2][11][1088]);
+void ADF2MFMOld(int adfSize,uint8_t* adf, uint8_t MFMdisk[80][2][11][1088]);
 
 void adf2rawtrack(uint8_t*,uint16_t*,int,int);
 

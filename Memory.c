@@ -234,6 +234,9 @@ void chipWriteWord(unsigned int address,unsigned int value){
     
     //Chipregs
     if(address>0xDFEFFF){
+        
+        uint32_t debugAddress = address;    // used for debugging to identify the register being called
+        
         address = (address - 0xDFF000) >> 1;
         putChipReg16[address](value);
         return;
@@ -295,6 +298,9 @@ void chipWriteLong(unsigned int address,unsigned int value){
     
     //Chipregs
     if(address>0xDFEFFF){
+        
+        uint32_t debugAddress = address;    // used for debugging to identify the register being called
+        
         address = (address - 0xDFF000) >> 1;
         putChipReg32[address](value);
         return;

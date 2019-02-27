@@ -7,6 +7,7 @@
 //  Copyright © 2019 Matt Parsons. All rights reserved.
 //  <h5n1xp@gmail.com>
 //
+//  Clocking and Checksum Code contributed by Dirk Hoffmann
 //
 //  This Source Code Form is subject to the terms of the
 //  Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed
@@ -16,403 +17,400 @@
 #include "Chipset.h"
 #include "Memory.h"
 
-Floppy_t df0;
-Floppy_t df1;
-Floppy_t df2;
-Floppy_t df3;
+#include <unistd.h>
+#include <fcntl.h>
 
 
-void floppy_init(Floppy_t* floppy,int driveNumber){
+void encodeBlock(uint8_t* source, uint8_t* destination,int size){
     
-    int shift = driveNumber+3;
-    
-    floppy->ID = 1 << shift;
-    floppy->ID = (~floppy->ID) &0x78;
-    
-    floppy->diskSelected = 1;           // Start in a non selected state
-    floppy->diskMotor    = 1;           // Motor is off
-    floppy->diskSide     = 0;           // Upper side selected
-    floppy->userInserted = 0;           // drive starts with no disk
-    floppy->diskchange   = 0;           // no disk
-    floppy->diskReady    = 1;           // Disk not ready
-    floppy->index = 0;                  // disk starts at 0... this is the disk rotation
-    
-    floppy->indexTop = 6399;
-}
-
-
-
-
- 
- void floppyInsert(Floppy_t* disk){
- 
- disk->diskTrack= 0;
- disk->diskProtect = 0;
- disk->diskMotor = 0;
- 
- 
- }
- 
- void floppy_execute(Floppy_t* disk){
-
-     static int state = 0;
-     
-     CIA_t* ciaBView = &CIAB;
-     
-        // check if Drive has been slected
-     if( (CIAB.prbw & 0x78) == disk->ID){
-         
-         if(state==0){
-             state = 1;
-         }
-     }else{
-         state = 0;
-     }
-     
-     switch(state){
-         case 0:
-             //Do nothing
-             break;
-         case 1:    //restore CIA A State
-             if(disk->diskReady == 0){
-                 CIAA.pra &= 0xDF;     // clear the disk ready bit
-             }else{
-                 CIAA.pra |= 0x20;     // set the disk ready bit
-             }
-             
-             if(disk->diskTrack == 0){
-                 CIAA.pra &= 0xEF;     // clear the track 0 bit
-             }else{
-                 CIAA.pra |= 0x10;     // set the track 0 bit
-             }
-             
-             if(disk->diskProtect == 0){
-                 CIAA.pra &= 0xF7;     // clear the disk protect bit
-             }else{
-                 CIAA.pra |= 0x8;      // set the disk protect bit
-             }
-             
-             if(disk->diskchange == 0){
-                 CIAA.pra &= 0xFB;     // clear the disk change bit
-             }else{
-                 CIAA.pra |= 0x4;      // set the disk change bit
-             }
-             
-             
-             //restore CIA B State to reflect this drive
-             CIAB.prb = CIAB.prbw;
-             
-             if(disk->diskMotor ==0){
-                 CIAB.prb &= 0x7F;     // clear motor on bit
-             }else{
-                 CIAB.prb |= 0x80;     // set motor on bit
-             }
-             
-             if(disk->diskSide == 0){
-                 CIAB.prb &= 0xFB;     // clear disk side bit
-             }else{
-                 CIAB.prb |= 0x4;     // set disk side bit
-             }
-             
-             if(disk->diskDirection == 0){
-                 CIAB.prb &= 0xFD;     // clear disk side bit
-             }else{
-                 CIAB.prb |= 0x2;     // set diskside bit
-             }
-             
-             /*
-              if(floppy->diskStep == 0){
-              b->prb &= 0xFE;     // clear disk side bit
-              }else{
-              b->prb |= 0x1;     // set diskside bit
-              }
-              */
-             state = 2;
-             break;
-             
-         case 2:
-             //update Drive to the new state
-             if( (CIAB.prbw & 0x80) == 0){
-                 CIAB.prb &= 0x7F;
-                 disk->diskMotor =0;
-                 //printf("Disk Motor On\n");
-             }else if(disk->diskMotor==0){
-                 CIAB.prb |= 0x80;         // set motor on bit
-                 disk->diskMotor = 1;  // Motor Off
-                 CIAA.pra |= 0x20;     // set the disk ready bit as the disk is no longer ready
-                 disk->diskReady = 1;
-                 //printf("Disk Motor Off\n");
-                 
-             }
-             
-             if( (CIAB.prbw & 0x4) == 0){
-                 CIAB.prb &= 0xFB;         // clear side bit
-                 disk->diskSide = 0;  // set upper side
-                                        //printf("Top Surface Selected\n");
-             }else if(disk->diskSide==0){
-                 CIAB.prb |= 0x4;         // set lower side
-                 disk->diskSide = 1;  // lower side
-                                        //printf("Lower Surface Selected\n");
-             }
-             
-             if( (CIAB.prbw & 0x2) == 0){
-                 CIAB.prb &= 0xFD;         // clear direction bit
-                 disk->diskDirection = 0;  // direction inwards
-                                             //printf("Direction Inwards\n");
-             }else if(disk->diskDirection==0){
-                 CIAB.prb |= 0x2;         // direction outwards
-                 disk->diskDirection = 1;  // direction outwards
-                                             //printf("Direction outwards\n");
-             }
-             
-             
-             //step head
-             if( (CIAB.prbw & 0x1)==0){
-                 
-                 if(disk->diskDirection ==0){
-                     disk->diskTrack +=1;
-                 }else{
-                     disk->diskTrack -=1;
-                     
-                     if(disk->diskTrack==0){
-                         CIAA.pra &= 0xEF;     // clear the track 0 bit signalling we are at track 0
-                     }else{
-                         CIAA.pra |= 0x10;     // set the track 0 bit
-                     }
-                     
-                 }
-                 
-                 
-                 // has a disk been inserted?
-                 if(disk->userInserted==1){
-                     disk->diskchange=1;
-                     CIAA.pra |= 0x4;      // set the disk change bit
-                 }else{
-                     disk->diskchange=0;
-                     CIAA.pra &= 0xFB;     // clear the disk change bit
-                 }
-                 
-                 //printf("Step head to Cylinder %d\n",floppy->diskTrack);
-                 
-             }
-
-             break;
-         case 3:
-
-             break;
-             
-             
-     }
-     
-     
- 
- }
-
-void resetIndex(Floppy_t* disk){
-    
-    disk->index = 0;
-    
-}
-
-uint8_t floppyDataRead(Floppy_t* disk){ //this function should be called by the DMA
-    
-    int surface = 1 - disk->diskSide;
-    int position = (disk->diskTrack * (12798*2)) + (surface * 12798) + (disk->index);
-    
-    disk->index +=1;
-    if(disk->index>12687){ //ADF track has 12798 bytes, but on a normal AmigaOS disk 12668 are used.
-        disk->index = 0;
-        CIAIndex(&CIAB);    // generate CIAB index interupt
+    for(int i=0;i<size;i++){
+        destination[i] = (source[i] >> 1) & 0x55;
+        destination[i+size] = (source[i]) & 0x55;
     }
     
-    uint8_t retVal = disk->mfmData[position];
+}
+
+uint8_t addClockBits(uint8_t previous, uint8_t value) {
+    // Clear all previously set clock bits
+    value &= 0x55;
     
+    // Compute clock bits (clock bit values are inverted)
+    uint8_t lShifted = (value << 1);
+    uint8_t rShifted = (value >> 1) | (previous << 7);
+    uint8_t cBitsInv = lShifted | rShifted;
+    
+    // Reverse the computed clock bits
+    uint64_t cBits = cBitsInv ^ 0xAA;
+    
+    // Return original value with the clock bits added
+    return value | cBits;
+}
+
+void ADF2MFM(int fd, uint8_t* mfm){
+    
+    int size =(int) lseek(fd, 0, SEEK_END);
+    
+    //512 bytes per sector
+    int sectors = size/512;
+    
+    //22 sectors per track (each side 11 sectors)
+    int tracks = (sectors / 22);
+    
+    //each track is 12798 bytes in size, multiplied by 2 because there are 2 sides
+    //int mfmSize = tracks * (12798 * 2);
+    
+    uint8_t adf[size];
+    // uint8_t mfm[mfmSize];
+    
+    uint8_t lowlevelSector[544]; //bytes per low level sector
+    
+    lseek(fd, 0, SEEK_SET);
+    read(fd, adf, size);
+    
+    
+    int count = 0;
+    int s = 0;
+    
+    for(int track = 0;track<tracks;track++){
+        for(int side=0;side<2;side++){
+            for(int sector=0;sector<11;sector++){
+                
+                //int secCountDown = 11 - sector;
+                
+                
+                //printf("%d: Track %d, Side: %d, Sector %d (%d)\n",s,track,side,sector,secCountDown);
+                
+                //Build the sector
+                lowlevelSector[0] = 0x0;
+                lowlevelSector[1] = 0x0;
+                
+                lowlevelSector[2] = 0xA1; // will be a sync mark
+                lowlevelSector[3] = 0xA1; // will be a sync mark
+                
+                //sector info
+                
+                lowlevelSector[4] = 0xFF;
+                lowlevelSector[5] = track << 1 | side;
+                lowlevelSector[6] = sector;
+                lowlevelSector[7] = 11 - sector;
+                
+                //Sector label
+                lowlevelSector[8]  = 0x0;
+                lowlevelSector[9]  = 0x0;
+                lowlevelSector[10] = 0x0;
+                lowlevelSector[11] = 0x0;
+                
+                lowlevelSector[12] = 0x0;
+                lowlevelSector[13] = 0x0;
+                lowlevelSector[14] = 0x0;
+                lowlevelSector[15] = 0x0;
+                
+                lowlevelSector[16] = 0x0;
+                lowlevelSector[17] = 0x0;
+                lowlevelSector[18] = 0x0;
+                lowlevelSector[19] = 0x0;
+                
+                lowlevelSector[20] = 0x0;
+                lowlevelSector[21] = 0x0;
+                lowlevelSector[22] = 0x0;
+                lowlevelSector[23] = 0x0;
+                
+                
+                //data
+                for(int i=0;i<512;++i){
+                    lowlevelSector[32+i] = adf[i+(count*512)];
+                    
+                }
+                
+                
+                
+                //***************
+                
+                //Encode
+                
+                mfm[s+0] = 0xAA;
+                mfm[s+1] = 0xAA;
+                mfm[s+2] = 0xAA;
+                mfm[s+3] = 0xAA;
+                
+                mfm[s+4] = 0x44;
+                mfm[s+5] = 0x89;
+                mfm[s+6] = 0x44;
+                mfm[s+7] = 0x89;
+                
+                //info
+                encodeBlock(&lowlevelSector[4], &mfm[s+8], 4); // adds 8 bytes
+                
+                //Disklabel
+                encodeBlock(&lowlevelSector[8], &mfm[s+16], 16);//adds 32 bytes
+                
+                //Data section
+                encodeBlock(&lowlevelSector[32], &mfm[s+64], 512);
+                
+                
+                //Header checksum
+                uint8_t hcheck[4] = { 0, 0, 0, 0 };
+                for(unsigned i = 8; i < 48; i += 4) {
+                    hcheck[0] ^= mfm[s+i];
+                    hcheck[1] ^= mfm[s+i+1];
+                    hcheck[2] ^= mfm[s+i+2];
+                    hcheck[3] ^= mfm[s+i+3];
+                }
+                
+                lowlevelSector[24] = hcheck[0];
+                lowlevelSector[25] = hcheck[1];
+                lowlevelSector[26] = hcheck[2];
+                lowlevelSector[27] = hcheck[3];
+                
+                //header checksum
+                encodeBlock(&lowlevelSector[24], &mfm[s+48], 4); //adds 8 bytes
+                
+                
+                // Data checksum
+                uint8_t dcheck[4] = { 0, 0, 0, 0 };
+                for(unsigned i = 64; i < 1088; i += 4) {
+                    dcheck[0] ^= mfm[s+i];
+                    dcheck[1] ^= mfm[s+i+1];
+                    dcheck[2] ^= mfm[s+i+2];
+                    dcheck[3] ^= mfm[s+i+3];
+                }
+                
+                lowlevelSector[28] = dcheck[0];
+                lowlevelSector[29] = dcheck[1];
+                lowlevelSector[30] = dcheck[2];
+                lowlevelSector[31] = dcheck[3];
+                
+                //Encode Data checksum
+                encodeBlock(&lowlevelSector[28], &mfm[s+56], 4); //adds 8 bytes
+                
+                
+                
+                //Add clocking bits
+                for(int i=8;i<1088;i++){
+                    uint8_t previous = mfm[s+i-1];
+                    
+                    mfm[s+i] = addClockBits(previous,mfm[s+i]);
+                    //mfm[s+i] = clocking(previous, mfm[s+i]);
+                    
+                }
+                
+                s += 1088;    //Why not 1088, which is the size of the data we've produced
+                count +=1;
+                
+                
+            }
+            
+            //Add clocking bits to the track gap
+            mfm[s]   = addClockBits(mfm[s-1],0);
+            mfm[s+1] = 0xA8;
+            mfm[s+2] = 0x55;
+            mfm[s+3] = 0x55;
+            mfm[s+4] = 0xAA;
+            
+            for(int i=5;i<700;i++){
+                uint8_t previous = mfm[s+i-1];
+                
+                mfm[s+i] = addClockBits(previous,0);
+                //mfm[s+i] = clocking(previous, mfm[s+i]);
+                
+            }
+            
+            s += 830;   //pad track to make 12798 bytes to meet the ADF-EXT spec.
+            //printf("\n");
+        }
+        
+    }
+    //printf("loaded");
+    
+}
+//*******************************
+
+
+
+
+int driveSelected=0;
+Fd_t df[4];
+
+uint8_t floppyDataRead(){ //this function should be called by the DMA
+    
+    //Fd_t* ourDisk = &df[driveSelected];
+    
+    //int surface = 1 - disk->diskSide;
+    //int position = (disk->diskTrack * (12798*2)) + (surface * 12798) + (disk->index);
+    int position   = (df[driveSelected].track * (12798 * 2)) + (df[driveSelected].side  * 12798) + df[driveSelected].index;
+    
+    
+    //disk->index +=1;
+    df[driveSelected].index +=1;
     /*
-     //Don't allow 0 in the data stream
-    if(retVal == 0){
+    if(disk->index>12667){ //ADF track has 12798 bytes, but on a normal AmigaOS disk 12668 are used.
         disk->index = 0;
         CIAIndex(&CIAB);    // generate CIAB index interupt
-        retVal = disk->mfmData[(disk->diskTrack * (12798*2)) + (surface * 12798) + (disk->index)]; //firstvalue
-        disk->index +=1;
     }
-     */
+    */
+    if(df[driveSelected].index>12667){ //ADF track has 12798 bytes, but on a normal AmigaOS disk 12668 are used.
+        df[driveSelected].index= 0;
+        CIAIndex(&CIAB);    // generate CIAB index interupt
+    }
+    
+    //uint8_t retVal = disk->mfmData[position];
+    uint8_t retVal = df[driveSelected].mfmData[position];
     
     return retVal;
 }
 
 
-
-void floppyDisk_execute(Floppy_t* floppy,Chipset_t* chipset, CIA_t* a, CIA_t* b){
-
+void floppyInsert(int drive){
     
-    //our drive has been slelcted then we are interested
-    if( (b->prbw & 0x78) == floppy->ID){
+    df[drive].pra |= 0x4;
     
-        //only execute if the register state has changed
-        if(b->prbChanged){
-            b->prbChanged=0;    //reset flag
-            
-            
-            //Check if we need to restore state
-            if(floppy->diskSelected==1){
-                floppy->diskSelected=0;
-                
-                switch(floppy->ID){
-                    //case 0x70: printf("Selected disk 0\n");break;
-                    //case 0x68: printf("Selected disk 1\n");break;
-                    //case 0x58: printf("Selected disk 2\n");break;
-                    //case 0x38: printf("Selected disk 3\n");break;
-                }
-                
-                //restore CIA A State to reflect this drive
-                
-                if(floppy->diskReady == 0){
-                    a->pra &= 0xDF;     // clear the disk ready bit
-                }else{
-                    a->pra |= 0x20;     // set the disk ready bit
-                }
-                
-                if(floppy->diskTrack == 0){
-                    a->pra &= 0xEF;     // clear the track 0 bit
-                }else{
-                    a->pra |= 0x10;     // set the track 0 bit
-                }
-                
-                if(floppy->diskProtect == 0){
-                    a->pra &= 0xF7;     // clear the disk protect bit
-                }else{
-                    a->pra |= 0x8;      // set the disk protect bit
-                }
-                
-                if(floppy->diskchange == 0){
-                    a->pra &= 0xFB;     // clear the disk change bit
-                }else{
-                    a->pra |= 0x4;      // set the disk change bit
-                }
-                
-                
-                //restore CIA B State to reflect this drive
-                b->prb = b->prbw;
-                
-                if(floppy->diskMotor ==0){
-                    b->prb &= 0x7F;     // clear motor on bit
-                }else{
-                    b->prb |= 0x80;     // set motor on bit
-                }
-                
-                if(floppy->diskSide == 0){
-                    b->prb &= 0xFB;     // clear disk side bit
-                }else{
-                    b->prb |= 0x4;     // set disk side bit
-                }
-                
-                if(floppy->diskDirection == 0){
-                    b->prb &= 0xFD;     // clear disk side bit
-                }else{
-                    b->prb |= 0x2;     // set diskside bit
-                }
-                
-                /*
-                if(floppy->diskStep == 0){
-                    b->prb &= 0xFE;     // clear disk side bit
-                }else{
-                    b->prb |= 0x1;     // set diskside bit
-                }
-                 */
-
-            }
-            
-            //update Drive to the new state
-            if( (b->prbw & 0x80) == 0){
-                b->prb &= 0x7F;
-                floppy->diskMotor =0;
-                //printf("Disk Motor On\n");
-            }else if(floppy->diskMotor==0){
-                b->prb |= 0x80;         // set motor on bit
-                floppy->diskMotor = 1;  // Motor Off
-                a->pra |= 0x20;     // set the disk ready bit as the disk is no longer ready
-                floppy->diskReady = 1;
-                //printf("Disk Motor Off\n");
-                
-            }
-        
-            if( (b->prbw & 0x4) == 0){
-                b->prb &= 0xFB;         // clear side bit
-                floppy->diskSide = 0;  // set upper side
-                //printf("Top Surface Selected\n");
-            }else if(floppy->diskSide==0){
-                b->prb |= 0x4;         // set lower side
-                floppy->diskSide = 1;  // lower side
-                //printf("Lower Surface Selected\n");
-            }
-            
-            if( (b->prbw & 0x2) == 0){
-                b->prb &= 0xFD;         // clear direction bit
-                floppy->diskDirection = 0;  // direction inwards
-                //printf("Direction Inwards\n");
-            }else if(floppy->diskDirection==0){
-                b->prb |= 0x2;         // direction outwards
-                floppy->diskDirection = 1;  // direction outwards
-                //printf("Direction outwards\n");
-            }
-            
-            
-            //step head
-            if( (b->prbw & 0x1)==0){
-                
-                if(floppy->diskDirection ==0){
-                    floppy->diskTrack +=1;
-                }else{
-                    floppy->diskTrack -=1;
-                    
-                    //Can't step back.
-                    if(floppy->diskTrack==-1){
-                        floppy->diskTrack = 0;
-                    }
-                    
-                    if(floppy->diskTrack==0){
-                        a->pra &= 0xEF;     // clear the track 0 bit signalling we are at track 0
-                    }else{
-                        a->pra |= 0x10;     // set the track 0 bit
-                    }
-                    
-                }
-                
-                
-                // has a disk been inserted?
-                if(floppy->userInserted==1){
-                    floppy->diskchange=1;
-                    a->pra |= 0x4;      // set the disk change bit
-                }else{
-                    floppy->diskchange=0;
-                    a->pra &= 0xFB;     // clear the disk change bit
-                }
-                
-                //printf("Step head to Cylinder %d\n",floppy->diskTrack);
-                 
-            }
-            
-        }
-        
-        
-    }else{
-        
-        if(floppy->diskSelected==0){
-            floppy->diskSelected=1;// our drive is not selected
-            return;
-        }
-        
-    }
-    
-    //run drive
-    
-    if(floppy->diskMotor==0){
-        a->pra &= 0xDF;     // clear the disk ready bit
-    }else{
-        a->pra |= 0x20;     // set the disk ready bit
-    }
     
 }
 
+uint8_t* floppyInit(int drive){
+    df[drive].idMode = -1;
+    df[drive].index = 0;
+    df[drive].track = 0;
+    df[drive].side = 0;
+    df[driveSelected].pra  &= 0xFB;      // no disk;
+    return df[drive].mfmData;
+}
 
+void floppyState(){
+    CIAA.pra |= df[driveSelected].pra & 0x3C;
+}
+
+void floppySetState(){            //To be called when Writes to CIAB prb happen.
+    
+    static uint8_t PRB;
+    static int count = 0;
+    
+    // No point doing anything if nothing has changed.
+    if(PRB == CIAB.prb){
+        PRB = CIAB.prb;
+        return;
+    }
+
+    PRB = CIAB.prb;
+    
+    switch (PRB & 0x78) {
+        case 0x78:
+            CIAA.pra &=0xC3;    //Need to take the Drives off the floppy bus.
+            return;
+            break;
+            
+        case 0x70:
+            driveSelected = 0;
+            break;
+
+        case 0x68:
+            driveSelected = 1;
+            //return;
+            break;
+            
+        case 0x58:
+            driveSelected = 2;
+            //return;
+            break;
+            
+        case 0x38:
+            driveSelected = 3;
+            //return;
+            break;
+            
+        default:
+            break;
+    }
+    //count++;
+
+    //printf("%d: ",count);
+    
+    //ID mode... to identify exteernal drives...
+     if(df[driveSelected].idMode>0){   // Id mode
+         printf("DF%d ID Mode: %d\n",driveSelected,df[driveSelected].idMode);
+         df[driveSelected].pra  &= 0xDF;     //Drive ready flag signals the drive is there
+         df[driveSelected].idMode -=1;
+         CIAA.pra |= df[driveSelected].pra & 0x3C;
+         return;
+     }
+    
+    // If no change in state just
+    if(PRB == df[driveSelected].prb){
+        //printf("---\n");
+        df[driveSelected].prb = PRB;
+        return;
+    }
+    
+
+    df[driveSelected].prb = PRB;
+    
+
+    //printf("DF%d - ",driveSelected);
+    
+    if(PRB & 0x80){
+        //printf(" Motor Off ");
+        //df[driveSelected].prb  |= 0x80;
+        
+        if(df[driveSelected].idMode==-1){   //is this the first time the motor has been turned off?
+            df[driveSelected].idMode = 32;  //if so activate ID Mode
+        }
+        
+        df[driveSelected].pra  |= 0x20;     //Drive not ready
+        
+    }else{
+        //printf(" Motor On ");
+        //df[driveSelected].prb  &= 0x7F;
+        
+        if(df[driveSelected].pra & 0x4){     // disk inserted
+            df[driveSelected].pra  &= 0xDF;  // Drive ready
+        }
+        
+    }
+    
+    
+    if(PRB & 0x4){
+        df[driveSelected].side = 0;
+        //df[driveSelected].prb |= 0x4;
+        //printf(" -upper surface.");
+        
+    }else{
+        df[driveSelected].side = 1;
+        //df[driveSelected].prb &= 0xFB;
+        //printf(" -lower surface.");
+    }
+
+    
+    //Step head
+    if(PRB & 0x1){
+        
+        
+        if(PRB & 0x2){
+            df[driveSelected].track -=1;
+            //printf(" Head Stepped back ");
+        }else{
+            df[driveSelected].track +=1;
+           // printf(" Head Stepped forward ");
+        }
+        
+        if(df[driveSelected].track < 0){
+            df[driveSelected].track = 0;
+        }
+        
+        if(df[driveSelected].track==0){
+            df[driveSelected].pra  &= 0xEF; //Track 0 reached
+        }else{
+            df[driveSelected].pra  |= 0X10; // not track 0;
+        }
+        
+        //printf(" to track %d|",df[driveSelected].track);
+        
+    }
+    
+    //printf("\n");
+    
+    CIAA.pra |= df[driveSelected].pra & 0x3C;
+    //CIAB.prb |= df[driveSelected].prb & 0x87;
+    
+
+}
 

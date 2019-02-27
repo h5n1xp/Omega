@@ -110,7 +110,7 @@ void (*DMALores[])() = {
     evenCycle,
     diskCycle,
     evenCycle,
-    audioCycle,
+    audio0Cycle,
     evenCycle,
     audioCycle,
     evenCycle,
@@ -349,7 +349,7 @@ void (*DMAHires[]) (void) = {
     evenCycle,
     diskCycle,
     evenCycle,
-    audioCycle,
+    audio0Cycle,
     evenCycle,
     audioCycle,
     evenCycle,
@@ -693,28 +693,38 @@ void dramCycle(void){
     
 }
 
-void diskCycle(void){
-    
-    static int count=0;
+int turboFloppy = 0;
 
-    
+void diskCycle(void){
+        
     if( (chipset.dmaconr & 0x210) && chipset.dsklen & 0x8000 ){
         
         if(chipset.dsklen & 0x3FFF){
-            uint8_t byte = floppyDataRead(&df0);
+            
+            uint8_t byte = floppyDataRead();
             low16Meg[chipset.dskpt] = byte;
             chipset.dskpt +=1;
-            byte = floppyDataRead(&df0);
+                    byte = floppyDataRead();
             low16Meg[chipset.dskpt] = byte;
             chipset.dskpt +=1;
-        
             chipset.dsklen -= 1;
         
-            count +=1;
+            //For faster floppy loading double up the data read
+            if(turboFloppy==1){
+                    byte = floppyDataRead();
+                low16Meg[chipset.dskpt] = byte;
+                chipset.dskpt +=1;
+                    byte = floppyDataRead();
+                low16Meg[chipset.dskpt] = byte;
+                chipset.dskpt +=1;
+                chipset.dsklen -= 1;
+            }
+            
+            
             
             if( (chipset.dsklen & 0x3FFF) == 0){
                 putChipReg16[INTREQ](0x8002);
-                count = 0;
+                //df0.index = 2; //try to reduce disk errors by artifically syncing disk head...
             }
         }
         return;
@@ -722,10 +732,28 @@ void diskCycle(void){
     
     oddCycle();
 }
-void audioCycle(void){
 
+void audio0Cycle(void){
+    
+    if((chipset.dmacon & 0x201) == 0x201){
+        
+        chipset.aud0len -=1;
+        
+        if(chipset.aud0len ==0){
+            putChipReg16[INTREQ](0x8080);
+        }
+        
+        return;
+    }
+    
+    
+}
+
+void audioCycle(void){
+    //dummy cycle slot
     oddCycle();
 }
+
 void spriteCycle(void){
 
     oddCycle();

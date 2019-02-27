@@ -42,6 +42,7 @@ void sprite2chunky(uint32_t* pixBuff,uint32_t* palette, int x,uint16_t plane1, u
 void pressKey(uint16_t keyCode);
 void releaseKey(uint16_t keyCode);
 
+void hostInit();
 
 void hostDisplay();
 

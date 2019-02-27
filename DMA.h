@@ -25,7 +25,11 @@ void evenCycle(void);
 void oddCycle(void);
 void dramCycle(void);
 void diskCycle(void);
+
+void audio0Cycle(void);
+
 void audioCycle(void);
+
 void spriteCycle(void);
 
 //deprecated DMA cycles, to be replaced with lores

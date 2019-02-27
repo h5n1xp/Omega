@@ -90,7 +90,7 @@ void cpu_execute(){
     uint32_t* guru = low16Meg;
  */
     
-    m68k_execute(4);
+    m68k_execute(16);
 
 }
 
@@ -99,13 +99,15 @@ void cpu_execute(){
 
 void checkInterrupt(Chipset_t* chipset){
     
-    m68k_end_timeslice();
+
     
     if(chipset->intenar & 0x4000){ // if master interrupt switch is enabled
         
         uint16_t intMask = chipset->intreqr & chipset->intenar; //only set the int level, if bits are enabled
         
         if(intMask !=0){
+            
+            m68k_end_timeslice();
             
             if(intMask & 8192){  // External int
                 m68k_set_irq(6);

@@ -14,6 +14,7 @@
 
 #include "CIA.h"
 #include "m68k.h"
+#include "Floppy.h"
 
 CIA_t CIAA;
 CIA_t CIAB;
@@ -53,11 +54,14 @@ void CIAWrite(CIA_t* cia,int reg,uint8_t value){
     switch(reg){
             
         case 0x0:cia->pra = value & 63;break;//pra
-        case 0x1://prb - Due to the floppy drive's dependance upon this register, it only flags a cahnge if the write actually changed the value.
+        case 0x1://prb - Due to the floppy drive's dependance upon this register, it only flags a change if the write actually changed the value.
             if(value != cia->prb){
                 cia->prbw = value;
                 cia->prbChanged=1;
-            }break;
+            }
+            cia->prb = value;
+            floppySetState();
+            break;
         case 0x2:cia->ddra = value;break;//ddra
         case 0x3:cia->ddrb = value;break;//ddrb
         case 0x4:cia->taLatch = (cia->taLatch & 65280) | value;break;//talo
@@ -130,7 +134,9 @@ uint8_t CIARead(CIA_t* cia,int reg){
     
     switch(reg){   
             
-        case 0x0:value = cia->pra;break;//pra
+        case 0x0:
+            floppyState();
+            value = cia->pra;break;//pra
         case 0x1:value = cia->prb;break;//prb
         case 0x2:value = cia->ddra;break;//ddra
         case 0x3:value = cia->ddrb;break;//ddrb

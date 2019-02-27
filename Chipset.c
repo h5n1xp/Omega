@@ -132,6 +132,10 @@ void cop2lchL(uint32_t value){  //
     //printf("(32bit)Copper 2: %0x\n",chipset.cop2lc);
 }
 
+void aud0lcL(uint32_t value){
+    chipset.aud0lc = value;
+}
+
 void aud0perL(uint32_t value){  //
     chipset.aud0per = value >> 16;
     chipset.aud0vol = value & 65535;
@@ -464,8 +468,22 @@ void adkcon(uint16_t value){
     }
 }
 
+
+
+void aud0len(uint16_t value){
+    chipset.aud0len = value;
+}
+
+void aud0per(uint16_t value){
+    chipset.aud0per = value;
+}
+
 void aud0vol(uint16_t value){
     chipset.aud0vol = value;
+}
+
+void aud0dat(uint16_t value){
+    chipset.aud0dat = value;
 }
 
 void aud3vol(uint16_t value){
@@ -1016,6 +1034,78 @@ uint16_t (*getChipReg16[])(void) = {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void (*putChipReg32[])(uint32_t) ={
     longWrite,
     noopL,
@@ -1097,7 +1187,7 @@ void (*putChipReg32[])(uint32_t) ={
     longWrite,
     longWrite,
     longWrite,
-    longWrite,
+    aud0lcL,
     longWrite,
     longWrite,
     aud0perL,
@@ -1906,107 +1996,6 @@ void (*putChipReg32[])(uint32_t) ={
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void (*putChipReg16[])(uint16_t) ={
     wordIllegalWrite,
     wordIllegalWrite,
@@ -2090,10 +2079,10 @@ void (*putChipReg16[])(uint16_t) ={
     adkcon,
     wordWrite,
     wordWrite,
-    wordWrite,
-    wordWrite,
+    aud0len,
+    aud0per,
     aud0vol,
-    wordWrite,
+    aud0dat,
     wordWrite,
     wordWrite,
     wordWrite,
