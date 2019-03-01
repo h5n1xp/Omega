@@ -14,6 +14,7 @@
 
 #include "debug.h"
 
+int debugChipAddress;
 
 /*
  uint32_t buffer[65536];
@@ -122,7 +123,7 @@
  close(fd);
  */
 
-
+/*
 int MFMEncode(int previous, int byte){
     
     int value = byte;
@@ -145,11 +146,11 @@ int MFMEncode(int previous, int byte){
     
     return value;
 }
+*/
 
 
 
-
-
+/*
 void adf2rawtrack(uint8_t* adf,uint16_t* track,int cylinder,int surface){ //returns little endian data
     
     //surface = 1 - surface; //invert value :-/
@@ -253,10 +254,11 @@ void adf2rawtrack(uint8_t* adf,uint16_t* track,int cylinder,int surface){ //retu
         track[index+31] =  (MFMEncode((sum>>16) & 255, (sum>>8) & 255)) | (MFMEncode((sum>>8) & 255, sum & 255) << 8);
         
     }
+ */
+
     
     
-    
-    return;
+    //return;
     
     /*
      
@@ -373,8 +375,8 @@ void adf2rawtrack(uint8_t* adf,uint16_t* track,int cylinder,int surface){ //retu
      
      return value;
      */
-}
-
+//}
+/*
 void ADF2MFMOld(int adfSize,uint8_t* adf, uint8_t MFMdisk[80][2][11][1088]){
     /*
      
@@ -543,7 +545,7 @@ void ADF2MFMOld(int adfSize,uint8_t* adf, uint8_t MFMdisk[80][2][11][1088]){
      
      }
      */
-}
+//}
 
 //Floppy_t df0;
 //Floppy_t df1;
@@ -802,7 +804,7 @@ void ADF2MFMOld(int adfSize,uint8_t* adf, uint8_t MFMdisk[80][2][11][1088]){
  b->prb |= 0x2;     // set diskside bit
  }
  
- /*
+ 
  if(floppy->diskStep == 0){
  b->prb &= 0xFE;     // clear disk side bit
  }else{

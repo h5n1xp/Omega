@@ -57,7 +57,7 @@ int thd68k(void* data){
 
 
 
-int main(int argc, const char * argv[]) {
+int main(int argc, char * argv[]) {
     
     
     //load rom from disk if need be
@@ -105,17 +105,17 @@ int main(int argc, const char * argv[]) {
         //fd = open("/Users/Shared/uae/DosUae/JUGGLER.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/amiga_500a_Tutorial_Disk.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/CuAmiga15.adf",O_RDONLY);
-        
-        if(fd==0){
-            printf("no disk in DF0:\n");
-        }
-        
+
     }
     
  
-
-    ADF2MFM(fd, floppyInit(0));
-    close(fd);
+    if(fd==0){
+        printf("no disk in DF0:\n");
+    }else{
+        ADF2MFM(fd, floppyInit(0));
+        close(fd);
+    }
+    
     
     //DF1
     //Floppy disk
@@ -130,8 +130,9 @@ int main(int argc, const char * argv[]) {
         //fd = open("/Users/Shared/uae/DosUae/Fright Night.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/JUGGLER.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/amiga_500a_Tutorial_Disk.ADF",O_RDONLY);
+        fd = open("/Users/Shared/uae/DosUae/af025_1991_08_d025.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/CuAmiga15.adf",O_RDONLY);
-        fd = open("/Users/Shared/uae/WORKBENCH/EX-1_3.adf",O_RDONLY);
+        //fd = open("/Users/Shared/uae/WORKBENCH/EX-1_3.adf",O_RDONLY);
         
         if(fd==0){
             printf("no disk in DF1:\n");
@@ -139,10 +140,12 @@ int main(int argc, const char * argv[]) {
         
     }
     
-
-    ADF2MFM(fd,floppyInit(1));
-    close(fd);
-    
+    if(fd==0){
+        printf("no disk in DF1:\n");
+    }else{
+        ADF2MFM(fd,floppyInit(1));
+        close(fd);
+    }
     
     
     

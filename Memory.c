@@ -16,7 +16,7 @@
 //#include "Kick13.h"
 #include "Chipset.h"
 #include "CIA.h"
-
+#include "debug.h"
 
 
 unsigned char low16Meg[16777216];
@@ -45,6 +45,7 @@ unsigned int chipReadByte(unsigned int address){
     if(address>0xDFEFFF){
         address = (address - 0xDFF000) >> 1;
         //return ChipsetReadByte(&chipset, address);
+        debugChipAddress = address;
         return getChipReg8[address]();
     }
     
@@ -91,6 +92,7 @@ unsigned int chipReadWord(unsigned int address){
     //Chipregs
     if(address>0xDFEFFF){
         address = (address - 0xDFF000) >> 1;
+        debugChipAddress = address;
         return getChipReg16[address]();
         //return ChipsetRead(&chipset, address);
     }
@@ -149,7 +151,7 @@ unsigned int chipReadLong(unsigned int address){
     //Chipregs
     if(address>0xDFEFFF){
         address = (address - 0xDFF000) >> 1;
-        //return ChipsetReadLong(&chipset, address);
+        debugChipAddress = address;
         return getChipReg32[address]();
     }
     
@@ -195,6 +197,7 @@ void chipWriteByte(unsigned int address,unsigned int value){   //ROM
     //Chipregs
     if(address>0xDFEFFF){
         address = (address - 0xDFF000) >> 1;
+        debugChipAddress = address;
         //ChipsetWrite(&chipset, address,value); // Does any software byte write to the custom chips?
         return;
     }
@@ -234,10 +237,9 @@ void chipWriteWord(unsigned int address,unsigned int value){
     
     //Chipregs
     if(address>0xDFEFFF){
-        
-        uint32_t debugAddress = address;    // used for debugging to identify the register being called
-        
         address = (address - 0xDFF000) >> 1;
+        
+        debugChipAddress = address;    // used for debugging to identify the register being called
         putChipReg16[address](value);
         return;
     }
@@ -298,10 +300,10 @@ void chipWriteLong(unsigned int address,unsigned int value){
     
     //Chipregs
     if(address>0xDFEFFF){
-        
-        uint32_t debugAddress = address;    // used for debugging to identify the register being called
-        
         address = (address - 0xDFF000) >> 1;
+        
+                debugChipAddress = address;    // used for debugging to identify the register being called
+    
         putChipReg32[address](value);
         return;
     }

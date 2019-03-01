@@ -16,6 +16,7 @@
 #define Blitter_h
 
 #include <stdio.h>
+#include <stdint.h>
 #include "Chipset.h"
 
 //keep internal blitter state in one place.

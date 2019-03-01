@@ -17,7 +17,7 @@
 #include "CPU.h"
 #include "m68k.h"
 #include "DMA.h"
-
+#include "debug.h"
 
 Chipset_t chipset;
 Internal_t internal;
@@ -62,7 +62,8 @@ uint32_t EHB2ARGB(uint16_t color){
 }
 
 uint16_t noRead(void){
-    printf("can't read a Write only Register\n");
+    printf("can't read a Write only Register %s\n",regNames[debugChipAddress]);
+    debugChipAddress = 0;
     return 0;
 }
 
@@ -166,7 +167,8 @@ void noopL(uint32_t value){
 }
 
 void longWrite(uint32_t value){
-    printf("Need to implement Long Write\n");
+    printf("32bit Write: to %s (%0x - %d) not implemented!\n",regNames[debugChipAddress],debugChipAddress<<1,debugChipAddress);
+        debugChipAddress = 0;
 }
 
 //**********************************************************
@@ -225,11 +227,13 @@ uint16_t deniseid(){
 }
 
 void wordWrite(uint16_t value){
-    printf("16bit Write: Not implemented!\n");
+    printf("16bit Write: to %s (%0x - %d) Not implemented!\n",regNames[debugChipAddress],debugChipAddress<<1,debugChipAddress);
+    debugChipAddress = 0;
 }
 
 void wordIllegalWrite(uint16_t value){
-     printf("16bit Write: To a read only register!\n");
+     printf("16bit Write: To a read only register %s\n",regNames[debugChipAddress]);
+    debugChipAddress = 0;
 }
 
 void dskpth(uint16_t value){
@@ -886,7 +890,7 @@ void noop(uint16_t value){
 //***********************************************************************************************
 
 uint32_t noReadL(void){
-    printf("can't do a 32bit read from Register yet \n");
+    printf("32bit Read: from %s (%0x - %d) Not implemented!\n",regNames[debugChipAddress],debugChipAddress<<1,debugChipAddress);
     return 0;
 }
 
@@ -896,7 +900,7 @@ uint32_t vposrL(){  //0x2
 }
 
 uint8_t noReadB(void){
-    printf("can't do an 8bit read from Register yet \n");
+    printf("8bit Read: from %s (%0x - %d) Not implemented!\n",regNames[debugChipAddress],debugChipAddress<<1,debugChipAddress);
     return 0;
 }
 
@@ -924,6 +928,10 @@ uint8_t intenarB(){ //0xE
     return chipset.intenar >> 8;
 }
 
+uint8_t intreqrB(){ //0xE
+    return chipset.intreqr >> 8;
+}
+
 uint8_t (*getChipReg8[])() = {
     noReadB,
     dmaconrB,
@@ -940,7 +948,7 @@ uint8_t (*getChipReg8[])() = {
     noReadB,
     noReadB,
     intenarB,
-    noReadB
+    intreqrB,
 };
 
 uint32_t (*getChipReg32[])() = {

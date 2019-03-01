@@ -277,7 +277,7 @@ void releaseKey(uint16_t keyCode){
 void hostInit(){
    
     SDL_Init(SDL_INIT_EVERYTHING);
-    host.window = SDL_CreateWindow("Omega v0.5",
+    host.window = SDL_CreateWindow("Omega v0.51",
                                    0,//window X position
                                    0,//window Y position
                                    640, 400,

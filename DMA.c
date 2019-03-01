@@ -584,9 +584,7 @@ void dma_execute(){
     chipset.vhposr  = internal.vPos << 8;
     chipset.vhposr |= internal.hPos;
     
-    uint16_t conr = chipset.dmaconr;
-    uint16_t cont = chipset.dmaconr & 0x300;
-    
+
     
         if(chipset.bplcon0 & 0x8000){
             DMAHires[internal.hPos]();
@@ -603,6 +601,35 @@ void dma_execute(){
     
     //end of line reached! 227 colour clocks have executed
     if(internal.hPos > 0xE3){
+        
+        
+        //********************************
+        uint16_t ddfstrt = chipset.ddfstrt;
+        uint16_t ddfstop = chipset.ddfstop;
+        
+        int diff = ddfstop - ddfstrt;
+        
+        if(internal.vPos>43){
+            int vBeam = (internal.vPos-44)/2;
+            
+            if(vBeam==0){
+                //printf("NLine");
+                
+            }
+            
+            int counter = host.FBCounter-16;
+            
+            vBeam = vBeam - 44;
+            
+            //host.FBCounter = vBeam*320;
+            //printf("");
+            
+        }
+        //***********************************
+        
+        
+        
+        
         
         internal.hPos = 0;
         internal.vPos +=1;

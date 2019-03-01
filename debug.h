@@ -16,6 +16,10 @@
 #define debug_h
 
 #include <stdio.h>
+#include <stdint.h>
+
+extern int debugChipAddress;
+extern int debugChipValue;
 
 static char* regNames[] = {"BLTDDAT",
     "DMACONR",

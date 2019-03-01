@@ -23,11 +23,11 @@
 
 unsigned char* _emulatorMemory;
 
-#define NOSLOWRAM
+//#define NOSLOWRAM
 
 //#define CHIPTOP  0x3FFFF // for 256K Chip
 //#define CHIPTOP  0x7FFFF // for 512K
-#define CHIPTOP  0xFFFFF // for 1Meg
+//#define CHIPTOP  0xFFFFF // for 1Meg
 //#define CHIPTOP 0x1FFFFF // for 2Meg
 
 /* Called when the CPU pulses the RESET line */
@@ -61,7 +61,7 @@ void cpu_init(unsigned char* ram){
 
 void cpu_execute(){
  
-    /*
+/*
     int* dis = &disass;
     uint32_t pc = m68k_get_reg(NULL, M68K_REG_PC);
     uint32_t A0 = m68k_get_reg(NULL, M68K_REG_A0);
