@@ -98,10 +98,10 @@ int main(int argc, char * argv[]) {
         fd = open(argv[2],O_RDWR);
     }else{
        
-        //fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
+        fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/DLXP4.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/DISK1.ADF",O_RDONLY);
-        fd = open("/Users/Shared/uae/DosUae/Fright Night.adf",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/Fright Night.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/JUGGLER.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/amiga_500a_Tutorial_Disk.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/CuAmiga15.adf",O_RDONLY);
@@ -133,9 +133,10 @@ int main(int argc, char * argv[]) {
         //fd = open("/Users/Shared/uae/DosUae/amiga_500a_Tutorial_Disk.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/af025_1991_08_d025.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/CuAmiga15.adf",O_RDONLY);
-        //fd = open("/Users/Shared/uae/WORKBENCH/EX-1_3.adf",O_RDONLY);
+        fd = open("/Users/Shared/uae/WORKBENCH/EX-1_3.adf",O_RDONLY);
         
     }
+    
     
     if(fd==0){
         printf("No disk in DF1:\n");
@@ -144,9 +145,64 @@ int main(int argc, char * argv[]) {
         close(fd);
         printf("DF1: Loaded\n");
     }
+    fd=0;
     
     
+    //DF2
+    //Floppy disk
+    if(argc>4){
+        printf("%s\n",argv[4]);
+        fd = open(argv[4],O_RDWR);
+    }else{
+        
+        //fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
+        fd = open("/Users/Shared/uae/DosUae/DLXP4.ADF",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/DISK1.ADF",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/Fright Night.adf",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/JUGGLER.ADF",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/amiga_500a_Tutorial_Disk.ADF",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/af025_1991_08_d025.adf",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/CuAmiga15.adf",O_RDONLY);
+        //fd = open("/Users/Shared/uae/WORKBENCH/EX-1_3.adf",O_RDONLY);
+        
+    }
     
+    
+    if(fd==0){
+        printf("No disk in DF2:\n");
+    }else{
+        ADF2MFM(fd,floppyInit(2));
+        close(fd);
+        printf("DF2: Loaded\n");
+    }
+ 
+    //DF2
+    //Floppy disk
+    if(argc>5){
+        printf("%s\n",argv[5]);
+        fd = open(argv[5],O_RDWR);
+    }else{
+        
+        //fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/DLXP4.ADF",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/DISK1.ADF",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/Fright Night.adf",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/JUGGLER.ADF",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/amiga_500a_Tutorial_Disk.ADF",O_RDONLY);
+        fd = open("/Users/Shared/uae/DosUae/af025_1991_08_d025.adf",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/CuAmiga15.adf",O_RDONLY);
+        //fd = open("/Users/Shared/uae/WORKBENCH/EX-1_3.adf",O_RDONLY);
+        
+    }
+    
+    
+    if(fd==0){
+        printf("No disk in DF3:\n");
+    }else{
+        ADF2MFM(fd,floppyInit(3));
+        close(fd);
+        printf("DF3: Loaded\n");
+    }
     
     //setup emulator
     cpu_init();
@@ -168,7 +224,7 @@ int main(int argc, char * argv[]) {
     Internal_t* internalView = &internal;
     
     printf("\nEntering main loop\n");
-    int running =1;
+    int running = 1;
     while(running){
         
 
@@ -193,9 +249,20 @@ int main(int argc, char * argv[]) {
                     }
                     
                     if(host.event.key.keysym.sym==SDLK_F3){
-                        //Capture F2
+                        //Capture F3
                         break;
                     }
+                    
+                    if(host.event.key.keysym.sym==SDLK_F4){
+                        //Capture F4
+                        break;
+                    }
+                    
+                    if(host.event.key.keysym.sym==SDLK_F5){
+                        //Capture F5
+                        break;
+                    }
+                    
                     
                     releaseKey(host.event.key.keysym.sym);
                     break;
@@ -221,6 +288,18 @@ int main(int argc, char * argv[]) {
                     }
                     
                     if(host.event.key.keysym.sym==SDLK_F3){
+                        floppyInsert(2);
+                        printf("Disk inserted in df2:\n");
+                        break;
+                    }
+                    
+                    if(host.event.key.keysym.sym==SDLK_F4){
+                        floppyInsert(3);
+                        printf("Disk inserted in df3:\n");
+                        break;
+                    }
+                    
+                    if(host.event.key.keysym.sym==SDLK_F5){
                         toggleLEDs();
                         break;
                     }
