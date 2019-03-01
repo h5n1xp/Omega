@@ -57,5 +57,7 @@ void CIATODEvent(CIA_t*);         //called every TOD event
 
 void CIAIndex(CIA_t*);      //called every floppy disk rotation
 
+void keyboardInt();
+
 #endif /* CIA_h */
 

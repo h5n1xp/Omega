@@ -94,9 +94,9 @@ unsigned int chipReadWord(unsigned int address){
         address = (address - 0xDFF000) >> 1;
         
         if(address>16){
-            printf("Attepmt to read write-only register %s\n",regNames[address]);
+            printf("Attepmt to read write-only register %s (returning DeniseID by default)\n",regNames[address]);
             debugChipAddress = address;
-            return 0;
+            return chipset.deniseid;    // the only read only register up that high is DeniseID...
         }
         debugChipAddress = address;
         return getChipReg16[address]();

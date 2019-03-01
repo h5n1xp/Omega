@@ -257,4 +257,6 @@ void CIAIndex(CIA_t* cia){
     cia->icr =  cia->icr | (0x90 & cia->icrMask);
 }
 
-
+void keyboardInt(){
+        CIAA.icr =  CIAA.icr | (0x8 & CIAA.icrMask); //raise Serial port interrupt flag on CIA A
+}

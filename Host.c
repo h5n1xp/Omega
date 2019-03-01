@@ -264,14 +264,27 @@ int LEDActive = 1;
 
 void pressKey(uint16_t keyCode){
     CIAWrite(&CIAA, 0xC, ~(keyMapping[keyCode]<<1) );      //place value in register
-    CIAA.icr =  CIAA.icr | (0x8 & CIAA.icrMask);     //raise Serial port interrupt flag
-    printf("keyCode: %d -> %02x (down)\n",keyCode,keyMapping[keyCode]);
+    keyboardInt();  //raise Serial port interrupt flag
+    //printf("keyCode: %d -> %02x (down)\n",keyCode,keyMapping[keyCode]);
 }
 
 void releaseKey(uint16_t keyCode){
     CIAWrite(&CIAA, 0xC, ~((keyMapping[keyCode] << 1) | 1) ); //place value in register, with key up flag
-    CIAA.icr =  CIAA.icr | (0x8 & CIAA.icrMask);      //raise Serial port interrupt flag
+    keyboardInt();
     //printf("keyCode: %d -> %d (up)\n",keyCode,keyMapping[keyCode]);
+}
+
+uint32_t HAM6(uint8_t hamPixel,uint32_t previousPixel){
+    
+    int control = hamPixel >> 6;
+    
+    switch(control){
+        case 0:
+            return 0;
+            break;
+    }
+    
+    return 0;
 }
 
 void hostInit(){
@@ -426,7 +439,42 @@ void hostDisplay(){
     
 }
 
-void planar2chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uint16_t plane2,uint16_t plane3,uint16_t plane4,uint16_t plane5,uint16_t plane6,int delta){ //delta =8 hires, 16 = lores
+
+void hiresPlanar2Chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uint16_t plane2,uint16_t plane3,uint16_t plane4){
+    
+    int counter = host.FBCounter;
+    
+    //Fetch and display 2 bytes of bitplane data (16 pixels)
+    uint32_t colourIndex1 = 0;
+    uint32_t colourIndex2 = 0;
+    
+    for(int j=7;j>-1;--j){
+        
+        //build 8 chunky pixels from a byte of bitplane data - Don't need to byte swap as the lump below does that
+        colourIndex1 =                  (plane1>>j) & 1;
+        colourIndex1 = colourIndex1 | (((plane2>>j) & 1) << 1);
+        colourIndex1 = colourIndex1 | (((plane3>>j) & 1) << 2);
+        colourIndex1 = colourIndex1 | (((plane4>>j) & 1) << 3);
+
+        
+        int k=j+8;
+        //build 8 chunky pixels from a byte of bitplane data
+        colourIndex2 =                  (plane1>>k) & 1;
+        colourIndex2 = colourIndex2 | (((plane2>>k) & 1) << 1);
+        colourIndex2 = colourIndex2 | (((plane3>>k) & 1) << 2);
+        colourIndex2 = colourIndex2 | (((plane4>>k) & 1) << 3);
+
+        
+        pixBuff[counter] = internal.palette[colourIndex1];           // use SDL texture buffer
+        pixBuff[counter+8] = internal.palette[colourIndex2];// use SDL texture buffer
+        counter +=1;
+        
+    }
+    
+    
+}
+
+void loresPlanar2Chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uint16_t plane2,uint16_t plane3,uint16_t plane4,uint16_t plane5,uint16_t plane6){
     
     int counter = host.FBCounter;
     
@@ -453,21 +501,68 @@ void planar2chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uint16_t
         colourIndex2 = colourIndex2 | (((plane5>>k) & 1) << 4);
         colourIndex2 = colourIndex2 | (((plane6>>k) & 1) << 5);
         
-        pixBuff[counter] = internal.palette[colourIndex1];           // use SDL texture buffer
-        pixBuff[counter+delta] = internal.palette[colourIndex2];// use SDL texture buffer
+        pixBuff[counter] = internal.palette[colourIndex1];
+        pixBuff[counter+16] = internal.palette[colourIndex2];
         counter +=1;
         
-        if(delta==16){
-            pixBuff[counter] = internal.palette[colourIndex1];           // use SDL texture buffer
-            pixBuff[counter+delta] = internal.palette[colourIndex2];// use SDL texture buffer
-            //
-            counter +=1;
-        }
+        //Double up pixels since lores only has 320 pixels
+        pixBuff[counter] = internal.palette[colourIndex1];
+        pixBuff[counter+16] = internal.palette[colourIndex2];
+        counter +=1;
+
         
         
     }
     
     
+}
+
+void loresHAM2Chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uint16_t plane2,uint16_t plane3,uint16_t plane4,uint16_t plane5,uint16_t plane6){
+    int counter = host.FBCounter;
+    
+    //Fetch and display 2 bytes of bitplane data (16 pixels)
+    uint32_t colourIndex1 = 0;
+    uint32_t colourIndex2 = 0;
+    
+    for(int j=7;j>-1;--j){
+        
+        //build 8 chunky pixels from a byte of bitplane data - Don't need to byte swap as the lump below does that
+        colourIndex1 =                  (plane1>>j) & 1;
+        colourIndex1 = colourIndex1 | (((plane2>>j) & 1) << 1);
+        colourIndex1 = colourIndex1 | (((plane3>>j) & 1) << 2);
+        colourIndex1 = colourIndex1 | (((plane4>>j) & 1) << 3);
+        colourIndex1 = colourIndex1 | (((plane5>>j) & 1) << 4);
+        colourIndex1 = colourIndex1 | (((plane6>>j) & 1) << 5);
+        
+        int k=j+8;
+        //build 8 chunky pixels from a byte of bitplane data
+        colourIndex2 =                  (plane1>>k) & 1;
+        colourIndex2 = colourIndex2 | (((plane2>>k) & 1) << 1);
+        colourIndex2 = colourIndex2 | (((plane3>>k) & 1) << 2);
+        colourIndex2 = colourIndex2 | (((plane4>>k) & 1) << 3);
+        colourIndex2 = colourIndex2 | (((plane5>>k) & 1) << 4);
+        colourIndex2 = colourIndex2 | (((plane6>>k) & 1) << 5);
+        
+        //check if we have a ham pixel
+        if(colourIndex1 & 0xF0){
+            
+            
+            
+        }else{
+        pixBuff[counter] = internal.palette[colourIndex1];
+        pixBuff[counter+16] = internal.palette[colourIndex2];
+        counter +=1;
+        
+        //Double up pixels since lores only has 320 pixels
+        pixBuff[counter] = internal.palette[colourIndex1];
+        pixBuff[counter+16] = internal.palette[colourIndex2];
+        counter +=1;
+        }
+        
+        
+    }
+
+
 }
 
 

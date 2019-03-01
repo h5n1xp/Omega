@@ -91,11 +91,12 @@ int main(int argc, char * argv[]) {
     
     close(fd);
     fd=0;
+    printf("ROM loaded\n");
     
     //Floppy disk
     if(argc>2){
-        printf("%s\n",argv[2]);
         fd = open(argv[2],O_RDWR);
+        printf("%s\n",argv[2]);
     }else{
        
         fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
@@ -109,7 +110,7 @@ int main(int argc, char * argv[]) {
     }
     
  
-    if(fd==0){
+    if(fd<1){
         printf("No disk in DF0:\n");
     }else{
         ADF2MFM(fd, floppyInit(0));
@@ -138,7 +139,7 @@ int main(int argc, char * argv[]) {
     }
     
     
-    if(fd==0){
+    if(fd<1){
         printf("No disk in DF1:\n");
     }else{
         ADF2MFM(fd,floppyInit(1));
@@ -168,14 +169,15 @@ int main(int argc, char * argv[]) {
     }
     
     
-    if(fd==0){
+    if(fd<1){
         printf("No disk in DF2:\n");
     }else{
         ADF2MFM(fd,floppyInit(2));
         close(fd);
         printf("DF2: Loaded\n");
     }
- 
+    fd=0;
+    
     //DF2
     //Floppy disk
     if(argc>5){
@@ -185,24 +187,25 @@ int main(int argc, char * argv[]) {
         
         //fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/DLXP4.ADF",O_RDONLY);
-        //fd = open("/Users/Shared/uae/DosUae/DISK1.ADF",O_RDONLY);
+        fd = open("/Users/Shared/uae/DosUae/DISK1.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/Fright Night.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/JUGGLER.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/amiga_500a_Tutorial_Disk.ADF",O_RDONLY);
-        fd = open("/Users/Shared/uae/DosUae/af025_1991_08_d025.adf",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/af025_1991_08_d025.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/CuAmiga15.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/WORKBENCH/EX-1_3.adf",O_RDONLY);
         
     }
     
     
-    if(fd==0){
+    if(fd<1){
         printf("No disk in DF3:\n");
     }else{
         ADF2MFM(fd,floppyInit(3));
         close(fd);
         printf("DF3: Loaded\n");
     }
+    fd=0;
     
     //setup emulator
     cpu_init();

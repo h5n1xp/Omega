@@ -951,7 +951,7 @@ void bitplaneCycle1(void){
     }
     
     uint32_t* pixbuff = (uint32_t*)host.pixels;
-    planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat,chipset.bpl5dat, chipset.bpl6dat, 16);
+    loresPlanar2Chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat,chipset.bpl5dat, chipset.bpl6dat);
     host.FBCounter +=16;
 
 }
@@ -1056,7 +1056,7 @@ void hiresPlane1(){
     }
     
     uint32_t* pixbuff = (uint32_t*)host.pixels;
-    planar2chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat, 0,0, 8);
+    hiresPlanar2Chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat);
     host.FBCounter +=8;
     return;
     

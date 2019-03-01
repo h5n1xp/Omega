@@ -50,6 +50,8 @@ void ADF2MFM(int fd, uint8_t* mfm){
     
     int size =(int) lseek(fd, 0, SEEK_END);
     
+    //printf("FloppySize: %d\n",size);
+    
     //512 bytes per sector
     int sectors = size/512;
     
@@ -261,7 +263,11 @@ uint8_t floppyDataRead(){ //this function should be called by the DMA
 
 
 void floppyInsert(int drive){
-    
+
+    if(df[drive].idMode !=0){
+        //Only Vaild drives have an ID Mode == 0 
+        return;
+    }
     df[drive].pra |= 0x4;
     
     
