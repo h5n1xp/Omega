@@ -92,6 +92,12 @@ unsigned int chipReadWord(unsigned int address){
     //Chipregs
     if(address>0xDFEFFF){
         address = (address - 0xDFF000) >> 1;
+        
+        if(address>16){
+            printf("Attepmt to read write-only register %s\n",regNames[address]);
+            debugChipAddress = address;
+            return 0;
+        }
         debugChipAddress = address;
         return getChipReg16[address]();
         //return ChipsetRead(&chipset, address);

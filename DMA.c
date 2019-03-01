@@ -1162,10 +1162,12 @@ int copperExecute(){
             
         case 3:
             
+            /* old debugging stuff
             if(1){}
             uint16_t vhposr = chipset.vhposr;
             uint16_t wait = internal.IR1;
             uint16_t comparison = internal.IR2;
+            */
             
             //Wait
             if( (chipset.vhposr & internal.IR2)  >= internal.IR1){

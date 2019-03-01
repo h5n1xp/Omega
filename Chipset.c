@@ -411,6 +411,10 @@ void copjmp2(uint16_t value){
 
 }
 
+void copjmp2L(uint32_t value){
+    copjmp2(value); //this just resets the copper...
+}
+
 void diwstrt(uint16_t value){
     chipset.diwstrt = value;
     //printf("diwstart: %04x\n",value);
@@ -732,6 +736,7 @@ void color01(uint16_t value){
     internal.palette[1] = OCS2ARGB(value);
     internal.palette[33] = EHB2ARGB(value);
 }
+
 void color02(uint16_t value){
     chipset.color02 = value; //old register
     internal.palette[2] = OCS2ARGB(value);
@@ -883,6 +888,86 @@ void color31(uint16_t value){
     internal.palette[63] = EHB2ARGB(value);
 }
 
+void color00L(uint32_t value){
+    color00(value >> 16);
+    color01(value & 65535);
+}
+
+void color02L(uint32_t value){
+    color02(value >> 16);
+    color03(value & 65535);
+}
+
+void color04L(uint32_t value){
+    color04(value >> 16);
+    color05(value & 65535);
+}
+
+void color06L(uint32_t value){
+    color06(value >> 16);
+    color07(value & 65535);
+}
+
+void color08L(uint32_t value){
+    color08(value >> 16);
+    color09(value & 65535);
+}
+
+void color10L(uint32_t value){
+    color10(value >> 16);
+    color11(value & 65535);
+}
+
+void color12L(uint32_t value){
+    color12(value >> 16);
+    color13(value & 65535);
+}
+
+void color14L(uint32_t value){
+    color14(value >> 16);
+    color15(value & 65535);
+}
+
+void color16L(uint32_t value){
+    color16(value >> 16);
+    color17(value & 65535);
+}
+
+void color18L(uint32_t value){
+    color18(value >> 16);
+    color19(value & 65535);
+}
+
+void color20L(uint32_t value){
+    color20(value >> 16);
+    color21(value & 65535);
+}
+
+void color22L(uint32_t value){
+    color22(value >> 16);
+    color23(value & 65535);
+}
+
+void color24L(uint32_t value){
+    color24(value >> 16);
+    color25(value & 65535);
+}
+
+void color26L(uint32_t value){
+    color26(value >> 16);
+    color27(value & 65535);
+}
+
+void color28L(uint32_t value){
+    color28(value >> 16);
+    color29(value & 65535);
+}
+
+void color30L(uint32_t value){
+    color30(value >> 16);
+    color31(value & 65535);
+}
+
 void noop(uint16_t value){
     
 }
@@ -893,7 +978,6 @@ uint32_t noReadL(void){
     printf("32bit Read: from %s (%0x - %d) Not implemented!\n",regNames[debugChipAddress],debugChipAddress<<1,debugChipAddress);
     return 0;
 }
-
 
 uint32_t vposrL(){  //0x2
     return chipset.vposr << 16 | chipset.vhposr;
@@ -1052,68 +1136,6 @@ uint16_t (*getChipReg16[])(void) = {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void (*putChipReg32[])(uint32_t) ={
     longWrite,
     noopL,
@@ -1184,7 +1206,7 @@ void (*putChipReg32[])(uint32_t) ={
     cop2lchL,
     longWrite,
     longWrite,
-    longWrite,
+    copjmp2L,
     longWrite,
     longWrite,
     longWrite,
@@ -1307,37 +1329,37 @@ void (*putChipReg32[])(uint32_t) ={
     longWrite,
     longWrite,
     longWrite,
+    color00L,
     longWrite,
+    color02L,
     longWrite,
+    color04L,
     longWrite,
+    color06L,
     longWrite,
+    color08L,
     longWrite,
+    color10L,
     longWrite,
+    color12L,
     longWrite,
+    color14L,
     longWrite,
+    color16L,
     longWrite,
+    color18L,
     longWrite,
+    color20L,
     longWrite,
+    color22L,
     longWrite,
+    color24L,
     longWrite,
+    color26L,
     longWrite,
+    color28L,
     longWrite,
-    longWrite,
-    longWrite,
-    longWrite,
-    longWrite,
-    longWrite,
-    longWrite,
-    longWrite,
-    longWrite,
-    longWrite,
-    longWrite,
-    longWrite,
-    longWrite,
-    longWrite,
-    longWrite,
-    longWrite,
-    longWrite,
+    color30L,
     longWrite,
     longWrite,
     longWrite,
@@ -1372,6 +1394,16 @@ void (*putChipReg32[])(uint32_t) ={
     longWrite,
     noopL
 };
+
+
+
+
+
+
+
+
+
+
 
 
 
