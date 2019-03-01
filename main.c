@@ -98,7 +98,7 @@ int main(int argc, char * argv[]) {
         fd = open(argv[2],O_RDWR);
     }else{
        
-        fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
+        //fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/DLXP4.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/DISK1.ADF",O_RDONLY);
         fd = open("/Users/Shared/uae/DosUae/Fright Night.adf",O_RDONLY);
@@ -110,11 +110,11 @@ int main(int argc, char * argv[]) {
     
  
     if(fd==0){
-        printf("no disk in DF0:\n");
+        printf("No disk in DF0:\n");
     }else{
         ADF2MFM(fd, floppyInit(0));
         close(fd);
-
+        printf("DF0: Loaded\n");
     }
     fd=0;
     
@@ -138,10 +138,11 @@ int main(int argc, char * argv[]) {
     }
     
     if(fd==0){
-        printf("no disk in DF1:\n");
+        printf("No disk in DF1:\n");
     }else{
         ADF2MFM(fd,floppyInit(1));
         close(fd);
+        printf("DF1: Loaded\n");
     }
     
     
