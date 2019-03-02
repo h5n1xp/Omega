@@ -290,7 +290,7 @@ uint32_t HAM6(uint8_t hamPixel,uint32_t previousPixel){
 void hostInit(){
    
     SDL_Init(SDL_INIT_EVERYTHING);
-    host.window = SDL_CreateWindow("Omega v0.51",
+    host.window = SDL_CreateWindow("Omega v0.52",
                                    0,//window X position
                                    0,//window Y position
                                    640, 400,
@@ -418,17 +418,58 @@ void hostDisplay(){
         SDL_Rect clo={winX-55,winY-100,50,50};
         SDL_RenderCopy(host.renderer, host.commodoreLogo, NULL, &clo);
     
-        //Spinny disk
+        
         SDL_Rect spin={5,winY-60,50,50};
-        //double angle = ((double)df0.index/6400.0)*365.0;
         double angle = ((double)df[0].index/6400.0)*365.0;
-        SDL_RenderCopyEx(host.renderer, host.spinner, NULL, &spin,angle,NULL,SDL_FLIP_NONE);
-    
-        //Disk head
-        SDL_SetRenderDrawColor(host.renderer, 255, 255, 255, 255);
-        //SDL_Rect head = {29,(winY-59)+(df0.diskTrack/6),3,3};
         SDL_Rect head = {29,(winY-59)+(df[0].track/6),3,3};
-        SDL_RenderFillRect(host.renderer,&head);
+        
+        if(df[0].pra & 0x4){
+            //Spinny disk
+            SDL_RenderCopyEx(host.renderer, host.spinner, NULL, &spin,angle,NULL,SDL_FLIP_NONE);
+    
+            //Disk head
+            SDL_SetRenderDrawColor(host.renderer, 255, 255, 255, 255);
+            SDL_RenderFillRect(host.renderer,&head);
+        }
+        
+        if(df[1].pra & 0x4){
+            //Spinny disk
+            spin.x +=50;
+            angle = ((double)df[1].index/6400.0)*365.0;
+            SDL_RenderCopyEx(host.renderer, host.spinner, NULL, &spin,angle,NULL,SDL_FLIP_NONE);
+        
+            //Disk head
+            SDL_SetRenderDrawColor(host.renderer, 255, 255, 255, 255);
+            head.x +=50;
+            head.y = (winY-59)+(df[1].track/6);
+            SDL_RenderFillRect(host.renderer,&head);
+        }
+        
+        if(df[2].pra & 0x4){
+            //Spinny disk
+            spin.x +=50;
+            angle = ((double)df[2].index/6400.0)*365.0;
+            SDL_RenderCopyEx(host.renderer, host.spinner, NULL, &spin,angle,NULL,SDL_FLIP_NONE);
+        
+            //Disk head
+            SDL_SetRenderDrawColor(host.renderer, 255, 255, 255, 255);
+            head.x +=50;
+            head.y = (winY-59)+(df[2].track/6);
+            SDL_RenderFillRect(host.renderer,&head);
+        }
+        
+        if(df[3].pra & 0x4){
+            //Spinny disk
+            spin.x +=50;
+            angle = ((double)df[3].index/6400.0)*365.0;
+            SDL_RenderCopyEx(host.renderer, host.spinner, NULL, &spin,angle,NULL,SDL_FLIP_NONE);
+        
+            //Disk head
+            SDL_SetRenderDrawColor(host.renderer, 255, 255, 255, 255);
+            head.x +=50;
+            head.y = (winY-59)+(df[3].track/6);
+            SDL_RenderFillRect(host.renderer,&head);
+        }
     }
     
     //render display
