@@ -951,8 +951,13 @@ void bitplaneCycle1(void){
     }
     
     uint32_t* pixbuff = (uint32_t*)host.pixels;
-    loresPlanar2Chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat,chipset.bpl5dat, chipset.bpl6dat);
+    if(chipset.bplcon0 & 0x800){
+        loresHAM2Chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat,chipset.bpl5dat, chipset.bpl6dat);
+    }else{
+        loresPlanar2Chunky(&pixbuff[host.FBCounter], internal.palette, chipset.bpl1dat, chipset.bpl2dat, chipset.bpl3dat, chipset.bpl4dat,chipset.bpl5dat, chipset.bpl6dat);
+    }
     host.FBCounter +=16;
+    
 
 }
 

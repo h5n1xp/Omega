@@ -291,12 +291,14 @@ void floppySetState(){            //To be called when Writes to CIAB prb happen.
     static uint8_t PRB;
     static int count = 0;
     
+    /*
     // No point doing anything if nothing has changed.
     if(PRB == CIAB.prb){
         PRB = CIAB.prb;
         return;
     }
-
+     */
+    
     PRB = CIAB.prb;
     
     switch (PRB & 0x78) {

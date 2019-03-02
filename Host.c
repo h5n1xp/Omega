@@ -575,6 +575,31 @@ void loresHAM2Chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uint16
         colourIndex1 = colourIndex1 | (((plane5>>j) & 1) << 4);
         colourIndex1 = colourIndex1 | (((plane6>>j) & 1) << 5);
         
+        //check if we have a ham pixel
+        if(colourIndex1 & 0xF0){
+            
+            
+            pixBuff[counter] = pixBuff[counter-1];
+            counter +=1;
+            pixBuff[counter] = pixBuff[counter-1];
+            counter +=1;
+            
+            
+        }else{
+            pixBuff[counter] = internal.palette[colourIndex1];
+            counter +=1;
+        
+            //Double up pixels since lores only has 320 pixels
+            pixBuff[counter] = internal.palette[colourIndex1];
+            counter +=1;
+        }
+        
+        
+    }
+
+    counter = host.FBCounter;
+    for(int j=7;j>-1;--j){
+        
         int k=j+8;
         //build 8 chunky pixels from a byte of bitplane data
         colourIndex2 =                  (plane1>>k) & 1;
@@ -588,16 +613,20 @@ void loresHAM2Chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uint16
         if(colourIndex1 & 0xF0){
             
             
+            pixBuff[counter+16] = pixBuff[counter+15];
+            counter +=1;
+            
+            pixBuff[counter+16] = pixBuff[counter+15];
+            counter +=1;
+            
             
         }else{
-        pixBuff[counter] = internal.palette[colourIndex1];
-        pixBuff[counter+16] = internal.palette[colourIndex2];
-        counter +=1;
-        
-        //Double up pixels since lores only has 320 pixels
-        pixBuff[counter] = internal.palette[colourIndex1];
-        pixBuff[counter+16] = internal.palette[colourIndex2];
-        counter +=1;
+            pixBuff[counter+16] = internal.palette[colourIndex2];
+            counter +=1;
+            
+            //Double up pixels since lores only has 320 pixels
+            pixBuff[counter+16] = internal.palette[colourIndex2];
+            counter +=1;
         }
         
         
