@@ -578,10 +578,31 @@ void loresHAM2Chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uint16
         //check if we have a ham pixel
         if(colourIndex1 & 0xF0){
             
+            int control = colourIndex1 >> 4;
+            uint32_t colour = colourIndex1 & 0xF;
+            colour = (colour << 4) | colour;
+            uint32_t previous = pixBuff[counter-1];
             
-            pixBuff[counter] = pixBuff[counter-1];
+            switch(control){
+                case 1:
+                    previous = (previous & 0xFFFFFF00) | colour;
+                    break;
+                case 2:
+                    colour <<= 16;
+                    previous = (previous & 0xFF00FFFF) | colour;
+                    break;
+                case 3:
+                    colour <<= 8;
+                    previous = (previous & 0xFFFF00FF) | colour;
+                    break;
+                    
+                    
+            }
+            
+            
+            pixBuff[counter] = previous;
             counter +=1;
-            pixBuff[counter] = pixBuff[counter-1];
+            pixBuff[counter] = previous;
             counter +=1;
             
             
@@ -610,13 +631,33 @@ void loresHAM2Chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uint16
         colourIndex2 = colourIndex2 | (((plane6>>k) & 1) << 5);
         
         //check if we have a ham pixel
-        if(colourIndex1 & 0xF0){
+        if(colourIndex2 & 0xF0){
+            
+            int control = colourIndex2 >> 4;
+            uint32_t colour = colourIndex2 & 0xF;
+            colour = (colour << 4) | colour;
+            uint32_t previous = pixBuff[counter+15];
+            
+            switch(control){
+                case 1:
+                    previous = (previous & 0xFFFFFF00) | colour;
+                    break;
+                case 2:
+                    colour <<= 16;
+                    previous = (previous & 0xFF00FFFF) | colour;
+                    break;
+                case 3:
+                    colour <<= 8;
+                    previous = (previous & 0xFFFF00FF) | colour;
+                    break;
+                    
+                    
+            }
             
             
-            pixBuff[counter+16] = pixBuff[counter+15];
+            pixBuff[counter+16] = previous;
             counter +=1;
-            
-            pixBuff[counter+16] = pixBuff[counter+15];
+            pixBuff[counter+16] = previous;
             counter +=1;
             
             
