@@ -721,28 +721,89 @@ void dramCycle(void){
     
 }
 
-int turboFloppy = 1;
+int turboFloppy = 8;
 
 void diskCycle(void){
-        
+    static sync = 0;
+    
     if( (chipset.dmaconr & 0x210) && chipset.dsklen & 0x8000 ){
         
         if(chipset.dsklen & 0x3FFF){
             
-            uint8_t byte;
+            
+            //OS2+ Disk loading
+            static int sync = 0;
+            
+            for(int i=0;i<turboFloppy;++i){
+                if(chipset.adkconr & 0x400){
+                    //printf("Needs a disk sync");
+                    //sync = 0;
+                }
+            
+                uint8_t b1 = floppyDataRead();
+                uint8_t b2 = floppyDataRead();
+            
+                uint16_t syncword = b1 << 8 | b2;
+            
+                if(syncword==chipset.dsksync){
+                
+                    putChipReg16[INTREQ](0x9000);   //DSKSYNC
+                    chipset.dskbytr |= 0x1000;  // set word sync bit
+                
+                    if(sync==0){
+                        //printf("%d\n",chipset.dsklen & 0x3FFF);
+                        uint8_t b1 = floppyDataRead();
+                        uint8_t b2 = floppyDataRead();
+                        sync=1;
+                        return;
+                    }
+                }
+            
+                if(sync == 1){
+                    chipset.dskbytr &= 0xEFFF;      //clear word sync
+                    low16Meg[chipset.dskpt] = b1;
+                    chipset.dskpt +=1;
+                
+                    low16Meg[chipset.dskpt] = b2;
+                    chipset.dskpt +=1;
+                
+                    chipset.dsklen -= 1;
+                
+                    if( (chipset.dsklen & 0x3FFF) == 0){
+                        putChipReg16[INTREQ](0x8002);
+                        sync = 0;
+                        return;
+                    }
+                
+                }
+            }
+            
+            
+            return;
+            
+            //OS 1.3 loader
+            uint8_t byte1;
+            uint8_t byte2;
             
             //For faster floppy loading double up the data read
             if(turboFloppy==1){
                 
                 for(int i=0;i<8;++i){
-                        byte = floppyDataRead();
-                    low16Meg[chipset.dskpt] = byte;
+                        byte1 = floppyDataRead();
+                    low16Meg[chipset.dskpt] = byte1;
                     chipset.dskpt +=1;
-                        byte = floppyDataRead();
-                    low16Meg[chipset.dskpt] = byte;
+                        byte2 = floppyDataRead();
+                    low16Meg[chipset.dskpt] = byte2;
                     chipset.dskpt +=1;
                     chipset.dsklen -= 1;
                 
+                    /*
+                    if( (byte1 == 0x44) && (byte2 ==0x89) ){
+                        putChipReg16[INTREQ](0x9000);   //DSKSYNC
+                        chipset.dskbytr |= 0x1000;
+                    }
+                    */
+                    
                     if( (chipset.dsklen & 0x3FFF) == 0){
                         putChipReg16[INTREQ](0x8002);
                         return;
@@ -751,11 +812,11 @@ void diskCycle(void){
                 
             }else{
                 
-                    byte = floppyDataRead();
-                low16Meg[chipset.dskpt] = byte;
+                    byte1 = floppyDataRead();
+                low16Meg[chipset.dskpt] = byte1;
                 chipset.dskpt +=1;
-                    byte = floppyDataRead();
-                low16Meg[chipset.dskpt] = byte;
+                    byte2 = floppyDataRead();
+                low16Meg[chipset.dskpt] = byte2;
                 chipset.dskpt +=1;
                 chipset.dsklen -= 1;
                 
@@ -963,10 +1024,12 @@ void bitplaneCycle1(void){
 
 void displayLineReset(){
     
-    int temp = (host.FBCounter / 640);
-    temp = (temp) * 640;
-    host.FBCounter= temp;
+    host.FBCounter -= (host.FBCounter%640);
     
+
+    //int temp = (host.FBCounter / 640);
+    //temp = (temp) * 640;
+    //host.FBCounter= temp;
 }
 
 void setDisplayMode(int mode){

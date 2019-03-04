@@ -100,6 +100,7 @@ int main(int argc, char * argv[]) {
     }else{
        
         fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
+        //fd = open("/Users/Shared/uae/WORKBENCH/WB-2_05.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/DLXP4.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/DISK1.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/Fright Night.adf",O_RDONLY);

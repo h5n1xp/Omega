@@ -37,6 +37,8 @@ void ChipsetInit(){
     internal.vPos = 0;
     internal.bitplaneMask = 0;
     
+    chipset.dsksync=0x4489; //For OS 1.2
+    
 }
 
 uint32_t OCS2ARGB(uint16_t color){
@@ -198,6 +200,9 @@ uint16_t clxdat(){
     return chipset.clxdat;
 }
 uint16_t adkconr(){
+    
+    printf("adkconr called\n");
+    
     return chipset.adkconr;
 }
 uint16_t pot0dat(){
@@ -378,6 +383,10 @@ void bltbdat(uint16_t value){
 }
 void bltadat(uint16_t value){
     chipset.bltadat = value;
+}
+
+void dsksync(uint16_t value){
+    chipset.dsksync=value;
 }
 
 void cop1lch(uint16_t value){
@@ -1996,46 +2005,6 @@ void (*putChipReg32[])(uint32_t) ={
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void (*putChipReg16[])(uint16_t) ={
     wordIllegalWrite,
     wordIllegalWrite,
@@ -2100,7 +2069,7 @@ void (*putChipReg16[])(uint16_t) ={
     wordWrite,
     wordWrite,
     wordWrite,
-    wordWrite,
+    dsksync,
     cop1lch,
     cop1lcl,
     cop2lch,

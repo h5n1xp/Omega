@@ -20,10 +20,10 @@ CIA_t CIAA;
 CIA_t CIAB;
 
 void CIAInit(CIA_t* cia,uint16_t paulaMask){
-    cia->ta  = 65535;
-    cia->tb  = 65535;
-    cia->taLatch = 65535;
-    cia->tbLatch = 65535;
+    cia->ta  = 0;//65535;
+    cia->tb  = 0;//65535;
+    cia->taLatch = 0;
+    cia->tbLatch = 0;
     cia->tod = 0;
     cia->todAlarm = 0;
     cia->chipInt = paulaMask;

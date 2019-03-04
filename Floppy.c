@@ -235,27 +235,15 @@ Fd_t df[4];
 
 uint8_t floppyDataRead(){ //this function should be called by the DMA
     
-    //Fd_t* ourDisk = &df[driveSelected];
-    
-    //int surface = 1 - disk->diskSide;
-    //int position = (disk->diskTrack * (12798*2)) + (surface * 12798) + (disk->index);
     int position   = (df[driveSelected].track * (12798 * 2)) + (df[driveSelected].side  * 12798) + df[driveSelected].index;
     
-    
-    //disk->index +=1;
     df[driveSelected].index +=1;
-    /*
-    if(disk->index>12667){ //ADF track has 12798 bytes, but on a normal AmigaOS disk 12668 are used.
-        disk->index = 0;
-        CIAIndex(&CIAB);    // generate CIAB index interupt
-    }
-    */
+
     if(df[driveSelected].index>12667){ //ADF track has 12798 bytes, but on a normal AmigaOS disk 12668 are used.
         df[driveSelected].index= 0;
         CIAIndex(&CIAB);    // generate CIAB index interupt
     }
     
-    //uint8_t retVal = disk->mfmData[position];
     uint8_t retVal = df[driveSelected].mfmData[position];
     
     return retVal;

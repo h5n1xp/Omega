@@ -506,8 +506,8 @@ void hiresPlanar2Chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uin
         colourIndex2 = colourIndex2 | (((plane4>>k) & 1) << 3);
 
         
-        pixBuff[counter] = internal.palette[colourIndex1];           // use SDL texture buffer
-        pixBuff[counter+8] = internal.palette[colourIndex2];// use SDL texture buffer
+        pixBuff[counter] = internal.palette[colourIndex1];
+        pixBuff[counter+8] = internal.palette[colourIndex2];
         counter +=1;
         
     }
@@ -542,13 +542,15 @@ void loresPlanar2Chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uin
         colourIndex2 = colourIndex2 | (((plane5>>k) & 1) << 4);
         colourIndex2 = colourIndex2 | (((plane6>>k) & 1) << 5);
         
-        pixBuff[counter] = internal.palette[colourIndex1];
-        pixBuff[counter+16] = internal.palette[colourIndex2];
+        uint32_t colour1 = internal.palette[colourIndex1];
+        uint32_t colour2 = internal.palette[colourIndex2];
+        pixBuff[counter] = colour1;
+        pixBuff[counter+16] = colour2;
         counter +=1;
         
         //Double up pixels since lores only has 320 pixels
-        pixBuff[counter] = internal.palette[colourIndex1];
-        pixBuff[counter+16] = internal.palette[colourIndex2];
+        pixBuff[counter] = colour1;
+        pixBuff[counter+16] = colour2;
         counter +=1;
 
         
@@ -607,11 +609,12 @@ void loresHAM2Chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uint16
             
             
         }else{
-            pixBuff[counter] = internal.palette[colourIndex1];
+            uint32_t colour = internal.palette[colourIndex1];
+            pixBuff[counter] = colour;
             counter +=1;
         
             //Double up pixels since lores only has 320 pixels
-            pixBuff[counter] = internal.palette[colourIndex1];
+            pixBuff[counter] = colour;
             counter +=1;
         }
         
@@ -662,11 +665,12 @@ void loresHAM2Chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uint16
             
             
         }else{
-            pixBuff[counter+16] = internal.palette[colourIndex2];
+            uint32_t colour = internal.palette[colourIndex2];
+            pixBuff[counter+16] = colour;
             counter +=1;
             
             //Double up pixels since lores only has 320 pixels
-            pixBuff[counter+16] = internal.palette[colourIndex2];
+            pixBuff[counter+16] = colour;
             counter +=1;
         }
         
