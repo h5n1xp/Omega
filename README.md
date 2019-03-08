@@ -14,7 +14,7 @@ omega ./kick13.rom ./workbench.adf
 Any 1.2 or 1.3 rom will work (256k or 512k).
 
 Once the emulator is running, hit F1 to "insert" the adf image into DF0: the emulator will now boot the disk. 
-Currently the emulator is able to boot to Workbench 1.3
+Currently the emulator is able to boot to Workbench 1.3 (up to 4 ADF can be specified in the command line)
 
 ### Background.
 
