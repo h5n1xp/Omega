@@ -5,7 +5,7 @@
 
 Omega only needs a basic install of libSDL 2 to be installed on your system. Nothing else is required. To build on Linux, I use clang (but any c compiler will do), copy all the .c and .h files to a single directory, open a comandline cd into it, and then type:
 
-clang *.c -o omega -Iinclude -Lib -lsdl2 -LSDL2main
+clang *.c -o omega -Iinclude -Lib -lSDL2 -LSDL2main
 
 This will build and link a file called omega. Run this with the options kickstart.rom bootdisk.adf; so it will look something like:
 
