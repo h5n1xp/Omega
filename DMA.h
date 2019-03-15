@@ -34,26 +34,14 @@ void audioCycle(void);
 
 void spriteCycle(void);
 
-//deprecated DMA cycles, to be replaced with lores
-void bitplaneCycle0_4(void);
-void bitplaneCycle4_2(void);
-void bitplaneCycle6_3(void);
-void bitplaneCycle2_1(void);
-void bitplaneCycle0_4(void);
-void bitplaneCycle3_2(void);
-void bitplaneCycle5_3(void);
-void bitplaneCycle1(void);
 
 void plane4(void);
 void plane6(void);
 void plane2(void);
 void plane3(void);
 void plane5(void);
-void loresPlane1(void);
 
-void hiresPlane4(void);
-void hiresPlane2(void);
-void hiresPlane3(void);
+void loresPlane1(void);
 void hiresPlane1(void);
 
 void drawBlank();

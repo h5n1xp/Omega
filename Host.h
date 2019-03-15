@@ -34,6 +34,7 @@ typedef struct{
 }Host_t;
 
 extern Host_t host;
+extern SDL_atomic_t cpuWait;
 
 void hiresPlanar2Chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uint16_t plane2,uint16_t plane3,uint16_t plane4);
 void loresPlanar2Chunky(uint32_t* pixBuff,uint32_t* palette,uint16_t plane1, uint16_t plane2,uint16_t plane3,uint16_t plane4,uint16_t plane5,uint16_t plane6);

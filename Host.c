@@ -21,8 +21,7 @@
 #include "image.h"
 
 Host_t host;
-
-
+SDL_atomic_t cpuWait;
 
 
 

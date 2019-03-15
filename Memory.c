@@ -42,7 +42,9 @@ unsigned int chipReadByte(unsigned int address){
         return 0;
     }
     
-    //waitFreeSlot(); //CPU must wait for DMA to complete;
+#ifdef THREADED_CPU
+    waitFreeSlot(); //CPU must wait for DMA to complete;
+#endif
     
     //Chipregs
     if(address>0xDFEFFF){
@@ -99,7 +101,9 @@ unsigned int chipReadWord(unsigned int address){
         return 0;
     }
     
-    //waitFreeSlot(); //CPU must wait for DMA to complete;
+#ifdef THREADED_CPU
+    waitFreeSlot(); //CPU must wait for DMA to complete;
+#endif
     
     //Chipregs
     if(address>0xDFEFFF){
@@ -178,7 +182,9 @@ unsigned int chipReadLong(unsigned int address){
         return value << 16 | value >> 16;
     }
     
-    //waitFreeSlot(); //CPU must wait for DMA to complete;
+#ifdef THREADED_CPU
+    waitFreeSlot(); //CPU must wait for DMA to complete;
+#endif
     
     //Chipregs
     if(address>0xDFEFFF){
@@ -233,7 +239,9 @@ void chipWriteByte(unsigned int address,unsigned int value){   //ROM
         return;
     }
 
-    //waitFreeSlot(); //CPU must wait for DMA to complete;
+#ifdef THREADED_CPU
+    waitFreeSlot(); //CPU must wait for DMA to complete;
+#endif
     
     //Chipregs
     if(address>0xDFEFFF){
@@ -284,7 +292,9 @@ void chipWriteWord(unsigned int address,unsigned int value){
         return;
     }
 
-    //waitFreeSlot(); //CPU must wait for DMA to complete;
+#ifdef THREADED_CPU
+    waitFreeSlot(); //CPU must wait for DMA to complete;
+#endif
     
     //Chipregs
     if(address>0xDFEFFF){
@@ -357,7 +367,9 @@ void chipWriteLong(unsigned int address,unsigned int value){
         return;
     }
 
-    //waitFreeSlot(); //CPU must wait for DMA to complete;
+#ifdef THREADED_CPU
+    waitFreeSlot(); //CPU must wait for DMA to complete;
+#endif
     
     //Chipregs
     if(address>0xDFEFFF){

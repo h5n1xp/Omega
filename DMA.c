@@ -96,7 +96,6 @@
 
 
 
-
 void (*DMALores[])() = {
     evenCycle,
     dramCycle,
@@ -154,174 +153,174 @@ void (*DMALores[])() = {
     oddCycle,
     evenCycle,
     oddCycle,
-    bitplaneCycle0_4,   //Normal start
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
-    bitplaneCycle0_4,
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
-    bitplaneCycle0_4,
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
-    bitplaneCycle0_4,
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
-    bitplaneCycle0_4,
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
-    bitplaneCycle0_4,
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
-    bitplaneCycle0_4,
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
-    bitplaneCycle0_4,
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
-    bitplaneCycle0_4,
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
-    bitplaneCycle0_4,
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
-    bitplaneCycle0_4,
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
-    bitplaneCycle0_4,
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
-    bitplaneCycle0_4,
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
-    bitplaneCycle0_4,
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
-    bitplaneCycle0_4,
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
-    bitplaneCycle0_4,
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
-    bitplaneCycle0_4,
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
-    bitplaneCycle0_4,
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
-    bitplaneCycle0_4,
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
-    bitplaneCycle0_4,
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
-    bitplaneCycle0_4,
-    bitplaneCycle4_2,
-    bitplaneCycle6_3,
-    bitplaneCycle2_1,
-    bitplaneCycle0_4,
-    bitplaneCycle3_2,
-    bitplaneCycle5_3,
-    bitplaneCycle1,
+    evenCycle,   //Normal start
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
+    evenCycle,
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
+    evenCycle,
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
+    evenCycle,
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
+    evenCycle,
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
+    evenCycle,
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
+    evenCycle,
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
+    evenCycle,
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
+    evenCycle,
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
+    evenCycle,
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
+    evenCycle,
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
+    evenCycle,
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
+    evenCycle,
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
+    evenCycle,
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
+    evenCycle,
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
+    evenCycle,
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
+    evenCycle,
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
+    evenCycle,
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
+    evenCycle,
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
+    evenCycle,
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
+    evenCycle,
+    plane4,
+    plane6,
+    plane2,
+    evenCycle,
+    plane3,
+    plane5,
+    loresPlane1,
     evenCycle,
     oddCycle,
     evenCycle,
@@ -389,177 +388,177 @@ void (*DMAHires[]) (void) = {
     spriteCycle,//07
     evenCycle,
     spriteCycle,//07
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,    //Normal Plane Start
-    hiresPlane2,
-    hiresPlane3,
+    plane4,    //Normal Plane Start
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
-    hiresPlane4,
-    hiresPlane2,
-    hiresPlane3,
+    plane4,
+    plane2,
+    plane3,
     hiresPlane1,
     evenCycle,
     oddCycle,
@@ -573,17 +572,18 @@ void (*DMAHires[]) (void) = {
     oddCycle,
 };
 
-int chipBusBusy;
-
 
 void waitFreeSlot(){
     
-    while(chipBusBusy){
-        dma_execute();
+    
+    
+    while(SDL_AtomicGet(&cpuWait)){
+        //SDL_Delay(1);
     }
     
 }
 
+int lastFetchCycle;
 
 void dma_execute(){
     
@@ -592,10 +592,16 @@ void dma_execute(){
     chipset.vhposr |= internal.hPos;
     
 
-    chipBusBusy = 1;
+    SDL_AtomicSet(&cpuWait, 1);
     if(chipset.bplcon0 & 0x8000){
+        
+        lastFetchCycle = chipset.ddfstrt+160;
+        
         DMAHires[internal.hPos]();
     }else{
+        
+        lastFetchCycle = chipset.ddfstrt+168;   //not sure why this needs an extra 8 cycles... need to investigate
+        
         DMALores[internal.hPos]();
     }
     
@@ -606,10 +612,10 @@ void dma_execute(){
     
 
     
+    
     //end of line reached! 227 colour clocks have executed
     if(internal.hPos > 0xE3){
-        chipBusBusy = 0;
-        
+        SDL_AtomicSet(&cpuWait, 0);
         
         //********************************
         uint16_t ddfstrt = chipset.ddfstrt;
@@ -700,7 +706,7 @@ void dma_execute(){
 
 void displayLineReset(){
     
-    host.FBCounter -= (host.FBCounter%640);
+    host.FBCounter -= (host.FBCounter%320);
     
     
     //int temp = (host.FBCounter / 640);
@@ -737,7 +743,7 @@ void oddCycle(void){
     }
     
     //A Free slot for CPU... but the CPU isn't currently bound to the DMA timing
-    chipBusBusy = 0;
+    SDL_AtomicSet(&cpuWait, 0);
 }
 
 void dramCycle(void){
@@ -881,7 +887,8 @@ int bitplaneActive(){
     }
  
     //too late horisonal position let the Copper and Blitter run... why + 16?
-    if(internal.hPos>0xd7+16){//(chipset.ddfstop+16)){     //not sure why the ddfstop sometimes have wrong values.
+    
+    if(internal.hPos>lastFetchCycle){// 0xd7+16 (chipset.ddfstop+16)){     //not sure why the ddfstop sometimes have wrong values.
     //if(internal.hPos>(chipset.ddfstop+4)){
         return 0;
     }
@@ -900,28 +907,9 @@ int bitplaneActive(){
     return 1;
 }
 
-void bitplaneCycle0_4(void){
 
-    evenCycle();
-}
 
-void bitplaneCycle4_2(void){
-    
-    if(bitplaneActive()==0){
-        return;
-    }
-    
-    chipset.bpl4dat = 0;
-    if( (internal.bitplaneMask & 0x8)  == 0x8){
-        uint16_t* p = &internal.chipramW[chipset.bpl4pt];
-        chipset.bpl4pt +=1;
-        chipset.bpl4dat = *p;
-        return;
-    }
-    
-    oddCycle();
-}
-void bitplaneCycle6_3(void){
+void plane6(void){
     
     if(bitplaneActive()==0){
         evenCycle(); // let the copper run
@@ -939,43 +927,8 @@ void bitplaneCycle6_3(void){
     evenCycle();
 }
 
-void bitplaneCycle2_1(void){
-    
-    if(bitplaneActive()==0){
-        
-        drawBlank();
-        
-        return;
-    }
 
-    chipset.bpl2dat = 0;
-    if( (internal.bitplaneMask & 0x2)  == 0x2){
-        uint16_t* p = &internal.chipramW[chipset.bpl2pt];
-        chipset.bpl2pt +=1;
-        chipset.bpl2dat = *p;
-        return;
-    }
-    
-    oddCycle();
-}
-
-void bitplaneCycle3_2(void){
-    
-    if(bitplaneActive()==0){
-        return;
-    }
- 
-    chipset.bpl3dat = 0;
-    if( (internal.bitplaneMask & 0x4)  == 0x4){
-        uint16_t* p = &internal.chipramW[chipset.bpl3pt];
-        chipset.bpl3pt +=1;
-        chipset.bpl3dat = *p;
-        return;
-    }
-    
-    oddCycle();
-}
-void bitplaneCycle5_3(void){
+void plane5(void){
     
     if(bitplaneActive()==0){
         evenCycle(); // let the copper run
@@ -993,7 +946,7 @@ void bitplaneCycle5_3(void){
     evenCycle();
     
 }
-void bitplaneCycle1(void){
+void loresPlane1(void){
     
     
     if(bitplaneActive()==0){
@@ -1031,7 +984,7 @@ void bitplaneCycle1(void){
 
 
 
-void hiresPlane4(){
+void plane4(){
     
     if(bitplaneActive()==0){
         evenCycle(); // let the copper run
@@ -1050,7 +1003,7 @@ void hiresPlane4(){
     
 }
 
-void hiresPlane2(){
+void plane2(){
     
     if(bitplaneActive()==0){
         evenCycle(); // let the copper run
@@ -1069,7 +1022,7 @@ void hiresPlane2(){
     
 }
 
-void hiresPlane3(){
+void plane3(){
     
     if(bitplaneActive()==0){
         evenCycle(); // let the copper run

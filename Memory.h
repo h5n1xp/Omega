@@ -16,6 +16,8 @@
 #define Memory_h
 
 #define NOSLOWRAM
+//#define THREADED_CPU
+
 
 //#define CHIPTOP  0x3FFFF // for 256K Chip
 //#define CHIPTOP  0x7FFFF // for 512K

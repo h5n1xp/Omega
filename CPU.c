@@ -40,14 +40,12 @@ void cpu_pulse_reset(void){
     printf("SP:%0x6\n",sp);
     
     printf("Machine reset...\n");
-    m68k_set_reg(M68K_REG_PC, 0xF80002); //start executing at the ROM + 2
-    //CIAA.pra = 1;
-    //CIAB.prb = 0;
+    cpu_init();
     
 }
 
 
-void cpu_init(unsigned char* ram){
+void cpu_init(){
 
     //set CIA IDs
     CIAInit(&CIAA, 32776);
@@ -90,7 +88,7 @@ void cpu_execute(){
     uint32_t* guru = low16Meg;
  */
     
-    m68k_execute(8);
+    m68k_execute(1);
 
 }
 

@@ -35,10 +35,6 @@
 int screenWidth = 640;
 int screenHeight = 200;
 
-//SDL_sem* cpuWait;
-//SDL_cond* interruptFlag;
-
-
 
 int disass = 0; //set to any value greter than 0 to turn on dissassembler
 
@@ -47,9 +43,12 @@ int disass = 0; //set to any value greter than 0 to turn on dissassembler
 //run the CPU in a seprate thread... need to sort out interrupts first...
 int thd68k(void* data){
     
+    SDL_Delay(250);
+    printf("CPU Running\n");
+    
     while(1){
         cpu_execute();
-        SDL_Delay(1);
+        //SDL_Delay(1);
     }
     
 }
@@ -109,8 +108,8 @@ int main(int argc, char * argv[]) {
         //fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/WORKBENCH/WB-2_05.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/Blitz2-1.ADF",O_RDONLY);
-        //fd = open("/Users/Shared/uae/DosUae/DLXP4.ADF",O_RDONLY);
-        fd = open("/Users/Shared/uae/DosUae/DISK1.ADF",O_RDONLY);
+        fd = open("/Users/Shared/uae/DosUae/DLXP4.ADF",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/DISK1.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/Fright Night.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/JUGGLER.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/amiga_500a_Tutorial_Disk.ADF",O_RDONLY);
@@ -226,10 +225,8 @@ int main(int argc, char * argv[]) {
     fd=0;
     
     //setup emulator
-    cpu_init();
-    
     hostInit();
-
+    cpu_init();
     ChipsetInit();
     
     //SDL_Thread* clockThread = SDL_CreateThread(thdClock, "Clock", &sec);
@@ -243,6 +240,7 @@ int main(int argc, char * argv[]) {
     
     Chipset_t* chipView = &chipset;
     Internal_t* internalView = &internal;
+    
     
     printf("\nEntering main loop\n");
     int running = 1;
