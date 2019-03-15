@@ -967,7 +967,7 @@ void loresPlane1(void){
     }
     
     //don't start actually rendering a deiplay before 44 lines
-    if(internal.vPos<43){
+    if(internal.vPos<44){
         return;
     }
     
