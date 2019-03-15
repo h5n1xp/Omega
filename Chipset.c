@@ -37,7 +37,11 @@ void ChipsetInit(){
     internal.vPos = 0;
     internal.bitplaneMask = 0;
     
-    chipset.dsksync=0x4489; //For OS 1.2
+    //For OS 1.x
+    chipset.dsksync=0x4489;
+    chipset.vtotal = 262;
+
+    
     
 }
 
@@ -232,7 +236,7 @@ uint16_t deniseid(){
 }
 
 void wordWrite(uint16_t value){
-    printf("16bit Write: to %s (%0x - %d) Not implemented!\n",regNames[debugChipAddress],debugChipAddress<<1,debugChipAddress);
+    printf("16bit Write: %d to %s (%0x - %d) Not implemented!\n", debugChipValue, regNames[debugChipAddress],debugChipAddress<<1,debugChipAddress);
     debugChipAddress = 0;
 }
 
@@ -273,7 +277,7 @@ void vposw(uint16_t value){
 void vhposw(uint16_t value){
     //internal.vPos = (value >> 8);
     //internal.hPos = value;
-    //Converstion with Toni Willen suggests this should never be written to!
+    //Converstion with Toni Wilen suggests this should never be written to!
 }
 
 void copcon(uint16_t  value){
@@ -295,6 +299,11 @@ void potgo(uint16_t value){
 void bltcon0(uint16_t value){
     chipset.bltcon0 = value;
 }
+
+void bltcon0l(uint16_t value){
+    chipset.bltcon0 = (chipset.bltcon0 & 0xFF00) | value;
+}
+
 void bltcon1(uint16_t value){
     chipset.bltcon1 = value;
 }
@@ -337,6 +346,9 @@ void bltsize(uint16_t value){
     chipset.bltsizv = value >> 6;
     chipset.bltsizh = value & 63;
 
+    //uint16_t debugv = chipset.bltsizv;
+    //uint16_t debugh = chipset.bltsizh;
+    
     if(chipset.bltsizv == 0){
         chipset.bltsizv=1024;
     }
@@ -579,6 +591,8 @@ void bplcon0(uint16_t value){
         case 4: internal.bitplaneMask  = 0x0F;break;
         case 5: internal.bitplaneMask  = 0x1F;break;
         case 6: internal.bitplaneMask  = 0x3F;break;
+        case 7: internal.bitplaneMask  = 0x7F;break;
+        case 8: internal.bitplaneMask  = 0xFF;break;
         default: internal.bitplaneMask = 0x0;break;
     }
 }
@@ -977,12 +991,20 @@ void color30L(uint32_t value){
     color31(value & 65535);
 }
 
+void vtotal(uint16_t value){
+    chipset.vtotal = value;
+}
+
+void beamcon0(uint16_t value){
+    chipset.beamcon0 = value;
+}
+
 void noop(uint16_t value){
     
 }
 
-//***********************************************************************************************
 
+//***********************************************************************************************
 uint32_t noReadL(void){
     printf("32bit Read: from %s (%0x - %d) Not implemented!\n",regNames[debugChipAddress],debugChipAddress<<1,debugChipAddress);
     return 0;
@@ -999,6 +1021,10 @@ uint8_t noReadB(void){
 
 uint8_t dmaconrB(){ // 0x1
     return chipset.dmaconr >> 8; // only read the top 8bits
+}
+
+uint8_t vposrB(){
+    return chipset.vposr >> 8;
 }
 
 uint8_t vhposrB(){  // 0x3
@@ -1028,7 +1054,7 @@ uint8_t intreqrB(){ //0xE
 uint8_t (*getChipReg8[])() = {
     noReadB,
     dmaconrB,
-    noReadB,
+    vposrB,
     vhposrB,
     noReadB,
     joy0datB,
@@ -1972,39 +1998,6 @@ void (*putChipReg32[])(uint32_t) ={
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void (*putChipReg16[])(uint16_t) ={
     wordIllegalWrite,
     wordIllegalWrite,
@@ -2051,7 +2044,7 @@ void (*putChipReg16[])(uint16_t) ={
     bltdpth,
     bltdptl,
     bltsize,
-    wordWrite,
+    bltcon0l,
     bltsizv,
     bltsizh,
     bltcmod,
@@ -2234,6 +2227,7 @@ void (*putChipReg16[])(uint16_t) ={
     wordWrite,
     wordWrite,
     wordWrite,
+    vtotal,
     wordWrite,
     wordWrite,
     wordWrite,
@@ -2243,8 +2237,7 @@ void (*putChipReg16[])(uint16_t) ={
     wordWrite,
     wordWrite,
     wordWrite,
-    wordWrite,
-    wordWrite,
+    beamcon0,
     wordWrite,
     wordWrite,
     wordWrite,

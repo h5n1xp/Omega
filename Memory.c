@@ -17,7 +17,8 @@
 #include "Chipset.h"
 #include "CIA.h"
 #include "debug.h"
-
+#include "DMA.h"
+#include "Gayle.h"
 
 unsigned char low16Meg[16777216];
 
@@ -41,12 +42,21 @@ unsigned int chipReadByte(unsigned int address){
         return 0;
     }
     
+    //waitFreeSlot(); //CPU must wait for DMA to complete;
+    
     //Chipregs
     if(address>0xDFEFFF){
         address = (address - 0xDFF000) >> 1;
         //return ChipsetReadByte(&chipset, address);
         debugChipAddress = address;
         return getChipReg8[address]();
+    }
+    
+    //IDE Interface
+    if(address>0xD9FFFF){
+        
+        return readGayleB(address);
+        
     }
     
     //Slow RAM
@@ -89,18 +99,32 @@ unsigned int chipReadWord(unsigned int address){
         return 0;
     }
     
+    //waitFreeSlot(); //CPU must wait for DMA to complete;
+    
     //Chipregs
     if(address>0xDFEFFF){
         address = (address - 0xDFF000) >> 1;
         
         if(address>16){
-            printf("Attepmt to read write-only register %s (returning DeniseID by default)\n",regNames[address]);
+            
+            if(address ==62){
+                return chipset.deniseid;
+            }
+            
+            printf("Attempt to read write-only register %s (returning DeniseID by default)\n",regNames[address]);
             debugChipAddress = address;
             return chipset.deniseid;    // the only read only register up that high is DeniseID...
         }
         debugChipAddress = address;
         return getChipReg16[address]();
         //return ChipsetRead(&chipset, address);
+    }
+    
+    //IDE Interface
+    if(address>0xD9FFFF){
+        
+       return readGayle(address);
+        
     }
     
     //Slow RAM
@@ -154,11 +178,20 @@ unsigned int chipReadLong(unsigned int address){
         return value << 16 | value >> 16;
     }
     
+    //waitFreeSlot(); //CPU must wait for DMA to complete;
+    
     //Chipregs
     if(address>0xDFEFFF){
         address = (address - 0xDFF000) >> 1;
         debugChipAddress = address;
         return getChipReg32[address]();
+    }
+    
+    //IDE Interface
+    if(address>0xD9FFFF){
+        
+        return readGayleL(address);
+        
     }
     
     //Slow RAM
@@ -199,6 +232,8 @@ void chipWriteByte(unsigned int address,unsigned int value){   //ROM
     if(address>0xF80000){
         return;
     }
+
+    //waitFreeSlot(); //CPU must wait for DMA to complete;
     
     //Chipregs
     if(address>0xDFEFFF){
@@ -206,6 +241,14 @@ void chipWriteByte(unsigned int address,unsigned int value){   //ROM
         debugChipAddress = address;
         //ChipsetWrite(&chipset, address,value); // Does any software byte write to the custom chips?
         return;
+    }
+    
+    //IDE Interface
+    if(address>0xD9FFFF){
+        
+        writeGayleB(address, value);
+        return;
+        
     }
     
     //Slow RAM
@@ -240,13 +283,23 @@ void chipWriteWord(unsigned int address,unsigned int value){
     if(address>0xF80000){
         return;
     }
+
+    //waitFreeSlot(); //CPU must wait for DMA to complete;
     
     //Chipregs
     if(address>0xDFEFFF){
         address = (address - 0xDFF000) >> 1;
         
         debugChipAddress = address;    // used for debugging to identify the register being called
+        debugChipValue = value;
         putChipReg16[address](value);
+        return;
+    }
+    
+    //IDE Interface
+    if(address>0xD9FFFF){
+        
+        writeGayle(address,value);
         return;
     }
     
@@ -303,6 +356,8 @@ void chipWriteLong(unsigned int address,unsigned int value){
     if(address>0xF80000){
         return;
     }
+
+    //waitFreeSlot(); //CPU must wait for DMA to complete;
     
     //Chipregs
     if(address>0xDFEFFF){
@@ -312,6 +367,13 @@ void chipWriteLong(unsigned int address,unsigned int value){
     
         putChipReg32[address](value);
         return;
+    }
+    
+    //IDE Interface
+    if(address>0xD9FFFF){
+        
+        writeGayleL(address, value);
+        
     }
     
     //Slow RAM

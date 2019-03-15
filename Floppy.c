@@ -242,9 +242,18 @@ uint8_t floppyDataRead(){ //this function should be called by the DMA
     if(df[driveSelected].index>12667){ //ADF track has 12798 bytes, but on a normal AmigaOS disk 12668 are used.
         df[driveSelected].index= 0;
         CIAIndex(&CIAB);    // generate CIAB index interupt
+        
+        //int stinkmog = (df[driveSelected].track * (12798 * 2)) + (df[driveSelected].side  * 12798) + df[driveSelected].index;
+        //uint8_t* dri = &df[driveSelected].mfmData[stinkmog];
+        //printf("wartest du!");
+        
     }
     
     uint8_t retVal = df[driveSelected].mfmData[position];
+    
+    if(retVal==0){
+        //printf("Uh oh!");
+    }
     
     return retVal;
 }

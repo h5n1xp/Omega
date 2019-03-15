@@ -573,9 +573,16 @@ void (*DMAHires[]) (void) = {
     oddCycle,
 };
 
+int chipBusBusy;
 
 
-
+void waitFreeSlot(){
+    
+    while(chipBusBusy){
+        dma_execute();
+    }
+    
+}
 
 
 void dma_execute(){
@@ -585,12 +592,12 @@ void dma_execute(){
     chipset.vhposr |= internal.hPos;
     
 
-    
-        if(chipset.bplcon0 & 0x8000){
-            DMAHires[internal.hPos]();
-        }else{
-            DMALores[internal.hPos]();
-        }
+    chipBusBusy = 1;
+    if(chipset.bplcon0 & 0x8000){
+        DMAHires[internal.hPos]();
+    }else{
+        DMALores[internal.hPos]();
+    }
     
     
     eclock_execute(&chipset);   // CIA timers
@@ -601,6 +608,7 @@ void dma_execute(){
     
     //end of line reached! 227 colour clocks have executed
     if(internal.hPos > 0xE3){
+        chipBusBusy = 0;
         
         
         //********************************
@@ -610,18 +618,15 @@ void dma_execute(){
         int diff = ddfstop - ddfstrt;
         
         if(internal.vPos>43){
-            int vBeam = (internal.vPos-44)/2;
+            int vBeam = (internal.vPos-44);
             
             if(vBeam==0){
                 //printf("NLine");
                 
             }
+
             
-            int counter = host.FBCounter-16;
-            
-            vBeam = vBeam - 44;
-            
-            //host.FBCounter = vBeam*320;
+            //host.FBCounter =vBeam*640;
             //printf("");
             
         }
@@ -650,6 +655,7 @@ void dma_execute(){
             internal.vPos = 0;
             
             
+            //Reset Copper.
             putChipReg16[COPJMP1](0);
             CIATODEvent(&CIAA);
             
@@ -660,8 +666,7 @@ void dma_execute(){
             host.FBCounter = 0; // restart the frambuffer pointer
             
             
-            
-            //Draw sprites
+            //Draw sprite 0
             if( (chipset.dmaconr & 0x220)== 0x220){
                 //Software renderer - draw sprite to the frame buffer
                 
@@ -686,12 +691,30 @@ void dma_execute(){
             
             
             
-            hostDisplay(&chipset);
+            hostDisplay(); //Call the host to update the display.
         }
         
     }
 }
 
+
+void displayLineReset(){
+    
+    host.FBCounter -= (host.FBCounter%640);
+    
+    
+    //int temp = (host.FBCounter / 640);
+    //temp = (temp) * 640;
+    //host.FBCounter= temp;
+}
+
+void setDisplayMode(int mode){
+    
+    int temp = host.FBCounter / 640;
+    temp = (temp) * 640;
+    host.FBCounter= temp;
+    
+}
 
 
 
@@ -714,17 +737,16 @@ void oddCycle(void){
     }
     
     //A Free slot for CPU... but the CPU isn't currently bound to the DMA timing
-    
+    chipBusBusy = 0;
 }
 
 void dramCycle(void){
     
 }
 
-int turboFloppy = 8;
+int turboFloppy = 8;    //8 for turbo
 
 void diskCycle(void){
-    static sync = 0;
     
     if( (chipset.dmaconr & 0x210) && chipset.dsklen & 0x8000 ){
         
@@ -733,8 +755,10 @@ void diskCycle(void){
             
             //OS2+ Disk loading
             static int sync = 0;
+
             
             for(int i=0;i<turboFloppy;++i){
+                
                 if(chipset.adkconr & 0x400){
                     //printf("Needs a disk sync");
                     //sync = 0;
@@ -747,20 +771,18 @@ void diskCycle(void){
             
                 if(syncword==chipset.dsksync){
                 
-                    putChipReg16[INTREQ](0x9000);   //DSKSYNC
+                    putChipReg16[INTREQ](0x9000);   //DSKSYNC INT
                     chipset.dskbytr |= 0x1000;  // set word sync bit
                 
                     if(sync==0){
-                        //printf("%d\n",chipset.dsklen & 0x3FFF);
-                        uint8_t b1 = floppyDataRead();
-                        uint8_t b2 = floppyDataRead();
+                        //printf("dsklen: %04x, dskpt: %06x\n",chipset.dsklen & 0x3FFF,chipset.dskpt);
                         sync=1;
-                        return;
+                        //return;
                     }
                 }
-            
+                
                 if(sync == 1){
-                    chipset.dskbytr &= 0xEFFF;      //clear word sync
+                    //chipset.dskbytr &= 0xEFFF;      //clear word sync
                     low16Meg[chipset.dskpt] = b1;
                     chipset.dskpt +=1;
                 
@@ -770,7 +792,7 @@ void diskCycle(void){
                     chipset.dsklen -= 1;
                 
                     if( (chipset.dsklen & 0x3FFF) == 0){
-                        putChipReg16[INTREQ](0x8002);
+                        putChipReg16[INTREQ](0x8002);   //Disk block loaded INT
                         sync = 0;
                         return;
                     }
@@ -786,9 +808,9 @@ void diskCycle(void){
             uint8_t byte2;
             
             //For faster floppy loading double up the data read
-            if(turboFloppy==1){
+
                 
-                for(int i=0;i<8;++i){
+            for(int i=0;i<turboFloppy;++i){
                         byte1 = floppyDataRead();
                     low16Meg[chipset.dskpt] = byte1;
                     chipset.dskpt +=1;
@@ -808,28 +830,12 @@ void diskCycle(void){
                         putChipReg16[INTREQ](0x8002);
                         return;
                     }
-                }
-                
-            }else{
-                
-                    byte1 = floppyDataRead();
-                low16Meg[chipset.dskpt] = byte1;
-                chipset.dskpt +=1;
-                    byte2 = floppyDataRead();
-                low16Meg[chipset.dskpt] = byte2;
-                chipset.dskpt +=1;
-                chipset.dsklen -= 1;
-                
-                if( (chipset.dsklen & 0x3FFF) == 0){
-                    putChipReg16[INTREQ](0x8002);
-                }
             }
-            
-            
-            
 
+        }else{
+            //floppyDataRead();   //spin the disk
         }
-        return;
+       
     }
     
     oddCycle();
@@ -876,6 +882,7 @@ int bitplaneActive(){
  
     //too late horisonal position let the Copper and Blitter run... why + 16?
     if(internal.hPos>0xd7+16){//(chipset.ddfstop+16)){     //not sure why the ddfstop sometimes have wrong values.
+    //if(internal.hPos>(chipset.ddfstop+4)){
         return 0;
     }
     
@@ -1022,23 +1029,6 @@ void bitplaneCycle1(void){
 
 }
 
-void displayLineReset(){
-    
-    host.FBCounter -= (host.FBCounter%640);
-    
-
-    //int temp = (host.FBCounter / 640);
-    //temp = (temp) * 640;
-    //host.FBCounter= temp;
-}
-
-void setDisplayMode(int mode){
-    
-    int temp = host.FBCounter / 640;
-    temp = (temp) * 640;
-    host.FBCounter= temp;
-    
-}
 
 
 void hiresPlane4(){
@@ -1161,6 +1151,9 @@ void drawBlank(){
     
 }
 
+
+
+
 int copperExecute(){
     
     if((chipset.dmaconr & 0x280) != 0x280){
@@ -1187,14 +1180,19 @@ int copperExecute(){
             internal.IR1 = (internal.IR1 >> 1) & 255;   // divide by 2 and mask off bad bits
             
             if(internal.IR1<0x20){
-                internal.copperCycle = 0;
-                return 1;};         //do nothing
-            if(internal.IR1<0x40){
                 internal.copperCycle = 4;return 1;};         //pause copper until next vbl
+            if(internal.IR1<0x40 && chipset.copcon==0){
+                internal.copperCycle = 4;return 1;};         //pause copper until next vbl, unless we allow copper access to blitter
+            
+
             
             //Move
             internal.IR2 = (internal.IR2 <<8) | (internal.IR2 >> 8);
             //printf("%04x Cop Move: %04x -> (%s)\n",internal.copperPC - 4,internal.IR2,regNames[internal.IR1]);
+            
+            debugChipAddress = internal.IR1; //Debug what the Copper is writing to...
+            debugChipValue   = internal.IR2;
+            
             putChipReg16[internal.IR1](internal.IR2);
             internal.copperCycle = 0;
             return 1;
@@ -1344,10 +1342,11 @@ int blitterExecute(){
     return 0;
 }
 
+
 int blitterCopyCycle(){
     
     
-    Internal_t* debug = &internal;
+    //Internal_t* debug = &internal;
     
         static uint16_t previousA = 0;
         static uint16_t previousB = 0;

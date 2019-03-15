@@ -175,7 +175,7 @@ void blitter_execute(Chipset_t* chipset){
             int oneDot = (chipset->bltcon1 >>1) & 1;    // I don't support one dot mode yet
             
             if(oneDot==1){
-                printf("No Single H-line mode yet\n");
+                printf("No Single pixel per H-line mode yet\n");
             }
             
             int minterm = chipset->bltcon0 & 255; //0xCA = normal 0x4A = XOR
@@ -411,7 +411,7 @@ void blitter_execute(Chipset_t* chipset){
             
             static int count = 0;
             
-            //  printf("Blitter Copy Mode: %d\n",count);
+            //printf("Blitter Copy Mode: %d\n",count);
             
             count++;
             
@@ -430,8 +430,12 @@ void blitter_execute(Chipset_t* chipset){
             if((chipset->bltcon1 & 2)){
                 xIncrement = -1;
                 
-                if(fillmode>0){
-                    printf("NO FILL MODE YET!!\n");
+                if(fillmode==1){
+                    printf("NO INCLUSIVE FILL MODE YET!!\n");
+                }
+                
+                if(fillmode==2){
+                    printf("NO EXCLUSIVE FILL MODE YET!!\n");
                 }
                 
             }

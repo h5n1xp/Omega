@@ -90,7 +90,7 @@ void cpu_execute(){
     uint32_t* guru = low16Meg;
  */
     
-    m68k_execute(1);
+    m68k_execute(8);
 
 }
 
@@ -98,8 +98,6 @@ void cpu_execute(){
 
 
 void checkInterrupt(Chipset_t* chipset){
-    
-
     
     if(chipset->intenar & 0x4000){ // if master interrupt switch is enabled
         
@@ -138,9 +136,13 @@ void checkInterrupt(Chipset_t* chipset){
             }else if(intMask & 1){    // Serial Transmit buffer empty
                 m68k_set_irq(1);
             }
+            
         }else{
             m68k_set_irq(0);    // no interupt pending
         }
+        
+    }else{
+        m68k_set_irq(0);    // no interupt if master INT disabled
     }
     
 }

@@ -21,6 +21,8 @@ void dma_execute();
 int copperExecute();
 int blitterExecute();
 
+void waitFreeSlot();
+
 void evenCycle(void);
 void oddCycle(void);
 void dramCycle(void);
@@ -42,11 +44,11 @@ void bitplaneCycle3_2(void);
 void bitplaneCycle5_3(void);
 void bitplaneCycle1(void);
 
-void loresPlane4(void);
-void loresPlane6(void);
-void loresPlane2(void);
-void loresPlane3(void);
-void loresPlane5(void);
+void plane4(void);
+void plane6(void);
+void plane2(void);
+void plane3(void);
+void plane5(void);
 void loresPlane1(void);
 
 void hiresPlane4(void);

@@ -120,8 +120,8 @@ void CIAWrite(CIA_t* cia,int reg,uint8_t value){
                 cia->icrMask = cia->icrMask | (value  & 127);
             }
             break;
-        case 0xE:cia->cra = cia->cra | value;break;//cra
-        case 0xF:cia->crb = cia->crb | value;break;//crb
+        case 0xE:cia->cra = value; break;//cra
+        case 0xF:cia->crb = value; break;//crb
             
     }
 }
@@ -154,8 +154,8 @@ uint8_t CIARead(CIA_t* cia,int reg){
             cia->icr = 0;
             cia->irqLatch = 0;
             break;
-        case 0xE:value = cia->cra;cia->cra=0;break;//cra
-        case 0xF:value = cia->crb;cia->crb=0;break;//crb
+        case 0xE:value = cia->cra;break;//cra
+        case 0xF:value = cia->crb;break;//crb
             
     }
     

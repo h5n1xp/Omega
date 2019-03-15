@@ -14,12 +14,87 @@
 
 #include "Host.h"
 
+#include "CPU.h"
 #include "Chipset.h"
 #include "CIA.h"
 #include "Floppy.h"
 #include "image.h"
 
 Host_t host;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const uint8_t keyMapping[] ={
     0x0,
@@ -31,7 +106,7 @@ const uint8_t keyMapping[] ={
     0x0,
     0x0,
     0x41,
-    0x0,
+    0x42,
     0x0,
     0x0,
     0x0,
@@ -61,7 +136,7 @@ const uint8_t keyMapping[] ={
     0x0,
     0x0,
     0x0,
-    0x0,
+    0x2A,
     0x0,
     0x0,
     0x0,
@@ -90,8 +165,8 @@ const uint8_t keyMapping[] ={
     0x56,
     0x58,
     0x59,
-    0x0,
-    0x0,
+    0x46,   //F11 -> Del    //THese 2 keys are mapped this way for laptops without Del and Help keys
+    0x5F,   //F12 -> Help
     0x0,
     0x0,
     0x0,
@@ -114,7 +189,7 @@ const uint8_t keyMapping[] ={
     0x0,
     0x0,
     0x1A,
-    0x0,
+    0x2B,
     0x1B,
     0x0,
     0x0,
@@ -189,7 +264,7 @@ const uint8_t keyMapping[] ={
     0x0,
     0x0,
     0x0,
-    0x0,
+    0x30,
     0x0,
     0x0,
     0x0,
@@ -261,17 +336,56 @@ const uint8_t keyMapping[] ={
 };
 
 int LEDActive = 1;
+int keyMask = 0;       //This will flag when Ctrl-Amiga-Amiga has been pressed to trigger a reset 
+
 
 void pressKey(uint16_t keyCode){
     CIAWrite(&CIAA, 0xC, ~(keyMapping[keyCode]<<1) );      //place value in register
     keyboardInt();  //raise Serial port interrupt flag
     //printf("keyCode: %d -> %02x (down)\n",keyCode,keyMapping[keyCode]);
+    
+    //Ctrl
+    if(keyCode==224){
+        keyMask |=0x1;
+    }
+    
+    //Left Amiga
+    if(keyCode==227){
+        keyMask |=0x2;
+    }
+    
+    //Right Amiga
+    if(keyCode==231){
+        keyMask |=0x4;
+    }
+    
+    //Reset key combination pressed
+    if(keyMask==0x7){
+        cpu_pulse_reset();
+    }
+    
 }
 
 void releaseKey(uint16_t keyCode){
     CIAWrite(&CIAA, 0xC, ~((keyMapping[keyCode] << 1) | 1) ); //place value in register, with key up flag
     keyboardInt();
     //printf("keyCode: %d -> %d (up)\n",keyCode,keyMapping[keyCode]);
+    
+    //Ctrl
+    if(keyCode==224){
+        keyMask &=0x6;
+    }
+    
+    //Left Amiga
+    if(keyCode==227){
+        keyMask &=0x5;
+    }
+    
+    //Right Amiga
+    if(keyCode==231){
+        keyMask &=0x3;
+    }
+    
 }
 
 uint32_t HAM6(uint8_t hamPixel,uint32_t previousPixel){

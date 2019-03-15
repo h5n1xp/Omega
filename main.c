@@ -91,7 +91,14 @@ int main(int argc, char * argv[]) {
     
     close(fd);
     fd=0;
-    printf("ROM loaded\n");
+    
+
+    if(low16Meg[0xF80000]==0x11){
+        printf("ROM loaded\n");
+    }else{
+        printf("Not an Amiga ROM\n");
+        return 0;
+    }
     
     //Floppy disk
     if(argc>2){
@@ -99,24 +106,33 @@ int main(int argc, char * argv[]) {
         printf("%s\n",argv[2]);
     }else{
        
-        fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
+        //fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/WORKBENCH/WB-2_05.ADF",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/Blitz2-1.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/DLXP4.ADF",O_RDONLY);
-        //fd = open("/Users/Shared/uae/DosUae/DISK1.ADF",O_RDONLY);
+        fd = open("/Users/Shared/uae/DosUae/DISK1.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/Fright Night.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/JUGGLER.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/amiga_500a_Tutorial_Disk.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/CuAmiga15.adf",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/LEMM1.ADF",O_RDONLY);
 
     }
+    
+    //fd = open("/Users/Shared/uae/WORKBENCH/raw3.adf",O_RDONLY);
     
  
     if(fd<1){
         printf("No disk in DF0:\n");
     }else{
+        
+        //int size =(int) lseek(fd, 0, SEEK_END);
+        //lseek(fd, 2004, SEEK_SET);
+        //read(fd, floppyInit(0), size);
+        
         ADF2MFM(fd, floppyInit(0));
         close(fd);
-        printf("DF0: Loaded\n");
+        printf("DF0: Loaded (press F1 to insert disk)\n");
     }
     fd=0;
     
@@ -135,7 +151,8 @@ int main(int argc, char * argv[]) {
         //fd = open("/Users/Shared/uae/DosUae/amiga_500a_Tutorial_Disk.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/af025_1991_08_d025.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/CuAmiga15.adf",O_RDONLY);
-        fd = open("/Users/Shared/uae/WORKBENCH/EX-1_3.adf",O_RDONLY);
+        //fd = open("/Users/Shared/uae/WORKBENCH/EX-1_3.adf",O_RDONLY);
+        fd = open("/Users/Shared/uae/DosUae/Blitz2-2.ADF",O_RDONLY);
         
     }
     
@@ -145,7 +162,7 @@ int main(int argc, char * argv[]) {
     }else{
         ADF2MFM(fd,floppyInit(1));
         close(fd);
-        printf("DF1: Loaded\n");
+        printf("DF1: Loaded (press F2 to insert disk)\n");
     }
     fd=0;
     
@@ -158,7 +175,7 @@ int main(int argc, char * argv[]) {
     }else{
         
         //fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
-        fd = open("/Users/Shared/uae/DosUae/DLXP4.ADF",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/DLXP4.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/DISK1.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/Fright Night.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/JUGGLER.ADF",O_RDONLY);
@@ -166,7 +183,7 @@ int main(int argc, char * argv[]) {
         //fd = open("/Users/Shared/uae/DosUae/af025_1991_08_d025.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/CuAmiga15.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/WORKBENCH/EX-1_3.adf",O_RDONLY);
-        
+        fd = open("/Users/Shared/uae/DosUae/Blitz2-3.ADF",O_RDONLY);
     }
     
     
@@ -175,7 +192,7 @@ int main(int argc, char * argv[]) {
     }else{
         ADF2MFM(fd,floppyInit(2));
         close(fd);
-        printf("DF2: Loaded\n");
+        printf("DF2: Loaded (press F3 to insert disk)\n");
     }
     fd=0;
     
@@ -188,14 +205,14 @@ int main(int argc, char * argv[]) {
         
         //fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/DLXP4.ADF",O_RDONLY);
-        fd = open("/Users/Shared/uae/DosUae/DISK1.ADF",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/DISK1.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/Fright Night.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/JUGGLER.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/amiga_500a_Tutorial_Disk.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/af025_1991_08_d025.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/CuAmiga15.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/WORKBENCH/EX-1_3.adf",O_RDONLY);
-        
+        fd = open("/Users/Shared/uae/DosUae/Blitz2-4.ADF",O_RDONLY);
     }
     
     
@@ -204,7 +221,7 @@ int main(int argc, char * argv[]) {
     }else{
         ADF2MFM(fd,floppyInit(3));
         close(fd);
-        printf("DF3: Loaded\n");
+        printf("DF3: Loaded (press F4 to insert disk)\n");
     }
     fd=0;
     
@@ -323,8 +340,9 @@ int main(int argc, char * argv[]) {
         
         for(int cpuCycles =0;cpuCycles<200;++cpuCycles){
             
-                    dma_execute();
-                    cpu_execute();
+
+            dma_execute();
+            cpu_execute();
 
         }
         

@@ -15,6 +15,7 @@
 #include "debug.h"
 
 int debugChipAddress;
+int debugChipValue;
 
 /*
  uint32_t buffer[65536];
