@@ -297,8 +297,6 @@ int main(int argc, char * argv[]) {
                         running = 0;
                     }
                     
- 
-                    
                     if(host.event.key.keysym.sym==SDLK_F1){
                             floppyInsert(0);
                             printf("Disk inserted in df0:\n");
@@ -329,9 +327,6 @@ int main(int argc, char * argv[]) {
                     }
                     
                     pressKey(host.event.key.keysym.sym);
-                    
-                    
-                    
                     break;
                     
                 default:

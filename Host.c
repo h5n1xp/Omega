@@ -342,7 +342,7 @@ int keyMask = 0;       //This will flag when Ctrl-Amiga-Amiga has been pressed t
 void pressKey(uint16_t keyCode){
     CIAWrite(&CIAA, 0xC, ~(keyMapping[keyCode]<<1) );      //place value in register
     keyboardInt();  //raise Serial port interrupt flag
-    printf("keyCode: %d -> %02x (down)\n",keyCode,keyMapping[keyCode]);
+    //printf("keyCode: %d -> %02x (down)\n",keyCode,keyMapping[keyCode]);
     
     //Ctrl
     if(keyCode==224){
