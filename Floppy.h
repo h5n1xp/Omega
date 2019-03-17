@@ -40,19 +40,23 @@ typedef struct{
     
     int idMode;
     int index;
-    int track;
+    int cylinder;
     int side;
-    uint8_t mfmData[12798*80*2]; //trackSize * tracks * sides
+    uint8_t mfmData[12798*82*2]; //trackSize * tracks * sides
 }Fd_t;
 
 extern Fd_t df[4];
+extern int floppySync;
+extern int driveSelected;
 
 void floppyEject();
 uint8_t floppyDataRead();
 void floppyInsert(int);
-uint8_t* floppyInit(int);
-void floppyState();
-void floppySetState();
+uint8_t* floppyInit(int);   // returns the mfm data buffer
+void floppyIndexReset();
+
+void floppyState();     //Get the drive state for the CIA
+void floppySetState();  //Set the Drive State for the CIA
 
 
 void encodeBlock(uint8_t* source, uint8_t* destination,int size);

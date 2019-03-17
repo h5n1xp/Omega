@@ -229,13 +229,19 @@ void ADF2MFM(int fd, uint8_t* mfm){
 
 
 
-
+int floppySync = 0;
 int driveSelected=0;
 Fd_t df[4];
 
+void floppyIndexReset(){
+    
+       df[driveSelected].index = 4;
+    
+}
+
 uint8_t floppyDataRead(){ //this function should be called by the DMA
     
-    int position   = (df[driveSelected].track * (12798 * 2)) + (df[driveSelected].side  * 12798) + df[driveSelected].index;
+    int position   = (df[driveSelected].cylinder * (12798 * 2)) + (df[driveSelected].side  * 12798) + df[driveSelected].index;
     
     df[driveSelected].index +=1;
 
@@ -251,9 +257,11 @@ uint8_t floppyDataRead(){ //this function should be called by the DMA
     
     uint8_t retVal = df[driveSelected].mfmData[position];
     
+    /*
     if(retVal==0){
         //printf("Uh oh!");
     }
+    */
     
     return retVal;
 }
@@ -273,14 +281,16 @@ void floppyInsert(int drive){
 uint8_t* floppyInit(int drive){
     df[drive].idMode = -1;
     df[drive].index = 0;
-    df[drive].track = 0;
+    df[drive].cylinder = 0;
     df[drive].side = 0;
     df[driveSelected].pra  &= 0xFB;      // no disk;
+    df[driveSelected].pra  &= 0xEF;     //cylinder 0
     return df[drive].mfmData;
 }
 
 void floppyState(){
-    CIAA.pra |= df[driveSelected].pra & 0x3C;
+    CIAA.pra &= 0xC3;
+    CIAA.pra |= df[driveSelected].pra;
 }
 
 void floppySetState(){            //To be called when Writes to CIAB prb happen.
@@ -294,7 +304,7 @@ void floppySetState(){            //To be called when Writes to CIAB prb happen.
         PRB = CIAB.prb;
         return;
     }
-     */
+    */
     
     PRB = CIAB.prb;
     
@@ -310,17 +320,14 @@ void floppySetState(){            //To be called when Writes to CIAB prb happen.
 
         case 0x68:
             driveSelected = 1;
-            //return;
             break;
             
         case 0x58:
             driveSelected = 2;
-            //return;
             break;
             
         case 0x38:
             driveSelected = 3;
-            //return;
             break;
             
         default:
@@ -330,24 +337,26 @@ void floppySetState(){            //To be called when Writes to CIAB prb happen.
 
     //printf("%d: ",count);
     
-    //ID mode... to identify exteernal drives...
+    //ID mode... to identify external drives...
      if(df[driveSelected].idMode>0){   // Id mode
-         //printf("DF%d ID Mode: %d\n",driveSelected,df[driveSelected].idMode); // The Disk Ready sitnal is pusled 32 times to signle a drive is present on the bus
+         printf("DF%d ID Mode: %d\n",driveSelected,df[driveSelected].idMode); // The Disk Ready sitnal is pusled 32 times to signle a drive is present on the bus
          df[driveSelected].pra  &= 0xDF;     //Drive ready flag signals the drive is there
          df[driveSelected].idMode -=1;
          CIAA.pra |= df[driveSelected].pra & 0x3C;
          return;
      }
     
-    // If no change in state just
+    
+
+    
+    // If no change in state just return
     if(PRB == df[driveSelected].prb){
         //printf("---\n");
-        df[driveSelected].prb = PRB;
         return;
     }
     
 
-    df[driveSelected].prb = PRB;
+
     
 
     //printf("DF%d - ",driveSelected);
@@ -366,54 +375,69 @@ void floppySetState(){            //To be called when Writes to CIAB prb happen.
         //printf(" Motor On ");
         //df[driveSelected].prb  &= 0x7F;
         
-        if(df[driveSelected].pra & 0x4){     // disk inserted
+        if(df[driveSelected].pra & 0x4){     // if disk is inserted  then
             df[driveSelected].pra  &= 0xDF;  // Drive ready
         }
+        //floppySync=0;
+    }
+    
+
+    
+    //Step head (don't step again if we've already stepped)
+    if( (PRB & 0x1) && !(df[driveSelected].prb & 0x1) ){
+        //printf("%04x - DF%d Click\n",count,driveSelected);
         
+        if(PRB & 0x2){
+            df[driveSelected].cylinder -=1;
+            //printf("DF%d Head Stepped back: %d\n",driveSelected,df[driveSelected].cylinder);
+        }else{
+            df[driveSelected].cylinder +=1;
+           //printf("DF%d Head Stepped forward: %d\n",driveSelected,df[driveSelected].cylinder);
+        }
+        
+        if(df[driveSelected].cylinder < 0){
+            df[driveSelected].cylinder = 0;
+        }
+    
+        
+        if(df[driveSelected].cylinder >79){    //not sure why sometimes the drive tries to go up to track 80.. with ks1.3
+            df[driveSelected].cylinder = 79;
+        }
+        
+        //floppySync = 0;
+        
+        //printf(" to track %d|",df[driveSelected].track);
+        
+    }
+    
+    
+    if(df[driveSelected].cylinder==0){
+        df[driveSelected].pra  &= 0xEF; //Track 0 reached
+    }else{
+        df[driveSelected].pra  |= 0X10; // not track 0;
     }
     
     
     if(PRB & 0x4){
         df[driveSelected].side = 0;
         //df[driveSelected].prb |= 0x4;
-        //printf(" -upper surface.");
+        //printf(" -lower surface.\n");
+        //floppySync = 0;
         
     }else{
         df[driveSelected].side = 1;
         //df[driveSelected].prb &= 0xFB;
-        //printf(" -lower surface.");
+        //printf(" -upper surface.\n");
+        //floppySync = 0;
     }
-
     
-    //Step head
-    if(PRB & 0x1){
-        
-        
-        if(PRB & 0x2){
-            df[driveSelected].track -=1;
-            //printf(" Head Stepped back ");
-        }else{
-            df[driveSelected].track +=1;
-           // printf(" Head Stepped forward ");
-        }
-        
-        if(df[driveSelected].track < 0){
-            df[driveSelected].track = 0;
-        }
-        
-        if(df[driveSelected].track==0){
-            df[driveSelected].pra  &= 0xEF; //Track 0 reached
-        }else{
-            df[driveSelected].pra  |= 0X10; // not track 0;
-        }
-        
-        //printf(" to track %d|",df[driveSelected].track);
-        
-    }
+    
+    df[driveSelected].prb = PRB;
     
     //printf("\n");
+    CIAA.pra &= 0xC3;
+    CIAA.pra |= df[driveSelected].pra;
     
-    CIAA.pra |= df[driveSelected].pra & 0x3C;
     //CIAB.prb |= df[driveSelected].prb & 0x87;
     
 

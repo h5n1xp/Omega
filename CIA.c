@@ -55,10 +55,12 @@ void CIAWrite(CIA_t* cia,int reg,uint8_t value){
             
         case 0x0:cia->pra = value & 63;break;//pra
         case 0x1://prb - Due to the floppy drive's dependance upon this register, it only flags a change if the write actually changed the value.
+            /*
             if(value != cia->prb){
                 cia->prbw = value;
                 cia->prbChanged=1;
             }
+             */
             cia->prb = value;
             floppySetState();
             break;

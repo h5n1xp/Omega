@@ -112,11 +112,11 @@ void (*DMALores[])() = {
     evenCycle,
     audio0Cycle,
     evenCycle,
-    audioCycle,
+    audio1Cycle,
     evenCycle,
-    audioCycle,
+    audio2Cycle,
     evenCycle,
-    audioCycle,
+    audio3Cycle,
     evenCycle,
     spriteCycle,    //00
     evenCycle,
@@ -351,11 +351,11 @@ void (*DMAHires[]) (void) = {
     evenCycle,
     audio0Cycle,
     evenCycle,
-    audioCycle,
+    audio1Cycle,
     evenCycle,
-    audioCycle,
+    audio2Cycle,
     evenCycle,
-    audioCycle,
+    audio3Cycle,
     evenCycle,
     spriteCycle,//00
     evenCycle,
@@ -754,14 +754,13 @@ int turboFloppy = 8;    //8 for turbo
 
 void diskCycle(void){
     
+        
     if( (chipset.dmaconr & 0x210) && chipset.dsklen & 0x8000 ){
         
         if(chipset.dsklen & 0x3FFF){
             
             
             //OS2+ Disk loading
-            static int sync = 0;
-
             
             for(int i=0;i<turboFloppy;++i){
                 
@@ -780,14 +779,16 @@ void diskCycle(void){
                     putChipReg16[INTREQ](0x9000);   //DSKSYNC INT
                     chipset.dskbytr |= 0x1000;  // set word sync bit
                 
-                    if(sync==0){
-                        //printf("dsklen: %04x, dskpt: %06x\n",chipset.dsklen & 0x3FFF,chipset.dskpt);
-                        sync=1;
-                        //return;
+                    if(floppySync==0){
+                    
+                        //printf("dsklen: %04x, dskpt: %06x | Track %d | Side %d | Index %d\n",chipset.dsklen & 0x3FFF,chipset.dskpt,df[driveSelected].cylinder,df[driveSelected].side,df[driveSelected].index);
+                        floppySync=1;
+                        return;
                     }
                 }
                 
-                if(sync == 1){
+                if(floppySync == 1){
+                    
                     //chipset.dskbytr &= 0xEFFF;      //clear word sync
                     low16Meg[chipset.dskpt] = b1;
                     chipset.dskpt +=1;
@@ -799,7 +800,7 @@ void diskCycle(void){
                 
                     if( (chipset.dsklen & 0x3FFF) == 0){
                         putChipReg16[INTREQ](0x8002);   //Disk block loaded INT
-                        sync = 0;
+                        floppySync = 0;
                         return;
                     }
                 
@@ -847,26 +848,100 @@ void diskCycle(void){
     oddCycle();
 }
 
+
 void audio0Cycle(void){
     
     if((chipset.dmacon & 0x201) == 0x201){
         
-        chipset.aud0len -=1;
+        internal.audio0Countdown -=1;
         
-        if(chipset.aud0len ==0){
-            putChipReg16[INTREQ](0x8080);
+        if(internal.audio0Countdown<0){
+            internal.audio0Countdown = chipset.aud0per;
+
+        
+            chipset.aud0len -=1;
+        
+            if(chipset.aud0len ==0){
+                internal.audio0Countdown = 0;
+                putChipReg16[INTREQ](0x8080);
+            }
         }
-        
         return;
     }
     
-    
-}
-
-void audioCycle(void){
-    //dummy cycle slot
     oddCycle();
 }
+
+
+void audio1Cycle(void){
+    
+    if((chipset.dmacon & 0x202) == 0x202){
+        
+        internal.audio1Countdown -=1;
+        
+        if(internal.audio1Countdown<0){
+            internal.audio1Countdown = chipset.aud1per;
+            
+            
+            chipset.aud1len -=1;
+            
+            if(chipset.aud1len ==0){
+                internal.audio1Countdown = 0;
+                putChipReg16[INTREQ](0x8100);
+            }
+        }
+        return;
+    }
+    
+    oddCycle();
+}
+
+void audio2Cycle(void){
+    
+    if((chipset.dmacon & 0x204) == 0x204){
+        
+        internal.audio2Countdown -=1;
+        
+        if(internal.audio2Countdown<0){
+            internal.audio2Countdown = chipset.aud2per;
+            
+            
+            chipset.aud2len -=1;
+            
+            if(chipset.aud2len ==0){
+                internal.audio2Countdown = 0;
+                putChipReg16[INTREQ](0x8200);
+            }
+        }
+        return;
+    }
+    
+    oddCycle();
+}
+
+void audio3Cycle(void){
+    
+    if((chipset.dmacon & 0x208) == 0x208){
+        
+        internal.audio3Countdown -=1;
+        
+        if(internal.audio3Countdown<0){
+            internal.audio3Countdown = chipset.aud3per;
+            
+            
+            chipset.aud3len -=1;
+            
+            if(chipset.aud3len ==0){
+                internal.audio3Countdown = 0;
+                putChipReg16[INTREQ](0x8400);
+            }
+        }
+        return;
+    }
+    
+    oddCycle();
+}
+
 
 void spriteCycle(void){
 

@@ -140,7 +140,19 @@ void cop2lchL(uint32_t value){  //
 }
 
 void aud0lcL(uint32_t value){
-    chipset.aud0lc = value;
+    chipset.aud0lc = value >> 1;    //word aligned
+}
+
+void aud1lcL(uint32_t value){
+    chipset.aud1lc = value >> 1;    //word aligned
+}
+
+void aud2lcL(uint32_t value){
+    chipset.aud2lc = value >> 1;    //word aligned
+}
+
+void aud3lcL(uint32_t value){
+    chipset.aud3lc = value >> 1;    //word aligned
 }
 
 void aud0perL(uint32_t value){  //
@@ -255,9 +267,16 @@ void dskptl(uint16_t value){
 
 void dsklen(uint16_t value){
     static int dskDMALock = 0; //the dsklen register need to be written twice to update
-    
-    dskDMALock +=1;
 
+    
+    if(value & 0x8000){
+        dskDMALock +=1;
+    }else{
+        dskDMALock = 0;
+    }
+
+    //printf("dsklen called: %04x (Lock:%d)\n",value,dskDMALock);
+    
     if(dskDMALock==2){
         chipset.dsklen = value; //a write of 0X8000 here is a secondary lock on the DMA to avoid accidental disk writes
         dskDMALock =0;
@@ -402,20 +421,16 @@ void dsksync(uint16_t value){
 }
 
 void cop1lch(uint16_t value){
-//    chipset.cop1lc = (chipset.cop1lc & 0x0000FFFF) | ((value & 31) <<16); //only 5 bits as this is a weird ECS/OCS hibrid
       chipset.cop1lc = (value << 15) | (chipset.cop1lc & 0x00007FFF); //this is only shifted by 15 because all addresses are word aligend
 }
 void cop1lcl(uint16_t value){
-//    chipset.cop1lc = (chipset.cop1lc & 0xFFFF0000) |  (value & 65535);
 //    printf("(16bit)Copper 1: %0x\n",chipset.cop1lc);
         chipset.cop1lc = (value >> 1)  | (chipset.cop1lc & 0xFFFF8000);
 }
 void cop2lch(uint16_t value){
-//    chipset.cop2lc = (chipset.cop2lc & 0x0000FFFF) | ((value & 31) <<16); //only 5 bits as this is a weird ECS/OCS hibrid
       chipset.cop2lc = (value << 15) | (chipset.cop1lc & 0x00007FFF); //this is only shifted by 15 because all addresses are word aligend
 }
 void cop2lcl(uint16_t value){
-//    chipset.cop2lc = (chipset.cop2lc & 0xFFFF0000) |  (value & 65535);
 //    printf("(16bit)Copper 2: %0x\n",chipset.cop2lc);
     chipset.cop2lc = (value >> 1)  | (chipset.cop2lc & 0xFFFF8000);
 }
@@ -497,7 +512,13 @@ void adkcon(uint16_t value){
     }
 }
 
+void aud0lch(uint16_t value){
+    chipset.aud0lc = (value << 15) | (chipset.aud0lc & 0x00007FFF); //this is only shifted by 15 because all addresses are word aligend
+}
 
+void aud0lcl(uint16_t value){
+    chipset.aud0lc = (value >> 1)  | (chipset.aud0lc & 0xFFFF8000);
+}
 
 void aud0len(uint16_t value){
     chipset.aud0len = value;
@@ -515,9 +536,78 @@ void aud0dat(uint16_t value){
     chipset.aud0dat = value;
 }
 
-void aud3vol(uint16_t value){
+void aud1lch(uint16_t value){
+    chipset.aud1lc = (value << 15) | (chipset.aud1lc & 0x00007FFF); //this is only shifted by 15 because all addresses are word aligend
+}
+
+void aud1lcl(uint16_t value){
+    chipset.aud1lc = (value >> 1)  | (chipset.aud1lc & 0xFFFF8000);
+}
+
+void aud1len(uint16_t value){
+    chipset.aud1len = value;
+}
+
+void aud1per(uint16_t value){
+    chipset.aud1per = value;
+}
+
+void aud1vol(uint16_t value){
     chipset.aud0vol = value;
 }
+
+void aud1dat(uint16_t value){
+    chipset.aud1dat = value;
+}
+
+void aud2lch(uint16_t value){
+    chipset.aud2lc = (value << 15) | (chipset.aud2lc & 0x00007FFF); //this is only shifted by 15 because all addresses are word aligend
+}
+
+void aud2lcl(uint16_t value){
+    chipset.aud2lc = (value >> 1)  | (chipset.aud2lc & 0xFFFF8000);
+}
+
+void aud2len(uint16_t value){
+    chipset.aud2len = value;
+}
+
+void aud2per(uint16_t value){
+    chipset.aud2per = value;
+}
+
+void aud2vol(uint16_t value){
+    chipset.aud2vol = value;
+}
+
+void aud2dat(uint16_t value){
+    chipset.aud2dat = value;
+}
+
+void aud3lch(uint16_t value){
+    chipset.aud3lc = (value << 15) | (chipset.aud3lc & 0x00007FFF); //this is only shifted by 15 because all addresses are word aligend
+}
+
+void aud3lcl(uint16_t value){
+    chipset.aud3lc = (value >> 1)  | (chipset.aud3lc & 0xFFFF8000);
+}
+
+void aud3len(uint16_t value){
+    chipset.aud3len = value;
+}
+
+void aud3per(uint16_t value){
+    chipset.aud3per = value;
+}
+
+void aud3vol(uint16_t value){
+    chipset.aud3vol = value;
+}
+
+void aud3dat(uint16_t value){
+    chipset.aud3dat = value;
+}
+
 
 void bpl1pth(uint16_t value){
     chipset.bpl1pt = (value << 15) | (chipset.bpl1pt & 0x00007FFF); //this is only shifted by 15 because all addresses are word aligend
@@ -1171,6 +1261,48 @@ uint16_t (*getChipReg16[])(void) = {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void (*putChipReg32[])(uint32_t) ={
     longWrite,
     noopL,
@@ -1260,7 +1392,7 @@ void (*putChipReg32[])(uint32_t) ={
     longWrite,
     longWrite,
     longWrite,
-    longWrite,
+    aud1lcL,
     longWrite,
     longWrite,
     aud1perL,
@@ -1268,7 +1400,7 @@ void (*putChipReg32[])(uint32_t) ={
     longWrite,
     longWrite,
     longWrite,
-    longWrite,
+    aud2lcL,
     longWrite,
     longWrite,
     aud2perL,
@@ -1276,7 +1408,7 @@ void (*putChipReg32[])(uint32_t) ={
     longWrite,
     longWrite,
     longWrite,
-    longWrite,
+    aud3lcL,
     longWrite,
     longWrite,
     aud3perL,
@@ -1925,79 +2057,6 @@ void (*putChipReg32[])(uint32_t) ={
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void (*putChipReg16[])(uint16_t) ={
     wordIllegalWrite,
     wordIllegalWrite,
@@ -2079,38 +2138,38 @@ void (*putChipReg16[])(uint16_t) ={
     intena,
     intreq,
     adkcon,
-    wordWrite,
-    wordWrite,
+    aud0lch,
+    aud0lcl,
     aud0len,
     aud0per,
     aud0vol,
     aud0dat,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
     noop,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
-    wordWrite,
+    noop,
+    aud1lch,
+    aud1lcl,
+    aud1len,
+    aud1per,
+    aud1vol,
+    aud1dat,
+    noop,
+    noop,
+    aud2lch,
+    aud2lcl,
+    aud2len,
+    aud2per,
+    aud2vol,
+    aud2dat,
+    noop,
+    noop,
+    aud3lch,
+    aud3lcl,
+    aud3len,
+    aud3per,
     aud3vol,
-    wordWrite,
-    wordWrite,
-    wordWrite,
+    aud3dat,
+    noop,
+    noop,
     bpl1pth,
     bpl1ptl,
     bpl2pth,

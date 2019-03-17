@@ -95,6 +95,7 @@ SDL_atomic_t cpuWait;
 
 
 
+
 const uint8_t keyMapping[] ={
     0x0,
     0x0,
@@ -123,7 +124,7 @@ const uint8_t keyMapping[] ={
     0x0,
     0x0,
     0x0,
-    0x0,
+    0x45,
     0x0,
     0x0,
     0x0,
@@ -156,15 +157,15 @@ const uint8_t keyMapping[] ={
     0x09,
     0x0,
     0x29,
-    0x51,
+    0x52,
     0xC,
-    0x53,
     0x54,
     0x55,
     0x56,
+    0x57,
     0x58,
     0x59,
-    0x46,   //F11 -> Del    //THese 2 keys are mapped this way for laptops without Del and Help keys
+    0x46,   //F11 -> Del    //These 2 keys are mapped this way for laptops without Del and Help keys
     0x5F,   //F12 -> Help
     0x0,
     0x0,
@@ -322,11 +323,11 @@ const uint8_t keyMapping[] ={
     0x0,
     0x63,
     0x60,
-    0x0,
+    0x64,
     0x66,
     0x0,
     0x61,
-    0x0,
+    0x65,
     0x67,
     0x0,
     0x0,
@@ -341,7 +342,7 @@ int keyMask = 0;       //This will flag when Ctrl-Amiga-Amiga has been pressed t
 void pressKey(uint16_t keyCode){
     CIAWrite(&CIAA, 0xC, ~(keyMapping[keyCode]<<1) );      //place value in register
     keyboardInt();  //raise Serial port interrupt flag
-    //printf("keyCode: %d -> %02x (down)\n",keyCode,keyMapping[keyCode]);
+    printf("keyCode: %d -> %02x (down)\n",keyCode,keyMapping[keyCode]);
     
     //Ctrl
     if(keyCode==224){
@@ -534,7 +535,7 @@ void hostDisplay(){
         
         SDL_Rect spin={5,winY-60,50,50};
         double angle = ((double)df[0].index/6400.0)*365.0;
-        SDL_Rect head = {29,(winY-59)+(df[0].track/6),3,3};
+        SDL_Rect head = {29,(winY-59)+(df[0].cylinder/6),3,3};
         
         if(df[0].pra & 0x4){
             //Spinny disk
@@ -554,7 +555,7 @@ void hostDisplay(){
             //Disk head
             SDL_SetRenderDrawColor(host.renderer, 255, 255, 255, 255);
             head.x +=50;
-            head.y = (winY-59)+(df[1].track/6);
+            head.y = (winY-59)+(df[1].cylinder/6);
             SDL_RenderFillRect(host.renderer,&head);
         }
         
@@ -567,7 +568,7 @@ void hostDisplay(){
             //Disk head
             SDL_SetRenderDrawColor(host.renderer, 255, 255, 255, 255);
             head.x +=50;
-            head.y = (winY-59)+(df[2].track/6);
+            head.y = (winY-59)+(df[2].cylinder/6);
             SDL_RenderFillRect(host.renderer,&head);
         }
         
@@ -580,7 +581,7 @@ void hostDisplay(){
             //Disk head
             SDL_SetRenderDrawColor(host.renderer, 255, 255, 255, 255);
             head.x +=50;
-            head.y = (winY-59)+(df[3].track/6);
+            head.y = (winY-59)+(df[3].cylinder/6);
             SDL_RenderFillRect(host.renderer,&head);
         }
     }

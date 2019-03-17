@@ -29,8 +29,10 @@ void dramCycle(void);
 void diskCycle(void);
 
 void audio0Cycle(void);
+void audio1Cycle(void);
+void audio2Cycle(void);
+void audio3Cycle(void);
 
-void audioCycle(void);
 
 void spriteCycle(void);
 

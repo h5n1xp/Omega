@@ -34,13 +34,18 @@ unsigned char* _emulatorMemory;
 void cpu_pulse_reset(void){
     uint32_t pc = m68k_get_reg(NULL, M68K_REG_PC);
     uint32_t sp = m68k_get_reg(NULL, M68K_REG_SP);
-    ChipsetInit();
-    
+
     printf("PC:%0x6\n",pc);
     printf("SP:%0x6\n",sp);
     
     printf("Machine reset...\n");
-    cpu_init();
+    
+    //clear RAM
+    for(int i=0;i<0x1FFFFF;i++){
+        low16Meg[i]=0;
+    }
+    ChipsetInit();
+    m68k_set_reg(M68K_REG_PC, 0xF80002); //start executing at the ROM + 2
     
 }
 
@@ -88,7 +93,7 @@ void cpu_execute(){
     uint32_t* guru = low16Meg;
  */
     
-    m68k_execute(1);
+    m68k_execute(16);
 
 }
 
@@ -155,6 +160,9 @@ unsigned int cpu_read_byte(unsigned int address){
     //If Address > 0xFFFFFF (the low16Meg), then access the BCM2837 chip
     //Not needed if running on a real RaspberryPi. just allow the CPU to access the memory.
     
+    //maskout 32bit address for now
+    address &=0xFFFFFF;
+    
     return chipReadByte(address);
     
 }
@@ -172,6 +180,9 @@ unsigned int cpu_read_long(unsigned int address){
     
     //If Address > 0xFFFFFF (the low16Meg), then access the BCM2837 chip
     //Not needed if running on a real RaspberryPi. just allow the CPU to access the memory.
+    
+    //maskout 32bit address for now
+    address &=0xFFFFFF;
     
     return chipReadLong(address);
     
@@ -213,7 +224,7 @@ void cpu_write_long(unsigned int address,unsigned int value){
 // Called when the CPU acknowledges an interrupt
 int cpu_irq_ack(int level)
 {
-    return 0;
+    return level;
     /*
      switch(level)
      {

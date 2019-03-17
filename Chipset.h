@@ -509,6 +509,11 @@ typedef struct{
     uint16_t comparisonMask;    //comparison mask for wait and skip
     uint16_t LOF; //LOF bit
     
+    int audio0Countdown;
+    int audio1Countdown;
+    int audio2Countdown;
+    int audio3Countdown;
+    
     int vPos;
     int hPos;
     uint16_t* chipramW; //word addressed
