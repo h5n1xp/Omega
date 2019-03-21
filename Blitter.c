@@ -465,6 +465,9 @@ void blitter_execute(Chipset_t* chipset){
             int sizev = chipset->bltsizv;
             int lastHWord=sizeh - 1;
             
+            //All operations start with a Zero Flag
+            chipset->dmaconr = chipset->dmaconr | 0x2000;   //set zero flag
+            
             for(int y=0;y<sizev;++y){
                 
                 uint16_t previousA = 0;
@@ -530,9 +533,7 @@ void blitter_execute(Chipset_t* chipset){
                     channelD = logicFunction(minterm, channelA, channelB, cdat);
                     
                     //Zero Flag
-                    if(channelD==0){
-                        chipset->dmaconr = chipset->dmaconr | 0x2000;   //set zero flag
-                    }else{
+                    if(channelD!=0){
                         chipset->dmaconr = chipset->dmaconr & 0xDFFF; // clear zero flag
                     }
                     
