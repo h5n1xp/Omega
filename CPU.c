@@ -40,8 +40,8 @@ void cpu_pulse_reset(void){
     
     printf("Machine reset...\n");
     
-    //clear RAM
-    for(int i=0;i<0x1FFFFF;i++){
+    //clear RAM (don't wipe long at address 0 as that signals a Guru occured)
+    for(int i=4;i<0x1FFFFF;i++){
         low16Meg[i]=0;
     }
     ChipsetInit();

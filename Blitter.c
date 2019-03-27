@@ -447,11 +447,17 @@ void blitter_execute(Chipset_t* chipset){
             int cpt=(chipset->bltcpt >> 1);
             int dpt=(chipset->bltdpt >> 1);
             
+            //Shifted seems to work properly
+            int amod=chipset->bltamod >> 1;
+            int bmod=chipset->bltbmod >> 1;
+            int cmod=chipset->bltcmod >> 1;
+            int dmod=chipset->bltdmod >> 1;
             
-            int amod=chipset->bltamod / 2; //these are signed so need to be divided not shifted
-            int bmod=chipset->bltbmod / 2;
-            int cmod=chipset->bltcmod / 2;
-            int dmod=chipset->bltdmod / 2;
+            //these are signed so need to be divided not shifted... but doesn't work properly
+            //int amod=chipset->bltamod / 2;
+            //int bmod=chipset->bltbmod / 2;
+            //int cmod=chipset->bltcmod / 2;
+            //int dmod=chipset->bltdmod / 2;
             
             uint16_t adat=chipset->bltadat;
             uint16_t bdat=chipset->bltbdat;

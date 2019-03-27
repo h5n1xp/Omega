@@ -458,6 +458,13 @@ void hostInit(){
 
 void toggleLEDs(){
     LEDActive = 1 - LEDActive;
+    
+    //Capture mouse if no leds
+    if(LEDActive==1){
+        SDL_SetRelativeMouseMode(SDL_DISABLE);
+    }else{
+        SDL_SetRelativeMouseMode(SDL_ENABLE);
+    }
 }
 
 void hostDisplay(){

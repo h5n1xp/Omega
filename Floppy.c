@@ -339,7 +339,7 @@ void floppySetState(){            //To be called when Writes to CIAB prb happen.
     
     //ID mode... to identify external drives...
      if(df[driveSelected].idMode>0){   // Id mode
-         printf("DF%d ID Mode: %d\n",driveSelected,df[driveSelected].idMode); // The Disk Ready sitnal is pusled 32 times to signle a drive is present on the bus
+         //printf("DF%d ID Mode: %d\n",driveSelected,df[driveSelected].idMode); // The Disk Ready sitnal is pusled 32 times to signle a drive is present on the bus
          df[driveSelected].pra  &= 0xDF;     //Drive ready flag signals the drive is there
          df[driveSelected].idMode -=1;
          CIAA.pra |= df[driveSelected].pra & 0x3C;

@@ -43,7 +43,7 @@ int disass = 0; //set to any value greter than 0 to turn on dissassembler
 //run the CPU in a seprate thread... need to sort out interrupts first...
 int thd68k(void* data){
     
-    SDL_Delay(250);
+    SDL_Delay(500);
     printf("CPU Running\n");
     
     while(1){
@@ -65,7 +65,7 @@ int main(int argc, char * argv[]) {
     if(argc>1){
         fd = open(argv[1],O_RDWR);
     }else{
-        fd = open("/Users/Shared/uae/roms/Kick2.rom",O_RDONLY); //"/Users/Shared/uae/roms/Kick12.rom" "/Users/Shared/uae/roms/DiagROM"  "/Users/Shared/uae/roms/Kick3.rom"
+        fd = open("/Users/Shared/uae/roms/Kick13.rom",O_RDONLY); //"/Users/Shared/uae/roms/Kick12.rom" "/Users/Shared/uae/roms/DiagROM"  "/Users/Shared/uae/roms/Kick3.rom"
         if(fd<1){
             printf("Usage: zorro <kickstart.rom> <raw adf image>\n");
         return 0;
@@ -116,8 +116,8 @@ int main(int argc, char * argv[]) {
         //fd = open("/Users/Shared/uae/DosUae/amiga_500a_Tutorial_Disk.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/CuAmiga15.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/LEMM1.ADF",O_RDONLY);
-        //fd =open("/Users/Shared/uae/ADF/Defender of the Crown (1986)(Mindscape)(Disk 1 of 2).adf",O_RDONLY);
-        fd = open("/Users/Shared/uae/ADF/AmigaTestKit.adf",O_RDONLY);
+        fd =open("/Users/Shared/uae/ADF/Defender of the Crown (1986)(Mindscape)(Disk 1 of 2).adf",O_RDONLY);
+        //fd = open("/Users/Shared/uae/ADF/AmigaTestKit.adf",O_RDONLY);
     }
     
     //fd = open("/Users/Shared/uae/WORKBENCH/raw3.adf",O_RDONLY);
@@ -154,8 +154,8 @@ int main(int argc, char * argv[]) {
         //fd = open("/Users/Shared/uae/DosUae/af025_1991_08_d025.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/CuAmiga15.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/WORKBENCH/EX-1_3.adf",O_RDONLY);
-        fd = open("/Users/Shared/uae/DosUae/Blitz2-2.ADF",O_RDONLY);
-        //fd =open("/Users/Shared/uae/ADF/Defender of the Crown (1986)(Mindscape)(Disk 2 of 2).adf",O_RDONLY);
+        //fd = open("/Users/Shared/uae/DosUae/Blitz2-2.ADF",O_RDONLY);
+        fd =open("/Users/Shared/uae/ADF/Defender of the Crown (1986)(Mindscape)(Disk 2 of 2).adf",O_RDONLY);
     }
     
     

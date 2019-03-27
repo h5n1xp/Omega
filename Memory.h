@@ -15,7 +15,7 @@
 #ifndef Memory_h
 #define Memory_h
 
-#define NOSLOWRAM
+//#define NOSLOWRAM
 //#define THREADED_CPU
 
 

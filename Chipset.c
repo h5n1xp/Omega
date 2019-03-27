@@ -22,6 +22,18 @@
 Chipset_t chipset;
 Internal_t internal;
 
+int planeMask[]={
+    0x00,
+    0x01,
+    0x03,
+    0x07,
+    0x0F,
+    0x1F,
+    0x3F,
+    0x7F,
+    0xFF
+};
+
 void ChipsetInit(){
     
     internal.chipramW =(uint16_t*)low16Meg;
@@ -107,6 +119,11 @@ void bltapthL(uint32_t value){  //
 
 void bltdpthL(uint32_t value){  //
     chipset.bltdpt = value;
+}
+
+void bltcmodL(uint32_t value){
+    chipset.bltcmod = value >> 16;
+    chipset.bltbmod = value & 65535;
 }
 
 void bltbmodL(uint32_t value){  //
@@ -343,22 +360,19 @@ void bltbpth(uint16_t value){
     chipset.bltbpt = (value << 16) | (chipset.bltbpt & 0x0000FFFF); //using the new 32bit register
 }
 void bltbptl(uint16_t value){
-    chipset.bltbpt =  value        | (chipset.bltbpt & 0xFFFF0000);//using the new 32bit register
+    chipset.bltbpt =  value        | (chipset.bltbpt & 0xFFFF0000); //using the new 32bit register
 }
 void bltapth(uint16_t value){
     chipset.bltapt = (value << 16) | (chipset.bltapt & 0x0000FFFF); //using the new 32bit register
 }
 void bltaptl(uint16_t value){
-
-    chipset.bltapt =  (chipset.bltapt & 0xFFFF0000);//using the new 32bit register
-    chipset.bltapt = chipset.bltapt | value;
-
+    chipset.bltapt =  value        | (chipset.bltapt & 0xFFFF0000); //using the new 32bit register
 }
 void bltdpth(uint16_t value){
     chipset.bltdpt = (value << 16) | (chipset.bltdpt & 0x0000FFFF); //using the new 32bit register
 }
 void bltdptl(uint16_t value){
-    chipset.bltdpt =  value        | (chipset.bltdpt & 0xFFFF0000);//using the new 32bit register
+    chipset.bltdpt =  value        | (chipset.bltdpt & 0xFFFF0000); //using the new 32bit register
 }
 
 void bltsize(uint16_t value){
@@ -390,8 +404,8 @@ void bltsizh(uint16_t value){
     chipset.bltsizh = value;
     chipset.bltsize = chipset.bltsizh;   //use the old OCS register to keep a copy of the blit width.
     
-    //Set to blitter busy
-    chipset.dmaconr =chipset.dmaconr | 16384;
+    //Set to blitter busy and start the blitter
+    chipset.dmaconr =chipset.dmaconr | 0x4000;
 }
 
 void bltcmod(uint16_t value){
@@ -464,10 +478,12 @@ void diwstop(uint16_t value){
 
 void ddfstrt(uint16_t value){
     chipset.ddfstrt = value;
+    //printf("Fetch Start: %02x\n",value);
 }
 
 void ddfstop(uint16_t value){
     chipset.ddfstop = value;
+    //printf("Fetch Stop: %02x\n",value);
 }
 
 void  dmacon(uint16_t value){
@@ -610,7 +626,7 @@ void aud3dat(uint16_t value){
 
 
 void bpl1pth(uint16_t value){
-    chipset.bpl1pt = (value << 15) | (chipset.bpl1pt & 0x00007FFF); //this is only shifted by 15 because all addresses are word aligend
+    chipset.bpl1pt = (value << 15) | (chipset.bpl1pt & 0x00007FFF); //this is only shifted by 15 because all bitplane addresses are word aligend
 }
 void bpl1ptl(uint16_t value){
     chipset.bpl1pt = (value >> 1)  | (chipset.bpl1pt & 0xFFFF8000);
@@ -667,24 +683,13 @@ void bpl8ptl(uint16_t value){
 
 void bplcon0(uint16_t value){
     
-    displayLineReset(); //restart drawing if the bplcon has changed. THis might need to take a value as to how many lines were needed to change the mode
+    displayLineReset(); //restart drawing if the bplcon has changed. This might need to take a value as to how many lines were needed to change the mode
 
     chipset.bplcon0 = value;
     
     int planes = (value >> 12) & 7 ;
     
-    switch(planes){
-        case 0: internal.bitplaneMask  = 0x00;break;
-        case 1: internal.bitplaneMask  = 0x01;break;
-        case 2: internal.bitplaneMask  = 0x03;break;
-        case 3: internal.bitplaneMask  = 0x07;break;
-        case 4: internal.bitplaneMask  = 0x0F;break;
-        case 5: internal.bitplaneMask  = 0x1F;break;
-        case 6: internal.bitplaneMask  = 0x3F;break;
-        case 7: internal.bitplaneMask  = 0x7F;break;
-        case 8: internal.bitplaneMask  = 0xFF;break;
-        default: internal.bitplaneMask = 0x0;break;
-    }
+    internal.bitplaneMask = planeMask[planes];
 }
 
 void bplcon1(uint16_t value){
@@ -703,7 +708,9 @@ void bpl1mod(uint16_t value){
 void bpl2mod(uint16_t value){
     chipset.bpl2mod = value >> 1;
 }
-
+void bplcon4(uint16_t value){
+    //No AGA support yet
+}
 
 void bpl1dat(uint16_t value){
     chipset.bpl1dat = value;
@@ -1089,6 +1096,10 @@ void beamcon0(uint16_t value){
     chipset.beamcon0 = value;
 }
 
+void fmode(uint16_t value){
+    //no aga support yet
+}
+
 void noop(uint16_t value){
     
 }
@@ -1291,18 +1302,6 @@ uint16_t (*getChipReg16[])(void) = {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 void (*putChipReg32[])(uint32_t) ={
     longWrite,
     noopL,
@@ -1352,7 +1351,7 @@ void (*putChipReg32[])(uint32_t) ={
     longWrite,
     longWrite,
     longWrite,
-    longWrite,
+    bltcmodL,
     bltbmodL,
     bltamodL,
     longWrite,
@@ -2003,60 +2002,6 @@ void (*putChipReg32[])(uint32_t) ={
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void (*putChipReg16[])(uint16_t) ={
     wordIllegalWrite,
     wordIllegalWrite,
@@ -2192,7 +2137,7 @@ void (*putChipReg16[])(uint16_t) ={
     bplcon3,
     bpl1mod,
     bpl2mod,
-    wordWrite,
+    bplcon4,
     wordWrite,
     bpl1dat,
     bpl2dat,
@@ -2312,14 +2257,14 @@ void (*putChipReg16[])(uint16_t) ={
     wordWrite,
     wordWrite,
     wordWrite,
-    wordWrite,
+    fmode,
     noop
 };
 
 void eclock_execute(Chipset_t* chipset){
     
     /*
-    The function is caled every DMA slot, which on a real Amiga lasts 280ns.
+    The function is called every DMA slot, which on a real Amiga lasts 280ns.
     This would be about 3,571,428hz (i.e. 3 million times per second), which is 5 times the eclock frequency
     So this function counts down from 5, and then increments the eClock, at a rate of aproximately 715,909hz. 
      

@@ -38,6 +38,7 @@ unsigned int chipReadByte(unsigned int address){
         return low16Meg[address];
     }
     
+    //Autoconfig space
     if(address>0xDFFFFF){
         return 0;
     }
@@ -80,7 +81,8 @@ unsigned int chipReadByte(unsigned int address){
     
     //24bit fast ram
     if(address>0x1FFFFF){
-        return 0;
+        //return 0;
+        return low16Meg[address];
     }
     
     //RAM
@@ -97,6 +99,7 @@ unsigned int chipReadWord(unsigned int address){
         
     }
     
+    //Autoconfig space
     if(address>0xDFFFFF){
         return 0;
     }
@@ -189,6 +192,7 @@ unsigned int chipReadLong(unsigned int address){
     //Chipregs
     if(address>0xDFEFFF){
         address = (address - 0xDFF000) >> 1;
+        address &=0xFF;  //maskout stupid values
         debugChipAddress = address;
         return getChipReg32[address]();
     }
@@ -274,6 +278,12 @@ void chipWriteByte(unsigned int address,unsigned int value){   //ROM
     if(address>=0xBFD000){
         address = (address - 0xBFD000) >> 8;
         CIAWrite(&CIAB,address,value);return;
+    }
+    
+    //CIA A - weird ROM 3 thing...
+    if(address>=0xBFA001){
+        address = (address - 0xBFA001) >> 8;
+        CIAWrite(&CIAA,address,value);return;
     }
     
     //24bit fast ram
@@ -409,7 +419,11 @@ void chipWriteLong(unsigned int address,unsigned int value){
     
     //24bit fast ram
     if(address>0x1FFFFF){
-        return;
+        //return;
+        uint32_t* dest = (uint32_t*)&low16Meg[address];
+        value = ((value << 8) & 0xFF00FF00 ) | ((value >> 8) & 0xFF00FF );
+        value = value << 16 | value >> 16;
+        *dest = value; return;
     }
     
     //RAM - Incomplete address decding means chip addresses below 2meg wrap around

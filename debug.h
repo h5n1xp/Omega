@@ -155,7 +155,7 @@ static char* regNames[] = {"BLTDDAT",
     "BPLCON3",
     "BPL1MOD",
     "BPL2MOD",
-    "RESERVED14",
+    "BPLCON4",
     "RESERVED15",
     "BPL1DAT",
     "BPL2DAT",
@@ -275,7 +275,7 @@ static char* regNames[] = {"BLTDDAT",
     "RESERVED30",
     "RESERVED31",
     "RESERVED32",
-    "RESERVED33",
+    "FMODE",
     "NO-OP"};
 
 void ADF2MFMOld(int adfSize,uint8_t* adf, uint8_t MFMdisk[80][2][11][1088]);

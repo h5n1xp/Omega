@@ -587,7 +587,7 @@ int lastFetchCycle;
 
 void dma_execute(){
     
-    chipset.vposr   = internal.LOF | internal.vPos >> 8;
+    chipset.vposr   = (internal.LOF | 0x1000) | internal.vPos >> 8; //0x1000 is for NTSC / 0x0000 is for PAL
     chipset.vhposr  = internal.vPos << 8;
     chipset.vhposr |= internal.hPos;
     
@@ -596,6 +596,7 @@ void dma_execute(){
     if(chipset.bplcon0 & 0x8000){
         
         lastFetchCycle = chipset.ddfstrt+160;
+        //lastFetchCycle = chipset.ddfstop+4;
         
         DMAHires[internal.hPos]();
     }else{
@@ -617,9 +618,15 @@ void dma_execute(){
     if(internal.hPos > 0xE3){
         SDL_AtomicSet(&cpuWait, 0);
         
-        //********************************
+
+        //************DeBugging**************
+        int hpos = internal.hPos;
+        int vpos = internal.vPos;
         uint16_t ddfstrt = chipset.ddfstrt;
         uint16_t ddfstop = chipset.ddfstop;
+        uint16_t diwstrt = chipset.diwstrt;
+        uint16_t diwstop = chipset.diwstop;
+        uint16_t actualDdfSyop = lastFetchCycle;
         
         int diff = ddfstop - ddfstrt;
         
@@ -645,6 +652,7 @@ void dma_execute(){
         internal.hPos = 0;
         internal.vPos +=1;
         CIATODEvent(&CIAB);
+        
         
         //Update bitplane modulo
         chipset.bpl1pt += chipset.bpl1mod;
@@ -809,38 +817,6 @@ void diskCycle(void){
             
             
             return;
-            
-            //OS 1.3 loader
-            uint8_t byte1;
-            uint8_t byte2;
-            
-            //For faster floppy loading double up the data read
-
-                
-            for(int i=0;i<turboFloppy;++i){
-                        byte1 = floppyDataRead();
-                    low16Meg[chipset.dskpt] = byte1;
-                    chipset.dskpt +=1;
-                        byte2 = floppyDataRead();
-                    low16Meg[chipset.dskpt] = byte2;
-                    chipset.dskpt +=1;
-                    chipset.dsklen -= 1;
-                
-                    /*
-                    if( (byte1 == 0x44) && (byte2 ==0x89) ){
-                        putChipReg16[INTREQ](0x9000);   //DSKSYNC
-                        chipset.dskbytr |= 0x1000;
-                    }
-                    */
-                    
-                    if( (chipset.dsklen & 0x3FFF) == 0){
-                        putChipReg16[INTREQ](0x8002);
-                        return;
-                    }
-            }
-
-        }else{
-            //floppyDataRead();   //spin the disk
         }
        
     }
@@ -970,7 +946,6 @@ int bitplaneActive(){
     
     //too early vertical position let the Copper and Blitter run
     if(internal.vPos<(chipset.diwstrt>>8)){
-        
         return 0;
     }
     
@@ -1043,6 +1018,7 @@ void loresPlane1(void){
     
     //don't start actually rendering a deiplay before 44 lines
     if(internal.vPos<44){
+        evenCycle();
         return;
     }
     
@@ -1054,7 +1030,6 @@ void loresPlane1(void){
     }
     host.FBCounter +=16;
     
-
 }
 
 
@@ -1136,8 +1111,9 @@ void hiresPlane1(){
     
     }
         
-    //don't start actually rendering a deiplay before 44 lines
+    //don't start actually rendering a display before 44 lines
     if(internal.vPos<43){
+        evenCycle();
         return;
     }
     
@@ -1165,17 +1141,12 @@ void drawBlank(){
     if(pixbuff==NULL || internal.vPos<44){
         return;
     }
-    return;
-    int res=16;
     
-    if(chipset.bplcon0 & 0x8000){
-        return;
+    for(int i=0;i<16;++i){
+        //pixbuff[host.FBCounter+i]=internal.palette[0];
+        pixbuff[host.FBCounter+i]=rand()%4294967296;
     }
-    
-    for(int i=0;i<res;++i){
-        pixbuff[host.FBCounter]=internal.palette[0];
-        host.FBCounter +=1;
-    }
+    host.FBCounter +=16;
     
 }
 
