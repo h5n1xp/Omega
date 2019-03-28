@@ -65,7 +65,7 @@ int main(int argc, char * argv[]) {
     if(argc>1){
         fd = open(argv[1],O_RDWR);
     }else{
-        fd = open("/Users/Shared/uae/roms/Kick13.rom",O_RDONLY); //"/Users/Shared/uae/roms/Kick12.rom" "/Users/Shared/uae/roms/DiagROM"  "/Users/Shared/uae/roms/Kick3.rom"
+        fd = open("/Users/Shared/uae/roms/Kick2.rom",O_RDONLY); //"/Users/Shared/uae/roms/Kick12.rom" "/Users/Shared/uae/roms/DiagROM"  "/Users/Shared/uae/roms/Kick3.rom"
         if(fd<1){
             printf("Usage: zorro <kickstart.rom> <raw adf image>\n");
         return 0;
@@ -108,7 +108,7 @@ int main(int argc, char * argv[]) {
         //fd = open("/Users/Shared/uae/WORKBENCH/WB-1.3.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/WORKBENCH/WB-2_05.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/Blitz2-1.ADF",O_RDONLY);
-        //fd = open("/Users/Shared/uae/DosUae/Blitz2-1-2.ADF",O_RDONLY);
+        fd = open("/Users/Shared/uae/DosUae/Blitz2-1-2.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/DLXP4.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/DISK1.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/Fright Night.adf",O_RDONLY);
@@ -116,7 +116,7 @@ int main(int argc, char * argv[]) {
         //fd = open("/Users/Shared/uae/DosUae/amiga_500a_Tutorial_Disk.ADF",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/CuAmiga15.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/LEMM1.ADF",O_RDONLY);
-        fd =open("/Users/Shared/uae/ADF/Defender of the Crown (1986)(Mindscape)(Disk 1 of 2).adf",O_RDONLY);
+        //fd =open("/Users/Shared/uae/ADF/Defender of the Crown (1986)(Mindscape)(Disk 1 of 2).adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/ADF/AmigaTestKit.adf",O_RDONLY);
     }
     
@@ -154,8 +154,8 @@ int main(int argc, char * argv[]) {
         //fd = open("/Users/Shared/uae/DosUae/af025_1991_08_d025.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/DosUae/CuAmiga15.adf",O_RDONLY);
         //fd = open("/Users/Shared/uae/WORKBENCH/EX-1_3.adf",O_RDONLY);
-        //fd = open("/Users/Shared/uae/DosUae/Blitz2-2.ADF",O_RDONLY);
-        fd =open("/Users/Shared/uae/ADF/Defender of the Crown (1986)(Mindscape)(Disk 2 of 2).adf",O_RDONLY);
+        fd = open("/Users/Shared/uae/DosUae/Blitz2-2.ADF",O_RDONLY);
+        //fd =open("/Users/Shared/uae/ADF/Defender of the Crown (1986)(Mindscape)(Disk 2 of 2).adf",O_RDONLY);
     }
     
     
@@ -299,25 +299,21 @@ int main(int argc, char * argv[]) {
                     
                     if(host.event.key.keysym.sym==SDLK_F1){
                             floppyInsert(0);
-                            printf("Disk inserted in df0:\n");
                         break;
                     }
                     
                     if(host.event.key.keysym.sym==SDLK_F2){
                             floppyInsert(1);
-                            printf("Disk inserted in df1:\n");
                         break;
                     }
                     
                     if(host.event.key.keysym.sym==SDLK_F3){
                         floppyInsert(2);
-                        printf("Disk inserted in df2:\n");
                         break;
                     }
                     
                     if(host.event.key.keysym.sym==SDLK_F4){
                         floppyInsert(3);
-                        printf("Disk inserted in df3:\n");
                         break;
                     }
                     

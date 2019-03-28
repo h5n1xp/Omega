@@ -161,7 +161,7 @@ void blitter_execute(Chipset_t* chipset){
             int octCode = (chipset->bltcon1 >> 2) & 7;
             int length = chipset->bltsizv;
             int inc1 = chipset->bltamod; // 4(dy - dx)
-            int D = (int16_t)chipset->bltapt;     // start value of 4dy - 2dx
+            int D = (int16_t)chipset->bltapt;// start value of 4dy - 2dx
             uint16_t* chipramW = internal.chipramW;
             
             int planeAddr = chipset->bltcpt & 0x1FFFFE;//word address

@@ -49,8 +49,7 @@ unsigned int chipReadByte(unsigned int address){
     
     //Chipregs
     if(address>0xDFEFFF){
-        address = (address - 0xDFF000) >> 1;
-        //return ChipsetReadByte(&chipset, address);
+        address = (address - 0xDFF000);
         debugChipAddress = address;
         return getChipReg8[address]();
     }

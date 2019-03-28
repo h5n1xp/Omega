@@ -273,8 +273,14 @@ void floppyInsert(int drive){
         //Only Vaild drives have an ID Mode == 0 
         return;
     }
-    df[drive].pra |= 0x4;
     
+    if( (df[drive].pra & 0x4) == 0x4){
+        df[drive].pra &= 0xFB;      // eject disk;
+        printf("Disk ejected from df%d:\n",drive);
+    }else{
+        df[drive].pra |= 0x04;      // insert disk
+        printf("Disk inserted in df%d:\n",drive);
+    }
     
 }
 
@@ -297,14 +303,6 @@ void floppySetState(){            //To be called when Writes to CIAB prb happen.
     
     static uint8_t PRB;
     static int count = 0;
-    
-    /*
-    // No point doing anything if nothing has changed.
-    if(PRB == CIAB.prb){
-        PRB = CIAB.prb;
-        return;
-    }
-    */
     
     PRB = CIAB.prb;
     
@@ -351,6 +349,7 @@ void floppySetState(){            //To be called when Writes to CIAB prb happen.
     
     // If no change in state just return
     if(PRB == df[driveSelected].prb){
+        floppyState();
         //printf("---\n");
         return;
     }
@@ -385,7 +384,7 @@ void floppySetState(){            //To be called when Writes to CIAB prb happen.
     
     //Step head (don't step again if we've already stepped)
     if( (PRB & 0x1) && !(df[driveSelected].prb & 0x1) ){
-        //printf("%04x - DF%d Click\n",count,driveSelected);
+        printf("%04x - DF%d Click\n",count,driveSelected);
         
         if(PRB & 0x2){
             df[driveSelected].cylinder -=1;

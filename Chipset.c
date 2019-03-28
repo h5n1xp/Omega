@@ -36,6 +36,7 @@ int planeMask[]={
 
 void ChipsetInit(){
     
+    internal.LOF = 0;
     internal.chipramW =(uint16_t*)low16Meg;
     chipset.deniseid = 15; //set DeniseID to OCS
     chipset.dmaconr = 0;
@@ -1120,55 +1121,115 @@ uint8_t noReadB(void){
     return 0;
 }
 
-uint8_t dmaconrB(){ // 0x1
+uint8_t dmaconrBH(){
     return chipset.dmaconr >> 8; // only read the top 8bits
 }
 
-uint8_t vposrB(){
+uint8_t dmaconrBL(){
+    return chipset.dmaconr & 0xFF; // only read the bottom 8bits
+}
+
+uint8_t vposrBH(){
     return chipset.vposr >> 8;
 }
 
-uint8_t vhposrB(){  // 0x3
-    return chipset.vhposr >> 8; //internal.vPos;  //vPos is the equilivent to the top byte
+uint8_t vposrBL(){
+    return chipset.vposr & 0xFF;
 }
 
-uint8_t joy0datB(){ // 0x5
+uint8_t vhposrBH(){
+    return chipset.vhposr >> 8;
+}
+
+uint8_t vhposrBL(){
+    return chipset.vhposr & 0xFF;
+}
+
+uint8_t joy0datBH(){
     return chipset.joy0dat >> 8; // only read the top 8bits
 }
 
-uint8_t joy1datB(){ // 0x6
+uint8_t joy0datBL(){
+    return chipset.joy0dat & 0xFF; // only read the bottom 8bits
+}
+
+uint8_t joy1datBH(){
     return chipset.joy1dat >> 8; // only read the top 8bits
 }
 
-uint8_t potgorB(){ //  0xB
+uint8_t joy1datBL(){
+    return chipset.joy1dat & 0xFF; // only read the bottom 8bits
+}
+
+uint8_t potgorBH(){
     return chipset.potinp >> 8; // only read the top 8bits
 }
 
-uint8_t intenarB(){ //0xE
+uint8_t potgorBL(){ //  0xB
+    return chipset.potinp & 0xFF; // only read the bottom 8bits
+}
+
+uint8_t intenarBH(){ //0xE
     return chipset.intenar >> 8;
 }
 
-uint8_t intreqrB(){ //0xE
+uint8_t intenarBL(){ //0xE
+    return chipset.intenar & 0xFF;
+}
+
+uint8_t intreqrBH(){ //0xE
     return chipset.intreqr >> 8;
 }
 
+uint8_t intreqrBL(){ //0xE
+    return chipset.intreqr & 0xFF;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 uint8_t (*getChipReg8[])() = {
     noReadB,
-    dmaconrB,
-    vposrB,
-    vhposrB,
     noReadB,
-    joy0datB,
-    joy1datB,
-    noReadB,
-    noReadB,
-    noReadB,
-    noReadB,
-    potgorB,
+    dmaconrBH,
+    dmaconrBL,
+    vposrBH,
+    vposrBL,
+    vhposrBH,
+    vhposrBL,
     noReadB,
     noReadB,
-    intenarB,
-    intreqrB,
+    joy0datBH,
+    joy0datBL,
+    joy1datBH,
+    joy1datBL,
+    noReadB,
+    noReadB,
+    noReadB,
+    noReadB,
+    noReadB,
+    noReadB,
+    noReadB,
+    noReadB,
+    potgorBH,
+    potgorBL,
+    noReadB,
+    noReadB,
+    noReadB,
+    noReadB,
+    intenarBH,
+    intenarBL,
+    intreqrBH,
+    intreqrBL
 };
 
 uint32_t (*getChipReg32[])() = {

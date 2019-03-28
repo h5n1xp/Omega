@@ -587,7 +587,7 @@ int lastFetchCycle;
 
 void dma_execute(){
     
-    chipset.vposr   = (internal.LOF | 0x1000) | internal.vPos >> 8; //0x1000 is for NTSC / 0x0000 is for PAL
+    chipset.vposr   = (0x1000) | internal.vPos >> 8; //the internal.LOF might be needed, 0x1000 is for NTSC / 0x0000 is for PAL
     chipset.vhposr  = internal.vPos << 8;
     chipset.vhposr |= internal.hPos;
     
@@ -595,7 +595,7 @@ void dma_execute(){
     SDL_AtomicSet(&cpuWait, 1);
     if(chipset.bplcon0 & 0x8000){
         
-        lastFetchCycle = chipset.ddfstrt+160;
+        lastFetchCycle = chipset.ddfstrt+168;
         //lastFetchCycle = chipset.ddfstop+4;
         
         DMAHires[internal.hPos]();
@@ -667,7 +667,7 @@ void dma_execute(){
         //VBL Time
         if(internal.vPos > 0x106 ){ //0x106 is the propper ntsc vbl
             internal.vPos = 0;
-            
+            //chipset.vposr   = (internal.LOF | 0x1000); //0x1000 is for NTSC / 0x0000 is for PAL
             
             //Reset Copper.
             putChipReg16[COPJMP1](0);
