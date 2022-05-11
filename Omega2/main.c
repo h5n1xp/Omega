@@ -25,22 +25,18 @@
 
 #include "SDLText.h"
 
+
+
+
 void NoOperation(EventQueue_t* queue, void* data){
     //Burn a cycle and return
-    printf("Do nossing!!");
+    printf("Do nothing!!");
 }
 
-void woopdiePoop(EventQueue_t* queue, void* data){
+void doSomething(EventQueue_t* queue, void* data){
    // printf("this took a cycle");
-    CreateEvent(queue, woopdiePoop, data, 2);
+    CreateEvent(queue, doSomething, data, 2);
 }
-
-
-
-
-
-
-
 
 void ExecuteChipsetCycles(EventQueue_t* queue, int count){
     for(int i = 0; i < count; ++i){
@@ -48,58 +44,278 @@ void ExecuteChipsetCycles(EventQueue_t* queue, int count){
     }
 }
 
+
+// Assumes little endian
+void printBits(size_t const size, void const * const ptr)
+{
+    unsigned char *b = (unsigned char*) ptr;
+    unsigned char byte;
+    int i, j;
+    
+    for (i = size-1; i >= 0; i--) {
+        for (j = 7; j >= 0; j--) {
+            byte = (b[i] >> j) & 1;
+            printf("%u", byte);
+        }
+    }
+}
+
+// Assumes little endian
+void sprintBits(char* buff, size_t const size, void const * const ptr)
+{
+    unsigned char *b = (unsigned char*) ptr;
+    unsigned char byte;
+    int i, j;
+    
+    for (i = size-1; i >= 0; i--) {
+        for (j = 7; j >= 0; j--) {
+            byte = (b[i] >> j) & 1;
+            sprintf(buff,"%u", byte);
+        }
+    }
+}
+
 uint32_t* pixelBuffer;
 
-void RunOmega(SDL_Renderer* renderer,SDL_Texture* framebuffer,Omega_t* omega, uint64_t* cycleCount,SDL_Event* event,int* running){
-   
-/*
-    for(int l=0;l<1;++l){
-        //CheckInterrupts();
-        *cycleCount += m68k_execute(1);
-        //printf("Ol");
-    }
-     
-     DMAExecute(omega->Chipstate, pixelBuffer);
-     FloppyExecute();
- */
-   
-    uint32_t cc = m68k_execute(24);
-    FloppyExecute();
-    
-    /*
-    for(int i=0;i<cc/10;++i){
-        RunCIACycle();
-    }
-    */
 
-    for(int i=0; i<cc/2; ++i){
-        CheckInterrupts();
-        DMAExecute(omega->Chipstate, pixelBuffer);
+SDL_sem *sem;
+
+int CPUThread(void* data){
+    
+    while(1){
+        m68k_execute(4096);
+        SDL_SemWait(sem);
+    }
+    
+}
+
+
+int main(int argc, const char * argv[]) {
+    printf("Omega V2\n");
+    
+    if(16777216 - sizeof(Omega_t) != 0){
+        printf("Error!!! Memory allocation Wrong!");
+    }
+    
 
     
+    SDL_Init(SDL_INIT_EVERYTHING);
+    SDL_Window* window = SDL_CreateWindow("Omega2 v0.01",
+                                   0,//window X position
+                                   0,//window Y position
+                                   800, 624,
+                                   SDL_WINDOW_RESIZABLE);// | SDL_WINDOW_FULLSCREEN_DESKTOP);
     
-    if( ((Chipset_t*)omega->Chipstate)->VBL == 1){
-        uint32_t* palette = ((Chipset_t*)omega->Chipstate)->Colour;
-        SDL_SetRenderDrawColor(renderer, palette[0] >> 16, (palette[0] >> 8) & 255, palette[0] & 255, 255);
-        SDL_RenderClear(renderer);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
+    SDL_SetRenderDrawBlendMode(renderer,SDL_BLENDMODE_BLEND);
+    
+    SDL_ShowCursor(SDL_DISABLE);
+    SDL_Texture* framebuffer = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 800, 312); //350 should be 312
+    SDL_TextInit(renderer);
+
+
+
+    
+    //create a new queue
+    EventQueue_t* queue = CreateQueue();
+
+    //Create first real event
+    CreateEvent(queue, NoOperation, NULL, 0);
+    CreateEvent(queue, doSomething, NULL, 1);
+
+    
+    
+    //Init Omega
+    Omega_t* omega = InitRAM(0);
+    Chipset_t* chipstate = (Chipset_t*)omega->Chipstate;
+    chipstate->frameBufferPitch = 800 * 4;
+    SDL_LockTexture(framebuffer, NULL, (void**)&chipstate->frameBuffer, &chipstate->frameBufferPitch);
+    
+    
+    // Datatype size checks for debugging
+    printf("Internal Chipset Data structure size: %d bytes\n",sizeof(Chipset_t));
+    printf("Internal CIA Data structure size: %d bytes\n",sizeof(CIA_t));
+    
+    
+    //Load ROM From Disk
+    int fd = -1;
+    //fd = open("/Users/Shared/Bootstrap.rom",O_RDONLY);
+    //fd = open("/Users/Shared/Kick07.rom",O_RDONLY);
+    //fd = open("/Users/Shared/Kick10.rom",O_RDONLY);
+    //fd = open("/Users/Shared/Kick13.rom",O_RDONLY);
+    //fd = open("/Users/Shared/Kick2.rom",O_RDONLY);
+    fd = open("/Users/Shared/Kick3.rom",O_RDONLY);
+    //fd = open("/Users/Shared/Kick31.rom",O_RDONLY);
+    //fd = open("/Users/Shared/DiagROM1",O_RDONLY);
+    //fd = open("/Users/Shared/DiagROM2",O_RDONLY);
+    if(fd > 0){
+        int size = (int)lseek(fd, 0, SEEK_END);
+        lseek(fd, 0, SEEK_SET);
+        read(fd, omega->KickstartROM, size);
         
-        if( ((Chipset_t*)omega->Chipstate)->needsRedraw){
-            SDL_UnlockTexture(framebuffer);
-            SDL_RenderCopy(renderer, framebuffer, NULL, NULL);
-            SDL_LockTexture(framebuffer, NULL,(void**)&((Chipset_t*)omega->Chipstate)->frameBuffer, &((Chipset_t*)omega->Chipstate)->frameBufferPitch);
-            ((Chipset_t*)omega->Chipstate)->needsRedraw = 0;
+        if(size < 524288){
+            lseek(fd, 0, SEEK_SET);
+            read(fd, omega->KickstartROM+262144, size);
         }
         
-        SDL_RenderPresent(renderer);
-        ((Chipset_t*)omega->Chipstate)->VBL = 0;
-        //SDL_Delay(16);
+        printf("BootROM Loaded OK!\n");
+        close(fd);
+    }
+
+    
+    fd = -1;
+    uint8_t DF0[1024*1024];
+    
+    //fd = open("/Users/Shared/WB-1.3.adf",O_RDONLY);
+    //fd = open("/Users/Shared/DISK1.ADF",O_RDONLY);
+    //fd = open("/Users/Shared/LEMM1.ADF",O_RDONLY);
+    //fd = open("/Users/Shared/MLM1.ADF",O_RDONLY);
+    //fd = open("/Users/Shared/MP.ADF",O_RDONLY);
+    //fd = open("/Users/Shared/DLXP4.ADF",O_RDONLY);
+    //fd = open("/Users/Shared/DLXP3.ADF",O_RDONLY);
+    //fd = open("/Users/Shared/WB31.ADF",O_RDONLY);
+    
+    fd = open("/Users/Shared/Blitz2-1.adf",O_RDONLY);
+    
+    if(fd > 0){
+        int size = (int)lseek(fd, 0, SEEK_END);
+        lseek(fd, 0, SEEK_SET);
+        read(fd, DF0, size);
+        printf("ADF Loaded OK: %d bytes\n",size);
+        close(fd);
+    }
+    
+    
+    uint8_t DF1[1024*1024];
+    
+    //fd = open("/Users/Shared/EX13.ADF",O_RDONLY);
+    //fd = open("/Users/Shared/DISK1.ADF",O_RDONLY);
+    //fd = open("/Users/Shared/DLXP4.ADF",O_RDONLY);
+    //fd = open("/Users/Shared/bpl0dat1.adf",O_RDONLY);
+    //fd = open("/Users/Shared/WB31.ADF",O_RDONLY);
+    
+    fd = open("/Users/Shared/Blitz2-2.adf",O_RDONLY);
+    
+    if(fd > 0){
+        int size = (int)lseek(fd, 0, SEEK_END);
+        lseek(fd, 0, SEEK_SET);
+        read(fd, DF1, size);
+        printf("ADF Loaded OK: %d bytes\n",size);
+        close(fd);
+    }
+    
+    
+    uint8_t DF2[1024*1024];
+    //fd = open("/Users/Shared/DLXP4.ADF",O_RDONLY);
+    
+    fd = open("/Users/Shared/Blitz2-3.adf",O_RDONLY);
+    
+    if(fd > 0){
+        int size = (int)lseek(fd, 0, SEEK_END);
+        lseek(fd, 0, SEEK_SET);
+        read(fd, DF2, size);
+        printf("ADF Loaded OK: %d bytes\n",size);
+        close(fd);
+    }
+    
+    uint8_t DF3[1024*1024];
+
+    //fd = open("/Users/Shared/Blitz2-4.adf",O_RDONLY);
+    fd = open("/Users/Shared/DISK1.ADF",O_RDONLY);
+    //fd = open("/Users/Shared/DLXP4.ADF",O_RDONLY);
+    
+    if(fd > 0){
+        int size = (int)lseek(fd, 0, SEEK_END);
+        lseek(fd, 0, SEEK_SET);
+        read(fd, DF3, size);
+        printf("ADF Loaded OK: %d bytes\n",size);
+        close(fd);
+    }
+    
+    FloppyInit();
+    FloppyInsert(0, DF0);
+    FloppyInsert(1, DF1);
+    FloppyInsert(2, DF2);
+    FloppyInsert(3, DF3);
+    
+    m68k_init();//M68K_CPU_TYPE_68EC020
+    m68k_set_cpu_type(M68K_CPU_TYPE_68000); //Pretend to be an A500 for now...
+    m68k_pulse_reset();
+    
+    
+    SDL_Event event;
+    int running = 1;
+    
+    //SDL_CreateThread(CPUThread, "CPU", NULL);
+
+
+    
+    //StartExecution(queue);
+    while (running) {
+
+        m68k_execute(128); //128 seems "Normal"
+        //SDL_SemPost(sem);
+        DMAExecute(omega->Chipstate, pixelBuffer);
+    
+        //The Emulator has signaled a new frame is reaady.
+        if( ((Chipset_t*)omega->Chipstate)->VBL == 1){
+            uint32_t* palette = ((Chipset_t*)omega->Chipstate)->Colour;
+            SDL_SetRenderDrawColor(renderer, palette[0] >> 16, (palette[0] >> 8) & 255, palette[0] & 255, 255);
+            SDL_RenderClear(renderer);
+        
+            if( ((Chipset_t*)omega->Chipstate)->needsRedraw){
+                
+                int x;
+                int y;
+                SDL_GetWindowSize(window, &x, &y);
+                
+                SDL_Rect framebufferRect = {0,0,x,y};
+                SDL_UnlockTexture(framebuffer);
+                SDL_RenderCopy(renderer, framebuffer, NULL, &framebufferRect);
+                
+                SDL_LockTexture(framebuffer, NULL,(void**)&((Chipset_t*)omega->Chipstate)->frameBuffer,&((Chipset_t*)omega->Chipstate)->frameBufferPitch);
+                ((Chipset_t*)omega->Chipstate)->frameBuffer -= ((800 * 20) + 180); // Offset adjust (800 * 20) + 180 // 20 lines up, 180 pixels left
+                
+                ((Chipset_t*)omega->Chipstate)->needsRedraw = 0;
+                
+                
+                char temp[512];
+                int ty = 10;
+                 /*
+                uint16_t BPLCON1 = RAM24bit[0xDFF102];
+
+                sprintf(temp, "BPLCON1: 0x%x",BPLCON1);
+                SDL_Print(temp, 10, ty);
+
+                sprintf(temp, "HSTART : %d",((Chipset_t*)omega->Chipstate)->HSTART);
+                SDL_Print(temp, 10, ty+16);
+                sprintf(temp, "HSTOP  : %d",((Chipset_t*)omega->Chipstate)->HSTOP);
+                SDL_Print(temp, 10, ty+16+16);
+                //sprintf(temp, "VSTOP  : %d",((Chipset_t*)omega->Chipstate)->VSTOP >> 8);
+                //SDL_Print(temp, 10, ty+16+16+16);
+                
+                sprintf(temp, "DFFSTRT: %d",*(uint16_t*)&((Chipset_t*)omega->Chipstate)->chipram[0xDFF092]);
+                SDL_Print(temp, 10, ty+16+16+16+16);
+                sprintf(temp, "DFFSTOP: %d",*(uint16_t*)&((Chipset_t*)omega->Chipstate)->chipram[0xDFF094]);
+                SDL_Print(temp, 10, ty+16+16+16+16+16);
+                */
+                uint32_t VBR = m68k_get_reg(NULL, M68K_REG_VBR);
+                sprintf(temp, "VBR: %d",VBR);
+                SDL_Print(temp, 10, ty+16+16+16+16+16+16);
+                
+                SDL_RenderPresent(renderer);
+            }
+        
+   
+            ((Chipset_t*)omega->Chipstate)->VBL = 0;
+       
         
         
-        while (SDL_PollEvent(event)) {
+        while (SDL_PollEvent(&event)) {
             
-            switch (event->type) {
+            switch (event.type) {
                 case SDL_QUIT:
-                    *running = 0;
+                    running = 0;
                     break;
                     
                 case SDL_KEYUP:
@@ -131,33 +347,38 @@ void RunOmega(SDL_Renderer* renderer,SDL_Texture* framebuffer,Omega_t* omega, ui
                     }
                     */
                     
-                    releaseKey(event->key.keysym.sym);
+                    releaseKey(event.key.keysym.sym);
                     //printf("Key Up: %c",event.key.keysym.sym);
                     break;
                     
                 case SDL_KEYDOWN:
                     
-                    /*
-                    if(host.event.key.keysym.sym==167){
+                   
+                    if(event.key.keysym.sym==167){
                         running = 0;
                     }
-                    */
+                    
                      
-                    if(event->key.keysym.sym==SDLK_F1){
+                    if(event.key.keysym.sym==SDLK_F1){
                             //floppyInsert(0);
-                        *cycleCount = 1;
+                        //*cycleCount = 1;
+                        FloppyInsert(0, DF0);
+                       
+                        
                         break;
                     }
                     
-                    if(event->key.keysym.sym==SDLK_F2){
-                            //floppyInsert(1);
-                        *cycleCount = 4096;
-                        if(*cycleCount < 100){*cycleCount = 1;};
+                    if(event.key.keysym.sym==SDLK_F2){
+                        printf("COPLIST1:\n");
+                        DecodeCopperList(1);
                         break;
                     }
                     
-                    if(event->key.keysym.sym==SDLK_F3){
+                    if(event.key.keysym.sym==SDLK_F3){
                         //floppyInsert(2);
+                        printf("COPLIST2:\n");
+                        DecodeCopperList(2);
+                        break;
                         
                         int fd = open("/Users/Shared/Dump.txt",O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
                         write(fd,omega->chipRAM, 524288);
@@ -165,20 +386,22 @@ void RunOmega(SDL_Renderer* renderer,SDL_Texture* framebuffer,Omega_t* omega, ui
                         
                         break;
                     }
-                    /*
+                    
+                  
+                     /*
                     if(host.event.key.keysym.sym==SDLK_F4){
-                        floppyInsert(3);
+                        FloppyInsert(0, Workbench);
                         break;
                     }
-                    
+                   
                     if(host.event.key.keysym.sym==SDLK_F5){
                         toggleLEDs();
                         break;
                     }
                     */
                     
-                    pressKey(event->key.keysym.sym);
-                    //printf("%c",event->key.keysym.sym);
+                    pressKey(event.key.keysym.sym);
+                    //printf("0x%x",event->key.keysym.sym);
                     break;
                 
                 default:
@@ -188,10 +411,21 @@ void RunOmega(SDL_Renderer* renderer,SDL_Texture* framebuffer,Omega_t* omega, ui
             }
 
         }
-        
+
         int button = SDL_GetRelativeMouseState(&((Chipset_t*)omega->Chipstate)->mouseXrel, &((Chipset_t*)omega->Chipstate)->mouseYrel);
-        
-        
+            
+            uint16_t* JOY0DAT = (uint16_t*)&omega->chipRAM[0xDFF00A];
+            
+            uint16_t my = *JOY0DAT & 255;
+            uint16_t mx = *JOY0DAT >> 8;
+            
+            mx +=((Chipset_t*)omega->Chipstate)->mouseXrel;
+            my +=((Chipset_t*)omega->Chipstate)->mouseYrel;
+            
+            *JOY0DAT = (mx<<8) | (my & 255);
+            
+   
+            
         switch(button){
             case 1:
                 omega->chipRAM[0xBFE001] = omega->chipRAM[0xBFE001] & 0xBF; // left mouse button down;
@@ -210,282 +444,9 @@ void RunOmega(SDL_Renderer* renderer,SDL_Texture* framebuffer,Omega_t* omega, ui
                 break;
         }
     }
-    
-    }
-    
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-char temp[256];
-
-
-int main(int argc, const char * argv[]) {
-    printf("Welcome to my world!\n");
-    
-    if(16777216 - sizeof(Omega_t) != 0){
-        printf("Error!!! Memory allocation Wrong!");
-    }
-    
-    
-    SDL_Init(SDL_INIT_EVERYTHING);
-    SDL_Window* window = SDL_CreateWindow("Omega2 v0.01",
-                                   0,//window X position
-                                   0,//window Y position
-                                   800, 600,
-                                   SDL_WINDOW_RESIZABLE);// | SDL_WINDOW_FULLSCREEN_DESKTOP);
-    
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
-    SDL_SetRenderDrawBlendMode(renderer,SDL_BLENDMODE_BLEND);
-    
-    //SDL_ShowCursor(SDL_DISABLE);
-    SDL_Texture* framebuffer = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 800, 312);
-    
-    
-    //Debugging Window
-    SDL_Window* debugWin = SDL_CreateWindow("Omega2 - ChipRAM Map",
-                                              0,//window X position
-                                              700,//window Y position
-                                              800, 660,
-                                              SDL_WINDOW_RESIZABLE);// | SDL_WINDOW_FULLSCREEN_DESKTOP);
-    SDL_Renderer* debugRen = SDL_CreateRenderer(debugWin, -1, SDL_RENDERER_PRESENTVSYNC);
-    SDL_TextInit(debugRen);
-    SDL_Texture* debugbuffer = SDL_CreateTexture(debugRen, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 800, 660);
-
-    uint32_t* pixelsT; // Destination RGBA Buffer
-    int32_t pitchT = 800 * 4; //bytes per RGBA buffer line
-    SDL_LockTexture(debugbuffer, NULL, (void**)&pixelsT, &pitchT);
-    for(int i=0; i <524288; ++i){
-        pixelsT[i] = 0xFFFF0000;    //Set DEbug Screen to red
-    }
-    SDL_UnlockTexture(debugbuffer);
-    SDL_RenderCopy(debugRen, debugbuffer, NULL, NULL);
-    SDL_RenderPresent(debugRen);
-    
-
-    
-    //create a new queue
-    EventQueue_t* queue = CreateQueue();
-
-    
-    //Create first real event
-    CreateEvent(queue, NoOperation, NULL, 0);
-    CreateEvent(queue, woopdiePoop, NULL, 1);
-
-    
-    //Init Omega
-    Omega_t* omega = InitRAM(0);
-    ((Chipset_t*)omega->Chipstate)->frameBufferPitch = 800 * 4;
-    SDL_LockTexture(framebuffer, NULL, (void**)&((Chipset_t*)omega->Chipstate)->frameBuffer, &((Chipset_t*)omega->Chipstate)->frameBufferPitch);
-    
-
-    
-    
-    //Load ROM From Disk
-    int fd = -1;
-    //fd = open("/Users/Shared/Kick13.rom",O_RDONLY);
-    //fd = open("/Users/Shared/Kick3.rom",O_RDONLY);
-    //fd = open("/Users/Shared/DiagROM1",O_RDONLY);
-    //fd = open("/Users/Shared/Kick2.rom",O_RDONLY);
-    //fd = open("/Users/Shared/DiagROM2",O_RDONLY);
-    if(fd > 0){
-        int size = (int)lseek(fd, 0, SEEK_END);
-        lseek(fd, 0, SEEK_SET);
-        read(fd, omega->KickstartROM, size);
-        printf("BootROM Loaded OK!\n");
-    }
-    
-    
-    FloppyInit();
-    m68k_init();
-    m68k_set_cpu_type(M68K_CPU_TYPE_68000); //Pretend to be an A500 for now...
-    m68k_pulse_reset();
-    
-    
-    
-    
-    SDL_Event event;
-    int running = 1;
-    
-    uint64_t cycleCount = 4096;
-    
-
-    
-    //StartExecution(queue);
-    while (running) {
-
-    
- 
-        int debugRefreshRate = cycleCount; // 4096 * 16
-        for(int i = 0;i < debugRefreshRate; ++i){
-            RunOmega(renderer,framebuffer,omega,&cycleCount,&event,&running);
-        }
         
-    
         
-        //Debug
-        uint32_t* pixels; // Destination RGBA Buffer
-        int32_t pitch = 800 * 4; //bytes per RGBA buffer line
-        uint32_t* buffer = (uint32_t*)omega->chipRAM;
-        SDL_LockTexture(debugbuffer, NULL, (void**)&pixels, &pitch);
-        for(int i=0; i <524288; ++i){
-            pixels[i] = buffer[i] | 0xFF000000;
-        }
-        SDL_UnlockTexture(debugbuffer);
-        SDL_RenderCopy(debugRen, debugbuffer, NULL, NULL);
-        
-        uint16_t* Temp16 = 0;
-        int ty = 2;
-        uint32_t* p = (uint32_t*)&omega->chipRAM[0xDFF0E0];
-        sprintf(temp, "BPL1PT - %d",*p);
-        SDL_Print(temp,1,ty);
-        
-        ty += 16;
-        p = (uint32_t*)&omega->chipRAM[0xDFF0E4];
-        sprintf(temp, "BPL2PT - %d",*p);
-        SDL_Print(temp,1,ty);
-        
-        ty += 16;
-        p = (uint32_t*)&omega->chipRAM[0xDFF0E8];
-        sprintf(temp, "BPL3PT - %d",*p);
-        SDL_Print(temp,1,ty);
-        
-        ty += 16;
-        p = (uint32_t*)&omega->chipRAM[0xDFF0EC];
-        sprintf(temp, "BPL4PT - %d",*p);
-        SDL_Print(temp,1,ty);
-        
-        ty += 16;
-        p = (uint32_t*)&omega->chipRAM[0xDFF0F0];
-        sprintf(temp, "BPL5PT - %d",*p);
-        SDL_Print(temp,1,ty);
-        
-        ty += 16;
-        Temp16 = (uint16_t*)&omega->chipRAM[0xDFF092];
-        sprintf(temp, "DFFSTRT - %d",*Temp16);
-        SDL_Print(temp,1,ty);
-        
-        ty += 16;
-        Temp16 = (uint16_t*)&omega->chipRAM[0xDFF094];
-        sprintf(temp, "DFFSTOP - %d",*Temp16);
-        SDL_Print(temp,1,ty);
-        
-        ty += 16;
-        Temp16 = (uint16_t*)&omega->chipRAM[0xDFF100];
-        sprintf(temp, "BPLCON0 - 0x%x",*Temp16);
-        SDL_Print(temp,1,ty);
-        
-        ty += 16;
-        Temp16 = (uint16_t*)&omega->chipRAM[0xDFF108];
-        sprintf(temp, "BPLMOD - %d",*Temp16);
-        SDL_Print(temp,1,ty);
-        
-        ty += 16;
-        Temp16 = (uint16_t*)&omega->chipRAM[0xDFF08E];
-        sprintf(temp, "DIWSTRT - 0x%x",*Temp16);
-        SDL_Print(temp,1,ty);
-        
-        ty += 16;
-        Temp16 = (uint16_t*)&omega->chipRAM[0xDFF090];
-        sprintf(temp, "DIWSTOP - 0x%x",*Temp16);
-        SDL_Print(temp,1,ty);
-        
-        ty += 16;
-        Temp16 = (uint16_t*)&omega->chipRAM[0xDFF080];
-        sprintf(temp, "COPLOC1 - 0x%x",*Temp16);
-        SDL_Print(temp,1,ty);
-        
-        ty += 16;
-        Temp16 = (uint16_t*)&omega->chipRAM[0xDFF084];
-        sprintf(temp, "COPLOC2 - 0x%x",*Temp16);
-        SDL_Print(temp,1,ty);
-        
-        ty += 16;
-        if( omega->chipRAM[0xDFF002] & 64){
-            SDL_Print("Blitter Busy",1,ty);
-        }else{
-            SDL_Print("Blitter Idle",1,ty);
-        }
-        
-        ty += 16;
-        if( omega->chipRAM[0xBFE001] & 2){
-            SDL_Print("LED Off",1,ty);
-        }else{
-            SDL_Print("LED On",1,ty);
-        }
-
-        ty += 32;
-        *Temp16 = CIAState->ATA;
-        sprintf(temp, "CIA A: TA - %d",*Temp16);
-        SDL_Print(temp,1,ty);
-        ty += 16;
-        *Temp16 = CIAState->ATB;
-        sprintf(temp, "CIA A: TB - %d",*Temp16);
-        SDL_Print(temp,1,ty);
-        ty += 16;
-        *Temp16 = omega->chipRAM[0xBFEE01];
-        sprintf(temp, "CIA A: CRA - %d",*Temp16);
-        SDL_Print(temp,1,ty);
-        ty += 16;
-        *Temp16 = omega->chipRAM[0xBFEF01];
-        sprintf(temp, "CIA A: CRB - %d",*Temp16);
-        SDL_Print(temp,1,ty);
-        
-        ty += 32;
-        *Temp16 = CIAState->ATA;
-        sprintf(temp, "CIA B: TA - %d",*Temp16);
-        SDL_Print(temp,1,ty);
-        ty += 16;
-        *Temp16 = CIAState->BTB;
-        sprintf(temp, "CIA B: TB - %d",*Temp16);
-        SDL_Print(temp,1,ty);
-
-        
-        ty += 32;
-        uint32_t time = ((Chipset_t*)omega->Chipstate)->DMACycles / ((Chipset_t*)omega->Chipstate)->DMAFreq;
-        sprintf(temp, "Emulator Time: %d:%d",time/60,time%60);
-        SDL_Print(temp,1,ty);
-  
-        ty += 16;
-        sprintf(temp, "Debug Cycle: %d",cycleCount);
-        SDL_Print(temp,1,ty);
-        SDL_RenderPresent(debugRen);
-
         
     }
-    
-    
-    
-    
-    
-    /*
-    float time = (SDL_GetPerformanceCounter() - queue->startTime);
-    float freq = SDL_GetPerformanceFrequency();
-    float microTime = time * 1000000.0;
-    printf("%f micro seconds\n",microTime / freq);
-    printf("%f micro seconds per cycle (%f MHz)",(microTime / freq)/queue->currentCycle,(1/((time / freq)/queue->currentCycle))/1000000);
-    */
-
     return 0;
 }

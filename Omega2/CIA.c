@@ -26,14 +26,15 @@ void RunCIACycle(){
         if(CIAState->ATA == 65535){
             CIAState->ATA = CIAState->ATAPreScaler;
             
+            //If we are oneshot mode, stop the timer
             if(RAM24bit[CIA_ACRA] & 8){
                 RAM24bit[CIA_ACRA] = RAM24bit[CIA_ACRA] & 254; // Stop the Timer
             }
             
             //Check the interrupt mask
-            if(CIAState->AICR & 1){
+            if(CIAState->AICRMask & 1){
                 RAM24bit[CIA_AICR] = RAM24bit[CIA_AICR] | 1;
-                ChipsetStateCIA->WriteWord[0x9C](32776); //Generate interrupt 3
+                //ChipsetStateCIA->WriteWord[0x9C](32776); //Generate interrupt 3
             }
         }
         
@@ -43,70 +44,82 @@ void RunCIACycle(){
     
     
     //CIA A Timer B
-    if(RAM24bit[0xBFEF01] & 1){
+    if(RAM24bit[CIA_ACRB] & 1){
         CIAState->ATB -= 1;
-        //printf("CIAA TB: %d\n",CIAState->ATB);
+
         if(CIAState->ATB == 65535){
             CIAState->ATB = CIAState->ATBPreScaler;
             
-            if(RAM24bit[0xBFEF01] & 8){
-                RAM24bit[0xBFEF01] = RAM24bit[0xBFEF01] & 254; // Stop the Timer
+            //If we are oneshot mode, stop the timer
+            if(RAM24bit[CIA_ACRB] & 8){
+                RAM24bit[CIA_ACRB] = RAM24bit[CIA_ACRB] & 254; // Stop the Timer
             }
             
             //Check the interrupt mask
-            if(CIAState->AICR & 2){
-                RAM24bit[0xBFED01] = RAM24bit[0xBFED01] | 2;
-                ChipsetStateCIA->WriteWord[0x9C](32776); //Generate interrupt 3
+            if(CIAState->AICRMask & 2){
+                RAM24bit[CIA_AICR] = RAM24bit[CIA_AICR] | 2;
+                //ChipsetStateCIA->WriteWord[0x9C](32776); //Generate interrupt 3
             }
         }
         
-        RAM24bit[0xBFE601] = CIAState->ATB & 255;
-        RAM24bit[0xBFE701] = (CIAState->ATB >> 8);
+        RAM24bit[CIA_ATBLO] = CIAState->ATB & 255;
+        RAM24bit[CIA_ATBHI] = (CIAState->ATB >> 8);
     }
     
     
     //CIA B Timer A
-    if(RAM24bit[0xBFDE00] & 1){
+    if(RAM24bit[CIA_BCRA] & 1){
         CIAState->BTA -= 1;
         
         if(CIAState->BTA == 65535){
             CIAState->BTA = CIAState->BTAPreScaler;
             
-            if(RAM24bit[0xBFDE00] & 8){
-                RAM24bit[0xBFDE00] = RAM24bit[0xBFDE00] & 254; // Stop the Timer
+            //If we are oneshot mode, stop the timer
+            if(RAM24bit[CIA_BCRA] & 8){
+                RAM24bit[CIA_BCRA] = RAM24bit[CIA_BCRA] & 254; // Stop the Timer
             }
             
             //Check the interrupt mask
-            if(CIAState->BICR & 1){
-                RAM24bit[0xBFDD00] = RAM24bit[0xBFDD00] | 1;
-                ChipsetStateCIA->WriteWord[0x9C](40960); //Generate interrupt 13
+            if(CIAState->BICRMask & 1){
+                RAM24bit[CIA_BICR] = RAM24bit[CIA_BICR] | 1;
+                //ChipsetStateCIA->WriteWord[0x9C](40960); //Generate interrupt 13
             }
         }
         
-        RAM24bit[0xBFD400] = CIAState->BTA & 255;
-        RAM24bit[0xBFD500] = (CIAState->BTA >> 8) ;
+        RAM24bit[CIA_BTALO] = CIAState->BTA & 255;
+        RAM24bit[CIA_BTAHI] = (CIAState->BTA >> 8) ;
     }
     
     //CIA B Timer B
-    if(RAM24bit[0xBFDF00] & 1){
+    if(RAM24bit[CIA_BCRB] & 1){
         CIAState->BTB -= 1;
         
         if(CIAState->BTB == 65535){
             CIAState->BTB = CIAState->BTBPreScaler;
             
-            if(RAM24bit[0xBFDF00] & 8){
-                RAM24bit[0xBFDF00] = RAM24bit[0xBFDF00] & 254; // Stop the Timer
+            //If we are oneshot mode, stop the timer
+            if(RAM24bit[CIA_BCRB] & 8){
+                RAM24bit[CIA_BCRB] = RAM24bit[CIA_BCRB] & 254; // Stop the Timer
             }
             
             //Check the interrupt mask
-            if(CIAState->BICR & 2){
-                RAM24bit[0xBFDD00] = RAM24bit[0xBFDD00] | 2;
-                ChipsetStateCIA->WriteWord[0x9C](40960); //Generate interrupt 13
+            if(CIAState->BICRMask & 2){
+                RAM24bit[CIA_BICR] = RAM24bit[CIA_BICR] | 2;
+                //ChipsetStateCIA->WriteWord[0x9C](40960); //Generate interrupt 13
             }
         }
         
-        RAM24bit[0xBFD600] = CIAState->BTB & 255;
-        RAM24bit[0xBFD700] = (CIAState->BTB >> 8) ;
+        RAM24bit[CIA_BTBLO] = CIAState->BTB & 255;
+        RAM24bit[CIA_BTBHI] = (CIAState->BTB >> 8);
+    }
+    
+    //Need to check interrupts, if any of the flags are set, then we need to raise an interrupt with Paula...and keep doing it until the offending ICR cleared
+    if(RAM24bit[CIA_AICR]){
+        ChipsetStateCIA->WriteWord[0x9C](32776); //Generate interrupt 3
+    }
+    
+    if(RAM24bit[CIA_BICR]){
+        ChipsetStateCIA->WriteWord[0x9C](40960); //Generate interrupt 13
     }
     
 }
@@ -126,12 +139,12 @@ void CIAATOD(void){
     //}
     CIAState->ATOD &= 0xFFFFFF; //wrap to 0
     
-    RAM24bit[0xBFE801] =  CIAState->ATOD & 255;
-    RAM24bit[0xBFE901] = (CIAState->ATOD >> 8) & 255;
-    RAM24bit[0xBFEA01] = (CIAState->ATOD >>16) & 255;
+    RAM24bit[CIA_ATODL] =  CIAState->ATOD & 255;
+    RAM24bit[CIA_ATODM] = (CIAState->ATOD >> 8) & 255;
+    RAM24bit[CIA_ATODH] = (CIAState->ATOD >>16) & 255;
     
     //Check Alarm
-    if(CIAState->AICR & 4){
+    if(CIAState->AICRMask & 4){
         
         if (CIAState->ATOD == CIAState->ATODAlarm){
             RAM24bit[0xBFED01] = RAM24bit[0xBFED01] | 4;
@@ -139,7 +152,7 @@ void CIAATOD(void){
         }
     }
     
-   // printf("%d Frames (%d Seconds)\n",CIAState->ATOD,CIAState->ATOD/60);
+    //printf("%d Frames (%d Seconds)\n",CIAState->ATOD,CIAState->ATOD/60);
 }
 
 
@@ -158,88 +171,106 @@ void CIABTOD(void){
     
     CIAState->BTOD &= 0xFFFFFF; //wrap to 0
     
-    RAM24bit[0xBFD800] =  CIAState->BTOD & 255;
-    RAM24bit[0xBFD900] = (CIAState->BTOD >> 8) & 255;
-    RAM24bit[0xBFDA00] = (CIAState->BTOD >>16) & 255;
+    RAM24bit[CIA_BTODL] =  CIAState->BTOD & 255;
+    RAM24bit[CIA_BTODM] = (CIAState->BTOD >> 8) & 255;
+    RAM24bit[CIA_BTODH] = (CIAState->BTOD >>16) & 255;
     
     //Check Alarm
-    if(CIAState->BICR & 4){
+    if(CIAState->BICRMask & 4){
         
         if (CIAState->BTOD == CIAState->BTODAlarm){
-            RAM24bit[0xBFDD00] = RAM24bit[0xBFDD00] | 4;
+            RAM24bit[CIA_BICR] = RAM24bit[CIA_BICR] | 4;
             ChipsetStateCIA->WriteWord[0x9C](40960); //Generate interrupt 13
         }
     }
 }
 
 void SetTrack0(void){
-    RAM24bit[0xBFE001] = RAM24bit[0xBFE001] & 0xEF;
+    RAM24bit[CIA_APRA] = RAM24bit[CIA_APRA] & 0xEF;
     return;
 }
 
 void ClearTrack0(void){
-    RAM24bit[0xBFE001] = RAM24bit[0xBFE001] | 0x10;
+    RAM24bit[CIA_APRA] = RAM24bit[CIA_APRA] | 0x10;
     return;
 }
 
 
 void SetDriveReady(void){
 
-    RAM24bit[0xBFE001] = RAM24bit[0xBFE001] & 0xDF;
+    RAM24bit[CIA_APRA] = RAM24bit[CIA_APRA] & 0xDF;
     
 }
 
 void ClearDriveReady(void){
 
-    RAM24bit[0xBFE001] = RAM24bit[0xBFE001] | 0x20;
+    RAM24bit[CIA_APRA] = RAM24bit[CIA_APRA] | 0x20;
 }
 
 void SetDriveFull(void){
 
-    RAM24bit[0xBFE001] = RAM24bit[0xBFE001] | 0x4;                //High when insterted?!?
+    RAM24bit[CIA_APRA] = RAM24bit[CIA_APRA] | 0x4;                // High when inserted
 }
 
 void SetDriveEmpty(void){
 
-    RAM24bit[0xBFE001] =  RAM24bit[0xBFE001] & 0xFB;              // Low when empty
+    RAM24bit[CIA_APRA] =  RAM24bit[CIA_APRA] & 0xFB;              // Low when empty
     
 }
 
 
+void DiskIndexPulse(){
+
+    if(CIAState->BICRMask & 0x10){
+            RAM24bit[CIA_BICR] = RAM24bit[CIA_BICR] | 0x10;
+            ChipsetStateCIA->WriteWord[0x9C](40960); //Generate interrupt 13
+    }
+}
+
 // ************ Registers
 void ASetPRA(uint8_t value){
     
-    RAM24bit[0xBFE001] = (RAM24bit[0xBFE001] & 0xFC) | (value & 0x03); // The top bits are unwritable.
+    RAM24bit[CIA_APRA] = (RAM24bit[CIA_APRA] & 0xFC) | (value & 0x03); // The top bits are unwritable.
     
     return;
 }
 
 void ASetPRB(uint8_t value){
-    RAM24bit[0xBFE101] = value;
+    RAM24bit[CIA_APRB] = value;
     return;
 }
 
 void ASetDDRA(uint8_t value){
-    RAM24bit[0xBFE201] = value;
+    RAM24bit[CIA_ADDRA] = value;
     return;
 }
 
 void ASetDDRB(uint8_t value){
-    RAM24bit[0xBFE301] = value;
+    RAM24bit[CIA_ADDRB] = value;
     return;
 }
 
 void ASetTALO(uint8_t value){
     CIAState->ATAPreScaler = (CIAState->ATAPreScaler & 65280) | value;
+    
+    //If timer not running then load in to register
+    if( (RAM24bit[CIA_ACRA] & 1) == 0){
+        CIAState->ATA = (CIAState->ATA & 0xFF00) | value;
+    }
+    
     return;
 }
 
 void ASetTAHI(uint8_t value){
     CIAState->ATAPreScaler = (CIAState->ATAPreScaler & 255) | value << 8;
     
-    if(RAM24bit[0xBFEE01] & 8){
+    if(RAM24bit[CIA_ACRA] & 8){
         CIAState->ATA = CIAState->ATAPreScaler;
-        RAM24bit[0xBFEE01] = RAM24bit[0xBFEE01] | 1;
+        RAM24bit[CIA_ACRA] = RAM24bit[CIA_ACRA] | 1;
+    }
+    
+    if( (RAM24bit[CIA_ACRA] & 1) == 0){
+        CIAState->ATA = CIAState->ATAPreScaler;
     }
     
     return;
@@ -247,65 +278,76 @@ void ASetTAHI(uint8_t value){
 
 void ASetTBLO(uint8_t value){
     CIAState->ATBPreScaler = (CIAState->ATBPreScaler & 65280) | value;
+    
+    //If timer not running then load in to register
+    if( (RAM24bit[CIA_ACRB] & 1) == 0){
+        CIAState->ATB = (CIAState->ATB & 0xFF00) | value;
+    }
+    
     return;
 }
 
 void ASetTBHI(uint8_t value){
     CIAState->ATBPreScaler = (CIAState->ATBPreScaler & 255) | value << 8;
     
-    if(RAM24bit[0xBFEF01] & 8){
+    if(RAM24bit[CIA_ACRB] & 8){
         CIAState->ATB = CIAState->ATBPreScaler;
-        RAM24bit[0xBFEF01] = RAM24bit[0xBFEF01] | 1;
+        RAM24bit[CIA_ACRB] = RAM24bit[CIA_ACRB] | 1;
     }
+    
+    if( (RAM24bit[CIA_ACRB] & 1) == 0){
+        CIAState->ATB = CIAState->ATAPreScaler;
+    }
+    
     return;
 }
 
 void ASetTODLO(uint8_t value){
     
-    if(RAM24bit[0xBFEF01] & 128){
+    if(RAM24bit[CIA_ACRB] & 128){
         CIAState->ATODAlarm = (CIAState->ATODAlarm & 16776960) | value;
         return;
     }
     
     CIAState->ATOD = (CIAState->ATOD & 16776960) | value;
-    RAM24bit[0xBFE801] = value;
+    RAM24bit[CIA_ATODL] = value;
     CIAState->ATODLatch = 0;
     return;
 }
 
 void ASetTODMID(uint8_t value){
     
-    if(RAM24bit[0xBFEF01] & 128){
+    if(RAM24bit[CIA_ACRB] & 128){
         CIAState->ATODAlarm = (CIAState->ATODAlarm & 16711935) | value << 8;
         return;
     }
     
     CIAState->ATODLatch = 1;
     CIAState->ATOD = (CIAState->ATOD & 16711935) | value << 8;
-    RAM24bit[0xBFE901] = value;
+    RAM24bit[CIA_ATODM] = value;
 
     return;
 }
 
 void ASetTODHI(uint8_t value){
     
-    if(RAM24bit[0xBFEF01] & 128){
+    if(RAM24bit[CIA_ACRB] & 128){
         CIAState->ATODAlarm = (CIAState->ATODAlarm & 65535) | value << 16;
         return;
     }
     
     CIAState->ATODLatch = 1;
     CIAState->ATOD = (CIAState->ATOD & 65535) | value << 16;
-    RAM24bit[0xBFEA01] = value;
+    RAM24bit[CIA_ATODH] = value;
     return;
 }
 
 
 void ASetSDR(uint8_t value){
-    RAM24bit[0xBFEC01] = value;
+    RAM24bit[CIA_ASDR] = value;
     
-    if( (CIAState->AICR & 8)){
-        RAM24bit[0xBFED01] = RAM24bit[0xBFED01] | 0x8;
+    if( (CIAState->AICRMask & 8)){
+        RAM24bit[CIA_AICR] = RAM24bit[CIA_AICR] | 0x8;
         ChipsetStateCIA->WriteWord[0x9C](32776); //Generate interrupt 3
     }
         
@@ -317,9 +359,9 @@ void ASetICR(uint8_t value){
     //RAM24bit[0xBFED01]
     
     if(value & 128){
-        CIAState->AICR = CIAState->AICR | (value & 127);
+        CIAState->AICRMask = CIAState->AICRMask | (value & 127);
     }else{
-        CIAState->AICR = CIAState->AICR ^ (value & CIAState->AICR); // clear requested bits
+        CIAState->AICRMask = CIAState->AICRMask ^ (value & CIAState->AICRMask); // clear requested bits
     }
     
     return;
@@ -337,7 +379,7 @@ void ASetCRA(uint8_t value){
         value = value & 0xEF;
     }
     
-    RAM24bit[0xBFEE01] = value;
+    RAM24bit[CIA_ACRA] = value;
     return;
 }
 
@@ -353,86 +395,106 @@ void ASetCRB(uint8_t value){
         value = value & 0xEF;
     }
     
-    RAM24bit[0xBFEF01] = value;
+    RAM24bit[CIA_ACRB] = value;
     return;
 }
 
 
 
 void BSetPRA(uint8_t value){
-    RAM24bit[0xBFD000] = value;
+    RAM24bit[CIA_BPRA] = value;
     return;
 }
 
 void BSetPRB(uint8_t value){
-    RAM24bit[0xBFD100] = value;
+    RAM24bit[CIA_BPRB] = value;
     
     return;
 }
 
 void BSetDDRA(uint8_t value){
-    RAM24bit[0xBFD200] = value;
+    RAM24bit[CIA_BDDRA] = value;
     return;
 }
 
 void BSetDDRB(uint8_t value){
-    RAM24bit[0xBFD300] = value;
+    RAM24bit[CIA_BDDRB] = value;
     return;
 }
 
 void BSetTALO(uint8_t value){
     CIAState->BTAPreScaler = (CIAState->BTAPreScaler & 65280) | value;
+    
+    if( (RAM24bit[CIA_BCRA] & 1) == 0){
+        CIAState->BTA = CIAState->BTAPreScaler;
+    }
+    
     return;
 }
 
 void BSetTAHI(uint8_t value){
     CIAState->BTAPreScaler = (CIAState->BTAPreScaler & 255) | value << 8;
     
-    if(RAM24bit[0xBFDE00] & 8){
+    if(RAM24bit[CIA_BCRA] & 8){
         CIAState->BTA = CIAState->BTAPreScaler;
-        RAM24bit[0xBFDE00] = RAM24bit[0xBFDE00] | 1;
+        RAM24bit[CIA_BCRA] = RAM24bit[CIA_BCRA] | 1;
     }
+    
+    if( (RAM24bit[CIA_BCRA] & 1) == 0){
+        CIAState->BTA = CIAState->BTAPreScaler;
+    }
+    
     return;
 }
 
 void BSetTBLO(uint8_t value){
     CIAState->BTBPreScaler = (CIAState->BTBPreScaler & 65280) | value;
+    
+    if( (RAM24bit[CIA_BCRB] & 1) == 0){
+        CIAState->BTB = CIAState->BTBPreScaler;
+    }
+    
     return;
 }
 
 void BSetTBHI(uint8_t value){
     CIAState->BTBPreScaler = (CIAState->BTBPreScaler & 255) | value << 8;
     
-    if(RAM24bit[0xBFDF00] & 8){
+    if(RAM24bit[CIA_BCRB] & 8){
         CIAState->BTB = CIAState->BTBPreScaler;
-        RAM24bit[0xBFDF00] = RAM24bit[0xBFDF00] | 1;
+        RAM24bit[CIA_BCRB] = RAM24bit[CIA_BCRB] | 1;
     }
+    
+    if( (RAM24bit[CIA_BCRB] & 1) == 0){
+        CIAState->BTB = CIAState->BTBPreScaler;
+    }
+    
     return;
 }
 
 void BSetTODLO(uint8_t value){
 
-    if(RAM24bit[0xBFDF00] & 128){
+    if(RAM24bit[CIA_BCRB] & 128){
         CIAState->BTODAlarm = (CIAState->BTODAlarm & 16776960) | value;
         return;
     }
     
     CIAState->BTOD = (CIAState->BTOD & 16776960) | value;
-    RAM24bit[0xBFD800] = value;
+    RAM24bit[CIA_BTODL] = value;
     CIAState->BTODLatch = 0;
     return;
 }
 
 void BSetTODMID(uint8_t value){
 
-    if(RAM24bit[0xBFDF00] & 128){
+    if(RAM24bit[CIA_BCRB] & 128){
         CIAState->BTODAlarm = (CIAState->BTODAlarm & 16711935) | value << 8;
         return;
     }
     
 
     CIAState->BTOD = (CIAState->BTOD & 16711935) | value << 8;
-    RAM24bit[0xBFD900] = value;
+    RAM24bit[CIA_BTODM] = value;
     CIAState->BTODLatch = 1;
     return;
 }
@@ -440,30 +502,30 @@ void BSetTODMID(uint8_t value){
 void BSetTODHI(uint8_t value){
 
     
-    if(RAM24bit[0xBFDF00] & 128){
+    if(RAM24bit[CIA_BCRB] & 128){
         CIAState->BTODAlarm = (CIAState->BTODAlarm & 65535) | value << 16;
         return;
     }
     
 
     CIAState->BTOD = (CIAState->BTOD & 65535) | value << 16;
-    RAM24bit[0xBFDA00] = value;
+    RAM24bit[CIA_BTODH] = value;
     CIAState->BTODLatch = 1;
     return;
 }
 
 
 void BSetSDR(uint8_t value){
-    RAM24bit[0xBFDC00] = value;
+    RAM24bit[CIA_BSDR] = value;
     return;
 }
 
 void BSetICR(uint8_t value){
     
     if(value & 128){
-        CIAState->BICR = CIAState->BICR | (value & 127);
+        CIAState->BICRMask = CIAState->BICRMask | (value & 127);
     }else{
-        CIAState->BICR = CIAState->BICR ^ (value & CIAState->BICR); // clear requested bits
+        CIAState->BICRMask = CIAState->BICRMask ^ (value & CIAState->BICRMask); // clear requested bits
     }
 
     return;
@@ -481,7 +543,7 @@ void BSetCRA(uint8_t value){
         value = value & 0xEF;
     }
     
-    RAM24bit[0xBFDE00] = value;
+    RAM24bit[CIA_BCRA] = value;
     return;
 }
 
@@ -497,7 +559,7 @@ void BSetCRB(uint8_t value){
         value = value & 0xEF;
     }
     
-    RAM24bit[0xBFDF00] = value;
+    RAM24bit[CIA_BCRB] = value;
     return;
 }
 
@@ -512,7 +574,7 @@ void InitCIA(void* chipstate, void* memory){
     ChipsetStateCIA = chipstate;
     
     uint8_t* temp = memory;
-    for(int i=0;i<524288;++i){
+    for(int i=0; i<262144; ++i){
         temp[i]=0;
     }
     
@@ -564,15 +626,15 @@ void InitCIA(void* chipstate, void* memory){
     CIAState->BTA = 0;
     CIAState->BTB = 0;
     CIAState->ATODAlarm = 0xFFFFFF;
-    CIAState->BTODAlarm = 0xFFFFFF;
+    CIAState->BTODAlarm = 0x0;      //Start Alarm at 0
     
     ASetCRA(0);
     ASetCRB(0);
     BSetCRA(0);
     BSetCRB(0);
     
-    CIAState->AICR = 0xFF;
-    CIAState->BICR = 0xFF;
+    CIAState->AICRMask = 0xFF;
+    CIAState->BICRMask = 0xFF;
     
     ASetSDR(0);
     
@@ -586,10 +648,351 @@ void WriteCIA(unsigned int address, uint8_t value){
     address = (address >> 8) & 31;
     CIAState->Write[address](value);
     
-    FloppyExecute(); // Don't want to miss a signal...
+    FloppyCycle(); // Don't want to miss a signal...
     
     return;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //   ******************************* Keyboard handling ******************************************
@@ -652,16 +1055,16 @@ const uint8_t keyMapping[] ={
     0x07,
     0x08,
     0x09,
-    0x0,
-    0x29,
-    0x52,
-    0xC,
-    0x54,
-    0x55,
-    0x56,
-    0x57,
-    0x58,
-    0x59,
+    0x50,   //F1
+    0x51,   //F2
+    0x52,   //F3
+    0x53,   //F4
+    0x54,   //F5
+    0x55,   //F6
+    0x56,   //F7
+    0x57,   //F8
+    0x58,   //F9
+    0x59,   //F10
     0x46,   //F11 -> Del    //These 2 keys are mapped this way for laptops without Del and Help keys
     0x5F,   //F12 -> Help
     0x0,
@@ -686,7 +1089,7 @@ const uint8_t keyMapping[] ={
     0x0,
     0x0,
     0x1A,
-    0x2B,
+    0x29, // should really be 2B, but have mapped to ;:
     0x1B,
     0x0,
     0x0,

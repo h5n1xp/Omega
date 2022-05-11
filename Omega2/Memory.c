@@ -18,6 +18,268 @@ uint8_t* RAM24bit;
 
 Omega_t omega;
 
+int diss = 0;
+
+
+char* regNames[] ={
+    "BLTDDAT",
+    "DMACONR",
+    "VPOSR",
+    "VHPOSR",
+    "DSKDATR",
+    "JOY0DAT",
+    "JOY1DAT",
+    "CLXDAT",
+    "ADKCONR",
+    "POT0DAT",
+    "POT1DAT",
+    "POTGOR",
+    "SERDATR",
+    "DSKBYTR",
+    "INTENAR",
+    "INTREQR",
+    "DSKPTH",
+    "DSKPTL",
+    "DSKLEN",
+    "DSKDAT",
+    "REFPTR",
+    "VPOSW",
+    "VHPOSW",
+    "COPCON",
+    "SERDAT",
+    "SERPER",
+    "POTGO",
+    "JOYTEST",
+    "STREQU",
+    "STRVBL",
+    "STRHOR",
+    "STRLONG",
+    "BLTCON0",
+    "BLTCON1",
+    "BLTAFWM",
+    "BLTALWM",
+    "BLTCPTH",
+    "BLTCPTL",
+    "BLTBPTH",
+    "BLTBPTL",
+    "BLTAPTH",
+    "BLTAPTL",
+    "BLTDPTH",
+    "BLTDPTL",
+    "BLTSIZE",
+    "BLTCON0L",
+    "BLTSIZV",
+    "BLTSIZH",
+    "BLTCMOD",
+    "BLTBMOD",
+    "BLTAMOD",
+    "BLTDMOD",
+    "RESERVED00",
+    "RESERVED01",
+    "RESERVED02",
+    "RESERVED03",
+    "BLTCDAT",
+    "BLTBDAT",
+    "BLTADAT",
+    "RESERVED04",
+    "SPRHDAT",
+    "RESERVED05",
+    "DENISEID",
+    "DSKSYNC",
+    "COP1LCH",
+    "COP1LCL",
+    "COP2LCH",
+    "COP2LCL",
+    "COPJMP1",
+    "COPJMP2",
+    "COPINS",
+    "DIWSTRT",
+    "DIWSTOP",
+    "DDFSTRT",
+    "DDFSTOP",
+    "DMACON",
+    "CLXCON",
+    "INTENA",
+    "INTREQ",
+    "ADKCON",
+    "AUD0LCH",
+    "AUD0LCL",
+    "AUD0LEN",
+    "AUD0PER",
+    "AUD0VOL",
+    "AUD0DAT",
+    "RESERVED06",
+    "RESERVED07",
+    "AUD1LCH",
+    "AUD1LCL",
+    "AUD1LEN",
+    "AUD1PER",
+    "AUD1VOL",
+    "AUD1DAT",
+    "RESERVED08",
+    "RESERVED09",
+    "AUD2LCH",
+    "AUD2LCL",
+    "AUD2LEN",
+    "AUD2PER",
+    "AUD2VOL",
+    "AUD2DAT",
+    "RESERVED10",
+    "RESERVED11",
+    "AUD3LCH",
+    "AUD3LCL",
+    "AUD3LEN",
+    "AUD3PER",
+    "AUD3VOL",
+    "AUD3DAT",
+    "RESERVED12",
+    "RESERVED13",
+    "BPL1PTH",
+    "BPL1PTL",
+    "BPL2PTH",
+    "BPL2PTL",
+    "BPL3PTH",
+    "BPL3PTL",
+    "BPL4PTH",
+    "BPL4PTL",
+    "BPL5PTH",
+    "BPL5PTL",
+    "BPL6PTH",
+    "BPL6PTL",
+    "BPL7PTH",
+    "BPL7PTL",
+    "BPL8PTH",
+    "BPL8PTL",
+    "BPLCON0",
+    "BPLCON1",
+    "BPLCON2",
+    "BPLCON3",
+    "BPL1MOD",
+    "BPL2MOD",
+    "RESERVED14",
+    "RESERVED15",
+    "BPL1DAT",
+    "BPL2DAT",
+    "BPL3DAT",
+    "BPL4DAT",
+    "BPL5DAT",
+    "BPL6DAT",
+    "BPL7DAT",
+    "BPL8DAT",
+    "SPR0PTH",
+    "SPR0PTL",
+    "SPR1PTH",
+    "SPR1PTL",
+    "SPR2PTH",
+    "SPR2PTL",
+    "SPR3PTH",
+    "SPR3PTL",
+    "SPR4PTH",
+    "SPR4PTL",
+    "SPR5PTH",
+    "SPR5PTL",
+    "SPR6PTH",
+    "SPR6PTL",
+    "SPR7PTH",
+    "SPR7PTL",
+    "SPR0POS",
+    "SPR0CTL",
+    "SPR0DATA",
+    "SPR0DATB",
+    "SPR1POS",
+    "SPR1CTL",
+    "SPR1DATA",
+    "SPR1DATB",
+    "SPR2POS",
+    "SPR2CTL",
+    "SPR2DATA",
+    "SPR2DATB",
+    "SPR3POS",
+    "SPR3CTL",
+    "SPR3DATA",
+    "SPR3DATB",
+    "SPR4POS",
+    "SPR4CTL",
+    "SPR4DATA",
+    "SPR4DATB",
+    "SPR5POS",
+    "SPR5CTL",
+    "SPR5DATA",
+    "SPR5DATB",
+    "SPR6POS",
+    "SPR6CTL",
+    "SPR6DATA",
+    "SPR6DATB",
+    "SPR7POS",
+    "SPR7CTL",
+    "SPR7DATA",
+    "SPR7DATB",
+    "COLOR00",
+    "COLOR01",
+    "COLOR02",
+    "COLOR03",
+    "COLOR04",
+    "COLOR05",
+    "COLOR06",
+    "COLOR07",
+    "COLOR08",
+    "COLOR09",
+    "COLOR10",
+    "COLOR11",
+    "COLOR12",
+    "COLOR13",
+    "COLOR14",
+    "COLOR15",
+    "COLOR16",
+    "COLOR17",
+    "COLOR18",
+    "COLOR19",
+    "COLOR20",
+    "COLOR21",
+    "COLOR22",
+    "COLOR23",
+    "COLOR24",
+    "COLOR25",
+    "COLOR26",
+    "COLOR27",
+    "COLOR28",
+    "COLOR29",
+    "COLOR30",
+    "COLOR31",
+    "HTOTAL",
+    "HSSTOP",
+    "HBSTRT",
+    "HBSTOP",
+    "VTOTAL",
+    "VSSTOP",
+    "VBSTRT",
+    "VBSTOP",
+    "RESERVED16",
+    "RESERVED17",
+    "RESERVED18",
+    "RESERVED19",
+    "RESERVED20",
+    "RESERVED21",
+    "BEAMCON0",
+    "HSSTRT",
+    "VSSTRT",
+    "HCENTER",
+    "DIWHIGH",
+    "RESERVED22",
+    "RESERVED23",
+    "RESERVED24",
+    "RESERVED25",
+    "RESERVED26",
+    "RESERVED27",
+    "RESERVED28",
+    "RESERVED29",
+    "RESERVED30",
+    "RESERVED31",
+    "RESERVED32",
+    "RESERVED33",
+    "NO-OP"
+};
+
 
 
 void BigEndianWrite(unsigned int address, enum DataSize size, unsigned int value){
@@ -27,7 +289,7 @@ void BigEndianWrite(unsigned int address, enum DataSize size, unsigned int value
     
     switch(size){
         case m68kByte:
-            RAM24bit[address] = value;
+            WRITEBYTE(address, value);
             return;
         case m68kWord:
              p16 = (uint16_t*) &RAM24bit[address];
@@ -46,23 +308,15 @@ void BigEndianWrite(unsigned int address, enum DataSize size, unsigned int value
 uint32_t BigEndianRead(unsigned int address, enum DataSize size){
     
     uint16_t* p16;
-    uint16_t retVal16;
     uint32_t* p;
     uint32_t retVal;
     
     switch(size){
         case m68kByte:
-            return RAM24bit[address];
+            return READBYTE(address);
         case m68kWord:
             p16 = (uint16_t*) &RAM24bit[address];
             uint16_t retVal16 = (*p16 >> 8) | (*p16 << 8);
-            
-            /*
-            if(address == 0xDFF01C){
-                printf("Wait");
-            }
-             */
-            
             return retVal16;
         case m68kLong:
              p = (uint32_t*) &RAM24bit[address];
@@ -76,7 +330,127 @@ uint32_t BigEndianRead(unsigned int address, enum DataSize size){
 
 uint32_t ZeroLong = 0;
 
+
 unsigned int RAM24BitDespatch(uint32_t address, enum DataSize size,enum DataDirection direction, unsigned int value){
+
+    if(address > 0xFFFFFF){
+        address &= 0xFFFFFF;
+        //return 0;
+    }
+
+    
+    
+    
+    switch((address >> 21) & 0x7){
+            
+        case 0://ChipRAM
+            
+            //address = address & 0x7FFFF;
+            
+            switch(direction){
+                case m68kWrite: BigEndianWrite(address, size, value); return 0;
+                case m68kRead: return BigEndianRead(address, size);
+            }
+            break;
+            
+        case 1://ZII Space
+            
+            switch(direction){
+                case m68kWrite: BigEndianWrite(address, size, value); return 0;
+                case m68kRead: return BigEndianRead(address, size);
+            }
+            break;
+            
+            return 0;
+            break;
+        case 2://ZII Space
+            return 0;
+            break;
+        case 3://ZII Space
+            return 0;
+            break;
+        case 4://Unused
+            return 0;
+            break;
+        case 5://Reserved - used by Emualtor
+            
+            //CIA at top of space
+            switch(direction){
+                case m68kWrite: WriteCIA(address, value); return 0;
+                case m68kRead: return RAM24bit[address];
+            }
+            return 0;
+            break;
+            
+        case 6:// ChipRegs
+            
+
+            //Slowram
+            if(address < 0xD80000){ // 0xD80000)
+
+                //We don't want slow RAM so the code below decodes the addesses as though there is no slow ram
+                switch(direction){
+                       
+                    case m68kRead:
+                       // printf("SlowRAM Read:0x%x\n",address);
+                        address =  0xDFF000 | (address & 511);
+                        uint16_t v1 =  BigEndianRead(address, size);
+                        return v1;
+                    case m68kWrite:
+                        if((address & 0x1FF) == 0x9A){
+                         //   printf("SlowRAM Write:0x%x\n",address);
+                            WriteChipsetWord(address, value);
+                        }
+                        return 0;
+                }
+              
+            }
+            
+            switch(direction){
+                    
+                case m68kRead:
+                    //if(address == 0xDFF00A){
+                    //    printf("Joy Read");
+                    //}
+                    return BigEndianRead(address, size);
+                                        
+                case m68kWrite:
+                    
+                    switch(size){
+                        case m68kByte:
+                            WriteChipsetByte(address, value);
+                            return 0;
+                        case m68kWord:
+                            WriteChipsetWord(address, value);
+                            return 0;
+                        case m68kLong:
+                            WriteChipsetLong(address, value);
+                            return 0;
+                    }
+            }
+            
+            return 0;
+            break;
+        case 7:// ROM
+            return BigEndianRead(address, size);
+            break;
+    }
+
+    return 0;
+    
+}
+
+
+unsigned int RAM24BitDespatchEXP(uint32_t address, enum DataSize size,enum DataDirection direction, unsigned int value){
+    
+   // m68k_end_timeslice();
+    
+    /*
+    if(address ==0xDFF084){
+        printf("Trap!!");
+    }
+    */
+    
     
     if(address == 0){
         
@@ -103,12 +477,11 @@ unsigned int RAM24BitDespatch(uint32_t address, enum DataSize size,enum DataDire
     if(address < 0x200000){
         //printf("ChipRAM\n");
         
-        
         //256k RAM test
         //address = address & 0x3FFFF;
         
         //512K RAM test
-        address = address & 0x7FFFF;
+        //address = address & 0x7FFFF;
         
         
         switch(direction){
@@ -121,13 +494,25 @@ unsigned int RAM24BitDespatch(uint32_t address, enum DataSize size,enum DataDire
     
     
     if(address < 0xA00000){
-        printf("ZII FastRAM\n");
+        
+        //2Meg Chipram
+        /*
+        address = address & 0x1FFFFF;
+        
+        
+        switch(direction){
+            case m68kWrite: BigEndianWrite(address, size, value); return 0;
+            case m68kRead: return BigEndianRead(address, size);
+        }
+        */
+        
+        //printf("ZII FastRAM\n");
         return 0;
     }
     
     
     if(address < 0xBF0000){
-        printf("Reserved Space\n");
+        //printf("Reserved Space\n");
         return 0;
     }
     
@@ -145,20 +530,45 @@ unsigned int RAM24BitDespatch(uint32_t address, enum DataSize size,enum DataDire
 
 
     
-    //We don't want slow RAM so the code below decodes the addesses as though there is no slow ram
-    if(address < 0xD80000){
+
+    if(address < 0xD80000){ // 0xD80000)
        
+        /*
+        //This looks like 1Mb of Slow RAM
+        switch(direction){
+            case m68kWrite:
+                if(address == 0xD7F09A){
+                    WriteChipsetWord(address, value);
+                    return 0;
+                }
+                //printf("SlowRAM Write:0x%x\n",address);
+                BigEndianWrite(address, size, value);
+                return 0;
+            case m68kRead:
+                if(address == 0xD7F01C){
+                    address =  0xDFF000 | (address & 511);
+                    uint16_t v1 =  BigEndianRead(address, size);
+                    return v1;
+                }
+                //printf("SlowRAM Read:0x%x\n",address);
+                return BigEndianRead(address, size);
+        }
+        return 0;
+        */
         
+        //We don't want slow RAM so the code below decodes the addesses as though there is no slow ram
         switch(direction){
                
             case m68kRead:
-                printf("SlowRAM Read:0x%x\n",address);
+               // printf("SlowRAM Read:0x%x\n",address);
                 address =  0xDFF000 | (address & 511);
                 uint16_t v1 =  BigEndianRead(address, size);
                 return v1;
             case m68kWrite:
-                printf("SlowRAM Write:0x%x\n",address);
-                WriteChipsetWord(address, value);
+                if((address & 0x1FF) == 0x9A){
+                    //printf("SlowRAM Write:0x%x\n",address);
+                    WriteChipsetWord(address, value);
+                }
                 return 0;
         }
       
@@ -167,8 +577,11 @@ unsigned int RAM24BitDespatch(uint32_t address, enum DataSize size,enum DataDire
     
     if(address < 0xDA0000){
         printf("Also Reserved\n");
+        uint32_t PC = m68k_get_reg(NULL, M68K_REG_PC);
+        diss = 1;
         return 0;
     }
+    
     
     if(address < 0xDC0000){
         printf("IDE: %d\n",value);
@@ -284,17 +697,36 @@ unsigned int RAM24BitDespatch(uint32_t address, enum DataSize size,enum DataDire
         switch(direction){
                 
             case m68kRead: debugReturn = BigEndianRead(address, size);
+                
+                switch(size){
+                    case m68kByte:
+                        //diss = 0;
+                        //printf("Chipset byte Read @ %s \t (0x%x) : %d\n",regNames[(address & 0x1FF)/2],address,debugReturn);
+                       //printf("VHPOSR: 0x%x",BigEndianRead(address, m68kWord));
+                       // printf("\n");
+                        break;
+                    case m68kWord:
+                      //  printf("Chipset Word Read @ %s \t (0x%x) : %d\n",regNames[(address & 0x1FF)/2],address,debugReturn);
+                        break;
+                    case m68kLong:
+                     //   printf("Chipset Long Read @ %s \t (0x%x) : %d\n",regNames[(address & 0x1FF)/2],address,debugReturn);
+                        break;
+                }
                 return debugReturn;
+                
             case m68kWrite:
                 switch(size){
                     case m68kByte:
                         WriteChipsetByte(address, value);
+                     //   printf("Chipset byte write @ %s \t (0x%x) : %d\n",regNames[(address & 0x1FF)/2],address, value);
                         return 0;
                     case m68kWord:
                         WriteChipsetWord(address, value);
+                     //   printf("Chipset word write @ %s \t (0x%x) : %d\n",regNames[(address & 0x1FF)/2],address, value);
                         return 0;
                     case m68kLong:
                         WriteChipsetLong(address, value);
+                     //   printf("Chipset long write @ %s \t (0x%x) : %d\n",regNames[(address & 0x1FF)/2],address, value);
                         return 0;
                 }
         }
@@ -307,7 +739,7 @@ unsigned int RAM24BitDespatch(uint32_t address, enum DataSize size,enum DataDire
     }
     
     if(address < 0xF00000){
-        printf("Autoconfig!\n");
+        //printf("Autoconfig!\n");
         return 0;
     }
     
@@ -342,7 +774,7 @@ unsigned int cpu_read_byte(unsigned int address){
     //Two special cases for the CIA ICRs which need to be cleared on read
     if(address == 0xBFED01){
         uint8_t p = RAM24bit[address];
-        RAM24bit[address] = 0;
+        WRITEBYTE(address, 0);
         return p;
     }
     
@@ -380,6 +812,24 @@ void cpu_write_long(unsigned int address, unsigned int value){
 
 
 void cpu_pulse_reset(void){
+
+    m68k_set_reg(M68K_REG_PC,4);
+    m68k_set_reg(M68K_REG_D0,0);
+    m68k_set_reg(M68K_REG_D1,0);
+    m68k_set_reg(M68K_REG_D2,0);
+    m68k_set_reg(M68K_REG_D3,0);
+    m68k_set_reg(M68K_REG_D4,0);
+    m68k_set_reg(M68K_REG_D5,0);
+    m68k_set_reg(M68K_REG_D6,0);
+    m68k_set_reg(M68K_REG_D7,0);
+    m68k_set_reg(M68K_REG_A0,0);
+    m68k_set_reg(M68K_REG_A1,0);
+    m68k_set_reg(M68K_REG_A2,0);
+    m68k_set_reg(M68K_REG_A3,0);
+    m68k_set_reg(M68K_REG_A4,0);
+    m68k_set_reg(M68K_REG_A5,0);
+    m68k_set_reg(M68K_REG_A6,0);
+    m68k_set_reg(M68K_REG_A7,0);
     
     //Set starting PC. The first thing the ROM does is set the Stack pointer so we don't have to.
     BigEndianWrite(0, m68kLong, 0);  // No stack pointer
@@ -424,12 +874,18 @@ Omega_t* InitRAM(int RAM32bitSize){
         uint8_t val = i % 256;
         
         if( RAM24bit[i] == val){
-            RAM24bit[i] = 0xFF;     // Why not fill with Junk?
+            RAM24bit[i] = 0x00;     // Why not fill with Junk?
         }else{
             printf("RAM ERROR!!!");
         }
     }
-
+    
+    //uint8_t* cr = malloc(sizeof(Chipset_t));
+    //InitChipset(omega.chipRAM,cr);       // Chipset internals
+    //uint8_t* ci = malloc(sizeof(CIA_t));
+    //InitCIA(omega.Chipstate, ci);         // CIA Pair
+    
+    
     InitChipset(omega.chipRAM,omega.Chipstate);       // Chipset internals can have 512Kb (Needs chipram address as it can access chipram)
     InitCIA(omega.Chipstate, omega.CIAState);         // CIA Pair can have 512Kb (Needs Chipstate so it can call interrupts)
 
@@ -537,8 +993,8 @@ typedef struct{
 
 contextI CIII;
 
-int diss = 0;
-int count = 0;
+
+
 
 
 void cpu_instr_callback(void){
@@ -566,6 +1022,8 @@ void cpu_instr_callback(void){
     
     if(diss==0){
         return;
+    }else{
+        diss += 0;
     }
     CSWindow_t* window = (CSWindow_t*)&RAM24bit[0xDFF000];
     
@@ -576,83 +1034,12 @@ void cpu_instr_callback(void){
     static unsigned int instr_size;
     
     pc = m68k_get_reg(NULL, M68K_REG_PC);
-    
-    
-    uint32_t* dbra = (uint32_t*)&CIII;
-    for(int i=0;i<16;++i){
-        if(dbra[i] == 0x22f8){
-            printf("Possible Copper list?\n");
-        }
-    }
-    
-    CIII.a7 += 2;
-
-    /*
-    d3 += 0;
-    d4 += 0;
-    d5 += 0;
-    d6 += 0;
-    d7 += 0;
-    a0 += 0;
-    a1 += 0;
-    a2 += 0;
-    a3 += 0;
-    a4 += 0;
-    a5 += 0;
-    a6 += 0;
-    a7 += 0;
-    */
-    
     instr_size = m68k_disassemble(buff, pc, M68K_CPU_TYPE_68000);
     
-    if(pc == 0xfc2fd6 || pc == 0xfc30fc){
-        CIII.a7 -= 2;
-        printCPUContext();
-        uint32_t error = m68k_get_reg(NULL, M68K_REG_D7);
-        printf("Crash!");
-        
-    }
-    
-    /*
-    //Start of exec.library task running.
-    if(pc==0xFC0522){
-        //diss = 1;
-    }
-    */
-    
-    /*
-    if(pc == 0xFC3100){
-        uint32_t D2 = m68k_get_reg(NULL, M68K_REG_D2);
+    if(pc == 0xf80e64){
         diss = 1;
     }
-    
-    if(diss == 0){
-        return;
-    }
-    
-    //Just skip the delay loop
-    if(pc < 0xFC00E2){
-        //return;
-    }
-    
-    
-    //Don't debug the Memory clear routine
-    if(pc > 0xFC0600 && pc < 0xFC061A){
-        return;
-    }
-    
-    
-    if(pc < 0xFC061A){
-    //return;
-    }
-    
-    //Trap ram error
-    if(pc == 0xFC05B8 || pc == 0xFC05DA){
-        printf("Oh shit...\n");
-    }
-    */
 
-    
     make_hex(buff2, pc, instr_size);
         
     //fprintf(globalFD,"E %03x: %-20s: %s\n", pc, buff2, buff);

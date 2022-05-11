@@ -11,12 +11,25 @@
 #include "Chipset.h"
 #include "Blitter.h"
 #include "CIA.h"
+#include "Floppy.h"
+#include "m68k.h"
+#include "Copper.h"
+#include "Bitplane.h"
+#include "Denise.h"
 
-uint16_t swap(uint16_t* p){
-    return (*p >> 8) | (*p << 8);
-}
 
-void P2C1(uint8_t* buffer, uint16_t source){
+int EclockCountdown = -1;
+
+/*
+typedef struct{
+    uint16_t SPRPOS;
+    uint16_t SPRCTL;
+    uint32_t Data[4096];
+} Sprite_t;
+*/
+
+
+void SpriteP2C1(uint8_t* buffer, uint16_t source){
     
     source = source << 8 | source >> 8;
     
@@ -28,7 +41,7 @@ void P2C1(uint8_t* buffer, uint16_t source){
     
 }
 
-void P2C2(uint8_t* buffer, uint16_t source){
+void SpriteP2C2(uint8_t* buffer, uint16_t source){
     
     source = source << 8 | source >> 8;
     
@@ -39,141 +52,8 @@ void P2C2(uint8_t* buffer, uint16_t source){
 
 }
 
-void P2C3(uint8_t* buffer,uint16_t source){
-    
-    source = source << 8 | source >> 8;
-    
-    for(int i = 15; i >= 0; --i){
-        buffer[i] = (buffer[i] & 0xFB) | (source & 1) << 2;
-        source = source >> 1;
-    }
-
-}
-
-void P2C4(uint8_t* buffer,uint16_t source){
-        
-    source = source << 8 | source >> 8;
-    
-    for(int i = 15; i >= 0; --i){
-        buffer[i] = (buffer[i] & 0xF7) | (source & 1) << 3;
-        source = source >> 1;
-    }
-}
-
-void P2C5(uint8_t* buffer,uint16_t source){
-            
-    source = source << 8 | source >> 8;
-    
-    for(int i = 15; i >= 0; --i){
-        buffer[i] = (buffer[i] & 0xEF) | (source & 1) << 4;
-        source = source >> 1;
-    }
-
-}
-
-//char copperIns[100];
-
-void ExecuteCopper(Chipset_t* ChipsetState){
-    
-    // Cycle 1: Load IR1
-    // Cycle 2: Load IR2
-    //          Decode IR1
-    // Cycle 3: Write Back
-    
-    if(ChipsetState->CopperPC == 0){
-        return;
-    }
-        
-    uint32_t VHPOS = ChipsetState->VHPOS & 0xFFFF; //ignore the top bit
-    switch(ChipsetState->CopperState){
-            
-        case 0:
-            //Load IR1
-            ChipsetState->CopperIR1 = swap((uint16_t*)&ChipsetState->chipram[ChipsetState->CopperPC]);
-            ChipsetState->CopperPC += 2;
-            ChipsetState->CopperState = 1;
-            break;
-            
-            
-            
-        case 1:
-            //Load IR2
-            ChipsetState->CopperIR2 = swap((uint16_t*)&ChipsetState->chipram[ChipsetState->CopperPC]);
-            ChipsetState->CopperPC += 2;
-            
-            
-            //Decode IR1
-            if( ChipsetState->CopperIR1 & 1){
-
-                ChipsetState->CopperIR1 = ChipsetState->CopperIR1 & ChipsetState->CopperIR2 ; // Mask comparion value and remove IR2 bit 0
-                
-                //This is a skip instruction
-                if(ChipsetState->CopperIR2 & 1){
-                    
-                    
-                    if(VHPOS >= ChipsetState->CopperIR1 ){
-                        ChipsetState->CopperPC += 4;
-                    }
-                    ChipsetState->CopperState = 0;
-                    break;
-                }
-                
-                
-                
-                //This is a wait Instruction
-                
-                if( VHPOS >= ChipsetState->CopperIR1 ){
-                    ChipsetState->CopperState = 0;
-                    break;
-                }
-                
-                ChipsetState->CopperState = 3;
-                break;
-            }
-            
-            //It's a Move instruction so advance to the Move state
-            ChipsetState->CopperState = 2;
-            
-            //printf("Move 0x%6x -> (0x%x)\n",ChipsetState->CopperIR2,0xDFF000+ChipsetState->CopperIR1);
-            //sprintf(copperIns, "Move 0x%x -> (0x%x)\n",ChipsetState->CopperIR2,0xDFF000+ChipsetState->CopperIR1);
-            
-            break;
-            
-            
-            
-        case 2:
-            //The Move Instruction
-            
-            if( (ChipsetState->CopperIR1 & 511) < 0x20){
-                ChipsetState->CopperState = 0;
-                return;
-            }
-            
-            ChipsetState->WriteWord[ChipsetState->CopperIR1 & 511](ChipsetState->CopperIR2);
-            ChipsetState->CopperState = 0;
-            break;
-            
-            
-            
-            
-        case 3:
-            //The Wait Instruction
-            
-            if( VHPOS >= ChipsetState->CopperIR1){
-                ChipsetState->CopperState = 0;
-            }
-                        
-            break;
-            
-    }
-    
-}
-
-int EclockCountdown = -1;
-
 void DMAExecute(void* address, uint32_t* framebuffer){
-    
-    
+        
     Chipset_t* ChipsetState = address;
     ChipsetState->DMACycles += 1;
     
@@ -197,8 +77,10 @@ void DMAExecute(void* address, uint32_t* framebuffer){
     
     if((ChipsetState->DMACycles % 5) == 0){
         RunCIACycle();
+        FloppyCycle();
         ChipsetState->EClockcycles += 1;
     }
+
     
     /*
     //RTC Clock TESt
@@ -215,216 +97,125 @@ void DMAExecute(void* address, uint32_t* framebuffer){
     }
     */
     
-    IncrementVHPOS(); //Increment the Display beam position
+    
     
 
+    
+    IncrementVHPOS(); //Increment the Display beam position
+    
+    uint16_t AUD0LEN = ChipsetState->chipram[0xDC00A4];
+    if(AUD0LEN == 0){
+        ChipsetState->WriteWord[0x9C](0x8080); //Generate an AUD0 interupt
+    }
+    
     //DMA disabled
     if( !(ChipsetState->DMACONR & 0x200)){
         return;
     }
     
-    if( ChipsetState->DMACONR & 0x10){
-        //printf("Run Floppy Disk\n");
+    //Audio
+    if( ChipsetState->DMACONR & 0xF){
+       // printf("bugger");
+        
     }
     
-    if( ChipsetState->DMACONR & 0x40){
-        if(ChipsetState->DMACONR & 0x4000){
+
+
+    
+    //Floppy Drive
+    if( ChipsetState->DMACONR & 0x10){
+        FloppyExecute(ChipsetState);
+    }
+    
+    //Blitter
+    if( ChipsetState->DMACONR & 0x40){  //DMA on flag
+        if(ChipsetState->DMACONR & 0x4000){ //Blitter busy Flag
             blitter_execute(ChipsetState);
         }
     }
     
+    //Copper
     if( ChipsetState->DMACONR & 0x80){
-        ExecuteCopper(ChipsetState);
+            ExecuteCopper(ChipsetState);
     }
     
+    
+    
+    
+    //Bitplanes
     if( ChipsetState->DMACONR & 0x100){
-        uint16_t* DFFSTRT = (uint16_t*) &ChipsetState->chipram[0xDFF092];
-        uint16_t* DFFSTOP = (uint16_t*) &ChipsetState->chipram[0xDFF094];
-        uint16_t* DIWSTRT = (uint16_t*) &ChipsetState->chipram[0xDFF08E];
         
-        
-        
-        //Check the vertical position of the beam
-        if( (ChipsetState->VHPOS & 0xFF00) == (*DIWSTRT & 0xFF00) ){
-            ChipsetState->bitplaneFetchActive = 1;
-        }
-        
-        if( (ChipsetState->VHPOS & 0x1FF00) == (ChipsetState->VSTOP) ){
-            ChipsetState->bitplaneFetchActive = 0;
-        }
-        
-        if(ChipsetState->bitplaneFetchActive == 0){
-            return;
-        }
-        
-        
-        
-        
-        // Check the horizontal position of the beam
-        ChipsetState->bitplaneFetchCountdown -= 1;
-        
-        if( (ChipsetState->VHPOS & 0xFF) == *DFFSTRT){
-            ChipsetState->bitplaneFetchCountdown = 0; // Start Countdown
-        }
-        
-        if( (ChipsetState->VHPOS & 0xFF) == *DFFSTOP + 8){
-            ChipsetState->bitplaneFetchCountdown = -1; // countdown stop...
-            
-            uint16_t* BPLMOD1 = (uint16_t*)&ChipsetState->chipram[0xDFF108];
-            
-            //need to add the Bitplane modulus if there is one.
-            if(*BPLMOD1 !=0){
-                
-                uint32_t* BP;
-                uint16_t* Data;
-            
-                //Bitplane1
-                BP  = (uint32_t*) &ChipsetState->chipram[0xDFF0E0];  // get BLP1PT register
-                Data = (uint16_t*)&ChipsetState->chipram[*BP];     // Get the data pointed to by register
-                *BP += *BPLMOD1;
-                
-                //Bitplane2
-                BP  = (uint32_t*) &ChipsetState->chipram[0xDFF0E4];  // get BLP1PT register
-                Data = (uint16_t*)&ChipsetState->chipram[*BP];     // Get the data pointed to by register
-                *BP += *BPLMOD1;
-                
-                //Bitplane3
-                BP  = (uint32_t*) &ChipsetState->chipram[0xDFF0E8];  // get BLP1PT register
-                Data = (uint16_t*)&ChipsetState->chipram[*BP];     // Get the data pointed to by register
-                *BP += *BPLMOD1;
-                
-                //Bitplane4
-                BP  = (uint32_t*) &ChipsetState->chipram[0xDFF0EC];  // get BLP1PT register
-                Data = (uint16_t*)&ChipsetState->chipram[*BP];     // Get the data pointed to by register
-                *BP += *BPLMOD1;
-                
-                //Bitplane5
-                BP  = (uint32_t*) &ChipsetState->chipram[0xDFF0F0];  // get BLP1PT register
-                Data = (uint16_t*)&ChipsetState->chipram[*BP];     // Get the data pointed to by register
-                *BP += *BPLMOD1;
-                
-                
-            }
-            
-        }
-        
-        
-        
-        
-        
-        //Draw display
-        uint16_t* BPLCON0 = (uint16_t*) &ChipsetState->chipram[0xDFF100];
-        uint32_t hires = *BPLCON0 >> 15;
-        uint32_t planeCount = (*BPLCON0 >> 12) & 0x7;
-        
-        if(hires){
-            if(ChipsetState->bitplaneFetchCountdown == 0){
-                ChipsetState->bitplaneFetchCountdown = 4; // Hires countdown... lowres would be 8
-            
-                uint8_t buffer[16]; // Bitplane buffer
-                uint32_t* BP;
-                uint16_t* Data;
-            
-                if(planeCount > 0){
-                    //Bitplane1
-                    BP  = (uint32_t*) &ChipsetState->chipram[0xDFF0E0];  // get BLP1PT register
-                    Data = (uint16_t*)&ChipsetState->chipram[*BP];     // Get the data pointed to by register
-                    *BP += 2;                                                       // increment register
-                    P2C1(buffer, *Data);    //Planar to Chunky
-                }
-            
-                if(planeCount > 1){
-                //Bitplane2
-                    BP  = (uint32_t*) &ChipsetState->chipram[0xDFF0E4];  // get BLP1PT register
-                    Data = (uint16_t*)&ChipsetState->chipram[*BP];     // Get the data pointed to by register
-                    *BP += 2;                                                       // increment register
-                    P2C2(buffer, *Data);    //Planar to Chunky
-                }
-            
-                if(planeCount > 2){
-                    //Bitplane3
-                    BP  = (uint32_t*) &ChipsetState->chipram[0xDFF0E8];  // get BLP1PT register
-                    Data = (uint16_t*)&ChipsetState->chipram[*BP];     // Get the data pointed to by register
-                    *BP += 2;                                                       // increment register
-                    P2C3(buffer, *Data);    //Planar to Chunky
-                }
-            
-                //Flush buffer to screen
-                
-                int up = ((*DIWSTRT & 0xFF00) >> 9) * 800; // a few calculations to centre the image on the framebuffer
-                int centre = *DFFSTRT + up;
-                
-                for(int i = 0; i < 16; ++i){
-                    ChipsetState->frameBuffer[ChipsetState->framebufferIndex+i-centre] = ChipsetState->Colour[buffer[i]];
-                }
-                ChipsetState->needsRedraw = 1;
-            }
+        if(ChipsetState->hires){
+            BitplaneExecuteHires(ChipsetState);
         }else{
-
-            if(ChipsetState->bitplaneFetchCountdown == 0){
-                ChipsetState->bitplaneFetchCountdown = 8;
-            
-                uint8_t buffer[16]; // Bitplane buffer
-                uint32_t* BP;
-                uint16_t* Data;
-            
-                if(planeCount > 0){
-                    //Bitplane1
-                    BP  = (uint32_t*) &ChipsetState->chipram[0xDFF0E0];  // get BLP1PT register
-                    Data = (uint16_t*)&ChipsetState->chipram[*BP];     // Get the data pointed to by register
-                    *BP += 2;                                                       // increment register
-                    P2C1(buffer, *Data);    //Planar to Chunky
-                }
-            
-                if(planeCount > 1){
-                //Bitplane2
-                    BP  = (uint32_t*) &ChipsetState->chipram[0xDFF0E4];  // get BLP1PT register
-                    Data = (uint16_t*)&ChipsetState->chipram[*BP];     // Get the data pointed to by register
-                    *BP += 2;                                                       // increment register
-                    P2C2(buffer, *Data);    //Planar to Chunky
-                }
-            
-                if(planeCount > 2){
-                    //Bitplane3
-                    BP  = (uint32_t*) &ChipsetState->chipram[0xDFF0E8];  // get BLP1PT register
-                    Data = (uint16_t*)&ChipsetState->chipram[*BP];     // Get the data pointed to by register
-                    *BP += 2;                                                       // increment register
-                    P2C3(buffer, *Data);    //Planar to Chunky
-                }
-            
-                if(planeCount > 3){
-                    //Bitplane4
-                    BP  = (uint32_t*) &ChipsetState->chipram[0xDFF0EC];  // get BLP1PT register
-                    Data = (uint16_t*)&ChipsetState->chipram[*BP];     // Get the data pointed to by register
-                    *BP += 2;                                                       // increment register
-                    P2C4(buffer, *Data);    //Planar to Chunky
-                }
-                
-                if(planeCount > 4){
-                    //Bitplane5
-                    BP  = (uint32_t*) &ChipsetState->chipram[0xDFF0F0];  // get BLP1PT register
-                    Data = (uint16_t*)&ChipsetState->chipram[*BP];     // Get the data pointed to by register
-                    *BP += 2;                                                       // increment register
-                    P2C5(buffer, *Data);    //Planar to Chunky
-                }
-                
-                //Flush buffer to screen
-                
-                int up = ((*DIWSTRT & 0xFF00) >> 9) * 800;  // a few calculations to centre the image on the framebuffer
-                int centre = *DFFSTRT + up;
-                
-                for(int i = 0; i < 16; i += 1){
-                    ChipsetState->frameBuffer[ChipsetState->framebufferIndex+(i*2)-centre] = ChipsetState->Colour[buffer[i]];
-                    ChipsetState->frameBuffer[ChipsetState->framebufferIndex+(i*2)+1 - centre] = ChipsetState->Colour[buffer[i]];
-                }
-                ChipsetState->needsRedraw = 1;
-            }
+            BitplaneExecuteLores(ChipsetState);
         }
-        
-        
         
     }
+
     
+    //Sprites are drawn after the bitplane fetches have completed
+    if( (ChipsetState->DMACONR & 0x20) && ((ChipsetState->VHPOS & 0xFF) == 0xDF)){
+    
+        uint32_t PATHAddress = 0xDFF120;
+        //uint32_t CTRLAddress = 0xDFF144;
+
+        //check each sprite in turn Currently ONLY SPRITE 0 is supported
+        for(int i = 0; i < 1;++i){
+            
+
+            // We need to display a line of a sprite
+            if(ChipsetState->sprite[i].VPOS == (ChipsetState->VHPOS & 0x1FF00)){
+                uint32_t* data   = (uint32_t*) &ChipsetState->chipram[PATHAddress];
+                uint16_t* datst = (uint16_t*) &ChipsetState->chipram[*data];
+        
+                //work out the x postiion of the sprite
+                int x = ((datst[0] & 0xFF00) >> 7) | ((datst[1] & 0x100) >> 8);
+                
+                //Safety value
+                if(x<96){
+                    x = 98;
+                }
+                
+                
+                //Calcuate the index into the famebuffer
+                uint32_t index =  ((ChipsetState->sprite[i].VPOS >> 8) * 800) + (x << 1) + 2;
+                //printf("Sprite x:%d\n",x);
+                
+ 
+                
+                //Planar To Chunky conversion
+                uint8_t buffer[16];
+    
+                SpriteP2C1(buffer, *(ChipsetState->sprite[i].data++));
+                SpriteP2C2(buffer, *(ChipsetState->sprite[i].data++));
+                
+                //Draw sprite
+                for(int j=0;j<16; ++j){
+                    
+
+                    if(buffer[j] !=0){
+                        int colour = ChipsetState->Colour[buffer[j]+16];
+                        ChipsetState->frameBuffer[index + (j*2)  ] = colour;
+                        ChipsetState->frameBuffer[index + (j*2)+1] = colour;
+                    }
+                }
+
+                ChipsetState->sprite[0].VPOS += 256;
+                
+                if(ChipsetState->sprite[0].VPOS >= ChipsetState->sprite[0].stop){
+                    ChipsetState->sprite[0].VPOS= 79874;// An unreachable value
+                }
+                
+            }
+            PATHAddress += 4;
+            //CTRLAddress += 8;
+        }
+        
+    }
+        
+   // DeniseExecute(ChipsetState);
+   // DeniseExecute(ChipsetState);
 }
 
 /*

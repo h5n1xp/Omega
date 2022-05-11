@@ -13,6 +13,16 @@
 #include "Chipset.h"
 #include "Omega.h"
 
+#define READBYTE(address) RAM24bit[address]
+#define WRITEBYTE(address, value) RAM24bit[address] = value
+
+#define READWORD(address) *(int16_t*)&RAM24bit[address]
+#define WRITEWORD(address, value) *(int16_t*)&RAM24bit[address] = value
+
+#define READLONG(address) *(int32_t*)&RAM24bit[address]
+#define WRITELONG(address, value) *(int32_t*)&RAM24bit[address] = value
+
+extern char* regNames[];
 extern uint8_t* RAM24bit;
 enum DataSize{m68kByte, m68kWord, m68kLong};
 enum DataDirection{m68kRead, m68kWrite};

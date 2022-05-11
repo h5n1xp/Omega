@@ -61,8 +61,8 @@ typedef struct{
     uint32_t BTODLatch;
     uint32_t BTODAlarm;
     
-    uint8_t AICR;
-    uint8_t BICR;
+    uint8_t AICRMask;
+    uint8_t BICRMask;
 }CIA_t;
 
 extern CIA_t* CIAState;
@@ -74,12 +74,15 @@ void WriteCIA(unsigned int address, uint8_t value);
 void CIAATOD(void);
 void CIABTOD(void);
 
+
+
 void SetTrack0(void);
 void ClearTrack0(void);
 void SetDriveReady(void);
 void ClearDriveReady(void);
 void SetDriveFull(void);
 void SetDriveEmpty(void);
+void DiskIndexPulse(void);
 
 void releaseKey(uint16_t keyCode);
 void pressKey(uint16_t keyCode);

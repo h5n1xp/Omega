@@ -34,12 +34,7 @@ void DSKPTL(uint16_t value){
     return;
 }
 
-// 20 32Bit
-void DSKPT(uint32_t value){
-    uint32_t* p = (uint32_t*) &RAM24bit[0xDFF020];
-    *p = value;
-    return;
-}
+
 
 
 
@@ -55,6 +50,7 @@ void VPOSW(uint16_t value){
     ChipsetState->VHPOS = (value << 16) | (ChipsetState->VHPOS & 65535);
 }
 
+// 2C
 void VHPOSW(uint16_t value){
     ChipsetState->VHPOS = (ChipsetState->VHPOS & 0xFFFF0000) | value;
 }
@@ -80,6 +76,49 @@ void POTGO(uint16_t value){
      *p = ByteSwap16(value);
 }
 
+// 36
+void JOYTEST(uint16_t value){
+    ChipsetState->POTGOR = value;
+    uint16_t* JOY0DAT= (uint16_t*)&RAM24bit[0xDFF0A];
+     *JOY0DAT = ByteSwap16(value);
+    
+    uint16_t* JOY1DAT= (uint16_t*)&RAM24bit[0xDFF0C];
+     *JOY1DAT = ByteSwap16(value);
+}
+
+// 38
+void STREQ(uint16_t value){
+    ChipsetState->POTGOR = value;
+    uint16_t* p = (uint16_t*)&RAM24bit[0xDFF038];
+     *p = ByteSwap16(value);
+    printf("Chipset: NOT IMPLEMENTED - Strobe for Horisontal sync with VB and EQU\n");
+}
+
+// 3A
+void STRVBL(uint16_t value){
+    ChipsetState->POTGOR = value;
+    uint16_t* p = (uint16_t*)&RAM24bit[0xDFF03A];
+     *p = ByteSwap16(value);
+    printf("Chipset: NOT IMPLEMENTED - Strobe for Horisontal sync with VB\n");
+}
+
+// 3C
+void STRHOR(uint16_t value){
+    ChipsetState->POTGOR = value;
+    uint16_t* p = (uint16_t*)&RAM24bit[0xDFF03A];
+     *p = ByteSwap16(value);
+    printf("Chipset: NOT IMPLEMENTED - Strobe for Horisontal sync\n");
+}
+
+// 3E
+void STRLONG(uint16_t value){
+    ChipsetState->POTGOR = value;
+    uint16_t* p = (uint16_t*)&RAM24bit[0xDFF03E];
+     *p = ByteSwap16(value);
+    printf("Chipset: NOT IMPLEMENTED - Strobe for Identifiction of long horizontal line\n");
+}
+
+
 // 40
 void BLTCON0(uint16_t value){
     uint16_t* p = (uint16_t*) &RAM24bit[0xDFF040];
@@ -94,11 +133,6 @@ void BLTCON1(uint16_t value){
     return;
 }
 
-// 40 32Bit
-void BLTCON032W(uint32_t value){
-    BLTCON0( value >> 16);
-    BLTCON1( value & 65535);
-}
 
 // 44
 void BLTAFWM(uint16_t value){
@@ -109,17 +143,12 @@ void BLTAFWM(uint16_t value){
 
 // 46
 void BLTALWM(uint16_t value){
-    uint16_t* p = (uint16_t*) &RAM24bit[0xDFF044];
+    uint16_t* p = (uint16_t*) &RAM24bit[0xDFF046];
     *p = value;
     return;
 }
 
-// 44 32Bit
-void BLTAFWM32W(uint32_t value){
-    BLTAFWM( value >> 16);
-    BLTALWM( value & 65535);
-    return;
-}
+
 
 // 48
 void BLTCPTH(uint16_t value){
@@ -135,12 +164,7 @@ void BLTCPTL(uint16_t value){
     return;
 }
 
-// 48 32Bit
-void BLTCPT(uint32_t value){
-    uint32_t* p = (uint32_t*) &RAM24bit[0xDFF048];
-    *p = value;
-    return;
-}
+
 
 // 4C
 void BLTBPTH(uint16_t value){
@@ -156,12 +180,7 @@ void BLTBPTL(uint16_t value){
     return;
 }
 
-// 4C 32Bit
-void BLTBPT(uint32_t value){
-    uint32_t* p = (uint32_t*) &RAM24bit[0xDFF04C];
-    *p = value;
-    return;
-}
+
 
 // 50
 void BLTAPTH(uint16_t value){
@@ -177,12 +196,7 @@ void BLTAPTL(uint16_t value){
     return;
 }
 
-// 50 32Bit
-void BLTAPT(uint32_t value){
-    uint32_t* p = (uint32_t*) &RAM24bit[0xDFF050];
-    *p = value;
-    return;
-}
+
 
 
 // 54
@@ -199,12 +213,7 @@ void BLTDPTL(uint16_t value){
     return;
 }
 
-// 54 32Bit
-void BLTDPT(uint32_t value){
-    uint32_t* p = (uint32_t*) &RAM24bit[0xDFF054];
-    *p = value;
-    return;
-}
+
 
 
 // 58
@@ -321,6 +330,62 @@ void DSKSYNC(uint16_t value){
     return;
 }
 
+
+void DecodeCopperList(int list){
+    
+    uint32_t address = 0;
+    
+    if(list == 2){
+        address = *(uint32_t*) &RAM24bit[0xDFF084];
+    }else{
+        address = *(uint32_t*) &RAM24bit[0xDFF080];
+    }
+    
+    if(address == 0){return;}
+    
+    
+    
+    for(int i = address; i<(address+512); i += 4){
+        
+        uint32_t instruction =  ByteSwap16(*(uint16_t*)&RAM24bit[i]);
+        uint16_t value =  ByteSwap16(*(uint16_t*)&RAM24bit[i+2]);
+        
+        if(instruction & 1){
+            
+            if(value & 1){
+                printf("Address: 0x%x - Skip 0x%04x (Mask: 0x%04x)\n",i,instruction, value);
+            }else{
+                printf("Address: 0x%x - Wait 0x%04x (Mask: 0x%04x)\n",i,instruction, value);
+            }
+                
+        }else{
+            
+            if(instruction <0x80){
+                printf("HALT\n");
+                break;
+            }
+            
+            if(instruction == 0x8A){
+                printf("Address: 0x%x - JMP COP2\n",i);
+                break;
+            }else if(instruction == 0x88){
+                printf("Address: 0x%x - JMP COP1\n",i);
+                break;
+            }else{
+                instruction += 0xDFF000;
+                //printf("Address: 0x%x - Move 0x%04x  -> 0x%x\n",i, value, instruction);
+                printf("Address: 0x%x - Move 0x%04x -> %s\n",i, value, regNames[ (instruction & 0x1FF) >> 1 ]);
+            }
+        }
+        
+
+        
+    }
+    
+    return;
+    
+}
+
 // 80
 void COP1LCH(uint16_t value){
     uint16_t* p = (uint16_t*) &RAM24bit[0xDFF082];
@@ -333,6 +398,7 @@ void COP1LCL(uint16_t value){
     
     uint16_t* p = (uint16_t*) &RAM24bit[0xDFF080];
     *p = value;
+    
     return;
 }
 
@@ -349,6 +415,7 @@ void COP2LCH(uint16_t value){
 void COP2LCL(uint16_t value){
     uint16_t* p = (uint16_t*) &RAM24bit[0xDFF084];
     *p = value;
+    
     return;
 }
 
@@ -373,6 +440,15 @@ void COPJMP2(uint16_t value){
 
 // 8E
 void DIWSTRT(uint16_t value){
+
+    ChipsetState->HSTART = (value & 0xFF);
+    
+    if( (value & 0xFF00) < 0x1400){
+        value &= 0xFF;
+        value |= 0x1400;
+    }
+       
+       
     uint16_t* p = (uint16_t*) &RAM24bit[0xDFF08E];
     *p = value;
 }
@@ -380,7 +456,14 @@ void DIWSTRT(uint16_t value){
 // 90
 void DIWSTOP(uint16_t value){
     
-    ChipsetState->VSTOP = (value & 0xFF00) | 0x10000;
+    //if the top bit is not set then add 256 to the value
+    if(value & 0x8000){
+        ChipsetState->VSTOP = (value & 0xFF00);
+    }else{
+        ChipsetState->VSTOP = (value & 0xFF00) | 0x10000;
+    }
+
+    ChipsetState->HSTOP = ((value & 0xFF) | 0x100) - 88;
     
     uint16_t* p = (uint16_t*) &RAM24bit[0xDFF090];
     *p = value;
@@ -396,13 +479,13 @@ void DFFSTRT(uint16_t value){
     }
     
     uint16_t* p = (uint16_t*) &RAM24bit[0xDFF092];
-    *p = value;
+    *p = value & 0xFC;
 }
 
 // 94
 void DFFSTOP(uint16_t value){
     uint16_t* p = (uint16_t*) &RAM24bit[0xDFF094];
-    *p = value;
+    *p = value & 0xFC;
 }
 
 // 96
@@ -435,22 +518,6 @@ void INTENA(uint16_t value){
     //Save big endian copy in RAM for the CPU to read
     *p = ByteSwap16(ChipsetState->INTENAR);
     return;
-}
-
-
-// Assumes little endian
-void printBits(size_t const size, void const * const ptr)
-{
-    unsigned char *b = (unsigned char*) ptr;
-    unsigned char byte;
-    int i, j;
-    
-    for (i = size-1; i >= 0; i--) {
-        for (j = 7; j >= 0; j--) {
-            byte = (b[i] >> j) & 1;
-            printf("%u", byte);
-        }
-    }
 }
 
 
@@ -498,7 +565,7 @@ void CheckInterrupts(){
             m68k_set_irq(1);
         }
         
-        m68k_execute(128);
+       // m68k_execute(1);
     }
 }
 
@@ -525,8 +592,6 @@ void INTREQ(uint16_t value){
     uint16_t intMask = (ChipsetState->INTREQR & ChipsetState->INTENAR); //only set the int level, if bits are enabled
     
     if(intMask !=0){
-        
-        m68k_end_timeslice();   //Don't know if I need this...
         
         if(intMask & 8192){  // External int
             m68k_set_irq(6);
@@ -584,7 +649,7 @@ void INTREQ(uint16_t value){
             m68k_set_irq(1);
         }
         
-        m68k_execute(1); //Definitely don't think I need this
+        //m68k_execute(1); //Definitely don't think I need this
     }else{
         
         m68k_set_irq(0);
@@ -597,6 +662,30 @@ void INTREQ(uint16_t value){
 void ADKCON(uint16_t value){
     uint16_t* p = (uint16_t*)&RAM24bit[0xDFF09E];
     *p = value;
+}
+
+
+
+
+// A0
+void AUD0LCH(uint16_t value){
+    uint16_t* p = (uint16_t*)&RAM24bit[0xDFF0A2];
+    *p = value;
+    return;
+}
+
+// A2
+void AUD0LCL(uint16_t value){
+    uint16_t* p = (uint16_t*)&RAM24bit[0xDFF0A0];
+    *p = value;
+    return;
+}
+
+// A4
+void AUD0LEN(uint16_t value){
+    uint16_t* p = (uint16_t*)&RAM24bit[0xDFF0A4];
+    *p = value;
+    return;
 }
 
 // A6
@@ -612,6 +701,16 @@ void AUD0VOL(uint16_t value){
     *p = value;
     return;
 }
+
+
+// AA
+void AUD0DAT(uint16_t value){
+    uint16_t* p = (uint16_t*)&RAM24bit[0xDFF0AA];
+    *p = value;
+    return;
+}
+
+
 
 // B6
 void AUD1PER(uint16_t value){
@@ -686,6 +785,9 @@ void BPL2PTL(uint16_t value){
 
 // E8
 void BPL3PTH(uint16_t value){
+    
+   // value &= 0x7; //Top three bits only
+    
     uint16_t* p = (uint16_t*)&RAM24bit[0xDFF0EA];
     *p = value;
     return;
@@ -701,6 +803,9 @@ void BPL3PTL(uint16_t value){
 
 // EC
 void BPL4PTH(uint16_t value){
+    
+   // value &= 0x7; //Top three bits only
+    
     uint16_t* p = (uint16_t*)&RAM24bit[0xDFF0EE];
     *p = value;
     return;
@@ -741,6 +846,8 @@ void BPL6PTL(uint16_t value){
 
 // 100
 void BPLCON0(uint16_t value){
+    ChipsetState->hires = value >> 15;
+    ChipsetState->planeCount = (value >> 12) & 0x7;
     
     
     uint16_t* p = (uint16_t*) &RAM24bit[0xDFF100];
@@ -844,6 +951,21 @@ void SPR0PTH(uint16_t value){
 void SPR0PTL(uint16_t value){
     uint16_t* p = (uint16_t*) &RAM24bit[0xDFF120];
     *p = value;
+    
+    //Calculate Vertical Position of Sprite
+    uint32_t* data   = (uint32_t*) &ChipsetState->chipram[0xDFF120];
+    uint16_t* datst = (uint16_t*) &ChipsetState->chipram[*data];
+    
+    ChipsetState->sprite[0].VPOS =  ((datst[0] & 0xFF) << 8)   |  ((datst[1] & 0x400) << 6);
+    
+    if(ChipsetState->sprite[0].VPOS < 0x1600){
+        ChipsetState->sprite[0].VPOS = 79874; //Sprite will never activate
+    }
+    
+    ChipsetState->sprite[0].data = &datst[2];
+    
+    ChipsetState->sprite[0].stop = ((((datst[1] &0xFF)  | ((datst[1] &0x200) >> 1)) ) << 8);
+    
     return;
 }
 
@@ -1450,7 +1572,7 @@ void InitChipset(void* chipram, void* memory){
     ChipsetState = memory;//calloc(1, sizeof(Chipset_t));
 
     
-    //Clear the REgisters
+    //Clear the Registers
     uint8_t* temp = chipram;
     for(int i=0xDFF000; i<0xDFF1FF; ++i){
        temp[i] = 0;
@@ -1487,6 +1609,13 @@ void InitChipset(void* chipram, void* memory){
     
     ChipsetState->WriteWord[0x32] = SERPER;
     ChipsetState->WriteWord[0x34] = POTGO;
+    
+    ChipsetState->WriteWord[0x36] = JOYTEST;
+    
+    ChipsetState->WriteWord[0x38] = STREQ;
+    ChipsetState->WriteWord[0x3A] = STRVBL;
+    ChipsetState->WriteWord[0x3C] = STRHOR;
+    ChipsetState->WriteWord[0x3E] = STRLONG;
     
     ChipsetState->WriteWord[0x40] = BLTCON0;
     ChipsetState->WriteWord[0x42] = BLTCON1;
@@ -1532,7 +1661,7 @@ void InitChipset(void* chipram, void* memory){
     ChipsetState->WriteWord[0x86] = COP2LCL;
     
     ChipsetState->WriteWord[0x88] = COPJMP1;
-    ChipsetState->WriteWord[0x8A] = COPJMP1;
+    ChipsetState->WriteWord[0x8A] = COPJMP2;
     
     ChipsetState->WriteWord[0x8E] = DIWSTRT;
     ChipsetState->WriteWord[0x90] = DIWSTOP;
@@ -1545,8 +1674,13 @@ void InitChipset(void* chipram, void* memory){
     
     ChipsetState->WriteWord[0x9E] = ADKCON;
     
+    
+    ChipsetState->WriteWord[0xA0] = AUD0LCH;
+    ChipsetState->WriteWord[0xA2] = AUD0LCL;
+    ChipsetState->WriteWord[0xA4] = AUD0LEN;
     ChipsetState->WriteWord[0xA6] = AUD0PER;
     ChipsetState->WriteWord[0xA8] = AUD0VOL;
+    ChipsetState->WriteWord[0xAA] = AUD0DAT;
     
     ChipsetState->WriteWord[0xB6] = AUD1PER;
     ChipsetState->WriteWord[0xB8] = AUD1VOL;
@@ -1556,6 +1690,7 @@ void InitChipset(void* chipram, void* memory){
     
     ChipsetState->WriteWord[0xD6] = AUD3PER;
     ChipsetState->WriteWord[0xD8] = AUD3VOL;
+    
     
     ChipsetState->WriteWord[0xE0] = BPL1PTH;
     ChipsetState->WriteWord[0xE2] = BPL1PTL;
@@ -1672,6 +1807,7 @@ void InitChipset(void* chipram, void* memory){
 
     ChipsetState->WriteWord[0x1E4] = DIWHIGH;
     ChipsetState->WriteWord[0x1FE] = NO_OP;
+    ChipsetState->WriteWord[0x200] = NO_OP;
     
     
     //Set the display to first possible pixel
@@ -1685,6 +1821,10 @@ void InitChipset(void* chipram, void* memory){
     //Init Some Registers
     ChipsetState->DMACONR = 0;
     RAM24bit[0xDFF002] = 0;
+    RAM24bit[0xDFF003] = 0;
+    
+    RAM24bit[0xDFF004] = 0;
+    RAM24bit[0xDFF005] = 0;
     
     ChipsetState->INTENAR = 0;
     INTENA(0x7FFF);
@@ -1729,6 +1869,7 @@ void InitChipset(void* chipram, void* memory){
     VTOTAL(262);
     
     //Set the copper to wait until it is reset
+    
     COP1LCH(0x0);
     COP1LCL(0x0);
     COP2LCH(0x0);
@@ -1746,11 +1887,19 @@ void InitChipset(void* chipram, void* memory){
     RAM24bit[0xDFF017]  = 0xFF;
     
     //Setup the Serial port to show that the buffer is empty
-    RAM24bit[0xDFF018]  = 0xFF;
+    RAM24bit[0xDFF018]  = 0x38;
     
     ChipsetState->DMACycles = 0;
     ChipsetState->DMAFreq = 3579545;    // NTSC
     //ChipsetState->DMAFreq = 3546895;    // PAL
+    
+    ChipsetState->DisplayPositionAdjust = (22 * 800) + 40; //Centre the display
+    
+    for(int i=0;i<8;++i){
+        ChipsetState->sprite[i].VPOS = 79874; //Sprite will never active
+    }
+    
+    
 }
 
 
@@ -1794,32 +1943,31 @@ uint32_t IncrementVHPOS(void){
 
     ChipsetState->VBL = 0;
     
+    //Check for external VH Sync...
     uint16_t* BPLCON0 =(uint16_t*)&RAM24bit[0xDFF100];
-    if( !(*BPLCON0 & 0x2) ){
+    if( (*BPLCON0 & 0x2) ){
+        ChipsetState->VBL =  0;
+        return 0;
+    }else{
         ChipsetState->VHPOS += 1;
     }
 
     
-    //Start drawing host display at 24 DMA cycles
-    if( (ChipsetState->VHPOS & 0xFF) > 0x18){
-        ChipsetState->framebufferIndex += 4; //Each DMA cycle is 4 host pixels
-    }
-    
-    //Check Horizontal Position, if we are at cycle  224, that is the maximum display position 800 host pixels
+    //Check Horizontal Position, if we are at cycle 0xE0 - 224, that is the maximum display position 800 host pixels
     if( (ChipsetState->VHPOS & 0xFF) == 0xE0){
         
-        CIABTOD(); //increment CIA B HL counter
-        //ChipsetState->needsRedraw = 1;  //update Display every line... just for fun to see the redraw!
+        CIABTOD(); //increment CIA B Horizontal Line counter
+     
         
-        // Clear low byte (H pos to 0) and add 256 (increment VPos)
+        // Clear low byte (H pos to 0) and add 256 to the high byte (increment VPos)
         ChipsetState->VHPOS = (ChipsetState->VHPOS & 0xFFFFFF00) + 0x100;
         
         
         // 0x10600 is 262 NTSC vertical lines left shifted by 8 places
         // 0x13800 is 312 PAL Vertical lines left shifted
-        if( (ChipsetState->VHPOS & 0x1FF00) == 0x13800){
-            ChipsetState->VHPOS = 0;
-            ChipsetState->framebufferIndex = 0; //reset host display
+        if( (ChipsetState->VHPOS & 0x1FF00) == 0x13900){
+            ChipsetState->VHPOS &= 0x80000000; //Clear the VHPos counters (leave the top bit alone)
+            //ChipsetState->framebufferIndex = 0; //reset host display
             
             ChipsetState->bitplaneFetchActive = 0; // stop any fetches... even though there shouldn't be at this point
             

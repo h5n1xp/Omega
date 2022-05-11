@@ -15,8 +15,14 @@
 #include <stdint.h>
 
 typedef struct{
+    int VPOS;
+    uint16_t* data; // incrementing pointer sprite data.
+    int stop;   // stop VPOS value, when reached the sprite stops being drawn to screen
+} SpriteInternal_t;
+
+typedef struct{
     
-    void (*WriteWord[512])(uint16_t value);
+    void (*WriteWord[513])(uint16_t value);
 
     // !!!!!!!WARNING!!!!
     // All L and H registers are swapped in memory
@@ -46,20 +52,35 @@ typedef struct{
     uint32_t VBL;
     
     uint32_t bitplaneFetchActive;
-    uint32_t Colour[64];    //Eventually I will support EHB
+    uint32_t Colour[32];
     uint8_t* chipram;
     uint32_t VSTOP;
+    uint32_t HSTART;
+    uint32_t HSTOP;
+    uint8_t PixelBuffer[16];
     
     uint64_t DMACycles;
     uint32_t DMAFreq;
     uint64_t EClockcycles;
     
+    //Internal Helper Variables
+    uint32_t hires;
+    uint32_t planeCount;
+    
     //Host Framebuffer
     uint32_t* frameBuffer;
     int32_t frameBufferPitch;
-    uint32_t framebufferIndex;
+    uint32_t* FrameBufferLine;
+    uint32_t FrameBufferLineIndex;
+    //uint32_t framebufferIndex;          //I don't think I need this anymore
+    int HPOS;   //Lores pixel position
+    int32_t  displayCountdown;
     int32_t  bitplaneFetchCountdown;
+    uint32_t DisplayPositionAdjust;
     uint32_t needsRedraw;
+    
+    //Sprite
+    SpriteInternal_t sprite[8];
     
     //Host Mouse
     int32_t mouseXrel;
@@ -73,8 +94,12 @@ void WriteChipsetByte(unsigned int address, unsigned int value);
 void WriteChipsetWord(unsigned int address, unsigned int value);
 void WriteChipsetLong(unsigned int address, unsigned int value);
 
+//void Write24bitByte()
+
 void CheckInterrupts(void);
 
 uint32_t IncrementVHPOS(void);
+
+void DecodeCopperList(int list);
 
 #endif /* Chipset_h */
