@@ -1,0 +1,1 @@
+SDL2 x64/x86 files from lib folder go in here
