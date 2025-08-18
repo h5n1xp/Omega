@@ -61,7 +61,7 @@ void ADF2MFM(int fd, uint8_t* mfm){
     //each track is 12798 bytes in size, multiplied by 2 because there are 2 sides
     //int mfmSize = tracks * (12798 * 2);
     
-    uint8_t adf[size];
+    uint8_t* adf = malloc(size);
     // uint8_t mfm[mfmSize];
     
     uint8_t lowlevelSector[544]; //bytes per low level sector
@@ -223,7 +223,7 @@ void ADF2MFM(int fd, uint8_t* mfm){
         
     }
     //printf("loaded");
-    
+    free(adf);
 }
 //*******************************
 

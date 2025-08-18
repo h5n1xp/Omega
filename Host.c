@@ -418,6 +418,8 @@ void hostInit(){
     
     
     host.playfield = SDL_CreateTexture(host.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 640, 400);
+    int pitch2;
+    SDL_LockTexture(host.playfield, NULL, &host.pixels, &pitch2);
     
     
     

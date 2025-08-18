@@ -696,7 +696,7 @@ void dma_execute(){
                     
                     
                     for(int i=2;i<32; i +=2){
-                        sprite2chunky(&host.pixels[mod+(Ny*640*4)], &internal.palette[16], Nx, pos[i], pos[i+1],16);
+                        sprite2chunky(&((uint8_t *)host.pixels)[mod+(Ny*640*4)], &internal.palette[16], Nx, pos[i], pos[i+1],16);
                         mod +=640*4;
                     }
                     
